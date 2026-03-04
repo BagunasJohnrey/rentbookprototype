@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #bf4a53;
+  --color-primary-light: #ff6b76;
+  --color-app-bg: #faf6f6;
+  --color-app-card: #ffffff;
+  --color-text-main: #111010;
+  --color-text-muted: #8e8e93;
+  --color-success: #34c759;
+}
+
+body {
+  background-color: #333;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom animations from your prototype */
+@keyframes float { 
+  0%, 100% { transform: translateY(0); } 
+  50% { transform: translateY(-10px); } 
+}
+.animate-float { animation: float 3s ease-in-out infinite; }
+
+@keyframes slideUp { 
+  from { transform: translateY(100%); } 
+  to { transform: translateY(0); } 
+}
+.animate-slide-up { animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1); }
+
+@keyframes fadeInDown { 
+  from { opacity: 0; transform: translateY(-20px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+.animate-fade-in-down { animation: fadeInDown 0.5s ease-out; }
