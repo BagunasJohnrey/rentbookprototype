@@ -1,3 +1,4 @@
+// src/pages/InventoryCatalog.jsx
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CATALOG_ITEMS } from '../data/mockData';
@@ -79,7 +80,7 @@ export default function InventoryCatalog() {
               className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group animate-slide-up"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+              <div className="relative aspect-3/4 bg-gray-100 overflow-hidden">
                 <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
                 <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase backdrop-blur-md ${item.status === 'Available' ? 'bg-green-500/10 text-green-600' : 'bg-orange-500/10 text-orange-600'}`}>
                   {item.status}
@@ -96,7 +97,7 @@ export default function InventoryCatalog() {
 
       {/* Responsive Detail Modal */}
       {detailItem && (
-        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6">
+        <div className="fixed inset-0 z-100 flex items-end md:items-center justify-center p-0 md:p-6">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDetailItem(null)} />
           <div className="relative bg-white w-full md:max-w-3xl md:rounded-4xl rounded-t-4xl overflow-hidden max-h-[95vh] md:max-h-[80vh] flex flex-col animate-slide-up">
             <div className="flex flex-col md:flex-row h-full">
@@ -137,7 +138,7 @@ export default function InventoryCatalog() {
 
 function SummaryChip({ label, value, color = "text-text-main" }) {
   return (
-    <div className="flex-1 min-w-[80px] md:min-w-[100px] bg-white rounded-2xl p-3 md:p-4 text-center shadow-sm border border-gray-50">
+    <div className="flex-1 min-w-20 md:min-w-25 bg-white rounded-2xl p-3 md:p-4 text-center shadow-sm border border-gray-50">
       <div className={`text-lg md:text-2xl font-black ${color}`}>{value}</div>
       <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">{label}</div>
     </div>

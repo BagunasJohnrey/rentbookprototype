@@ -14,13 +14,13 @@ export default function StaffHistory() {
   const [filter, setFilter] = useState('All');
 
   return (
-    <div className="min-h-screen bg-[#faf6f6] font-sans">
+    <div className="min-h-screen bg-app-bg font-sans">
       
       {/* --- MOBILE NATIVE UI --- */}
       <div className="flex md:hidden flex-col h-screen">
         <header className="pt-12 px-6 pb-4 bg-white shrink-0 shadow-sm">
           <div className="flex justify-between items-center mb-4">
-            <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-[#111010]">
+            <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-text-main">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><polyline points="15 18 9 12 15 6"></polyline></svg>
             </button>
             <h1 className="text-[17px] font-bold">History</h1>
@@ -33,7 +33,7 @@ export default function StaffHistory() {
               <button 
                 key={f} 
                 onClick={() => setFilter(f)}
-                className={`px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${filter === f ? 'bg-[#bf4a53] text-white' : 'bg-gray-100 text-gray-400'}`}
+                className={`px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${filter === f ? 'bg-primary text-white' : 'bg-gray-100 text-gray-400'}`}
               >
                 {f}
               </button>
@@ -41,19 +41,19 @@ export default function StaffHistory() {
           </div>
         </header>
 
-        <main className="flex-grow overflow-y-auto px-6 py-4 pb-24">
+        <main className="grow overflow-y-auto px-6 py-4 pb-24">
           <div className="space-y-4">
             {MOCK_HISTORY.map(tx => (
-              <div key={tx.id} className="bg-white p-5 rounded-[24px] shadow-sm flex justify-between items-center active:scale-95 transition-all">
+              <div key={tx.id} className="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center active:scale-95 transition-all">
                 <div className="flex gap-4 items-center">
                   <div className={`w-2 h-10 rounded-full ${tx.status === 'Active' ? 'bg-blue-400' : tx.status === 'Overdue' ? 'bg-red-400' : 'bg-green-400'}`}></div>
                   <div>
-                    <p className="font-black text-[#111010]">{tx.customer}</p>
+                    <p className="font-black text-text-main">{tx.customer}</p>
                     <p className="text-xs text-gray-400 font-bold">{tx.item} • {tx.id}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-black text-[#bf4a53]">₱{tx.total}</p>
+                  <p className="font-black text-primary">₱{tx.total}</p>
                   <p className="text-[10px] uppercase font-bold text-gray-300">{tx.date}</p>
                 </div>
               </div>
@@ -67,7 +67,7 @@ export default function StaffHistory() {
         <div className="max-w-7xl mx-auto w-full">
           <header className="flex justify-between items-end mb-12">
             <div>
-              <h1 className="text-5xl font-black tracking-tighter text-[#111010] mb-2">Transaction History</h1>
+              <h1 className="text-5xl font-black tracking-tighter text-text-main mb-2">Transaction History</h1>
               <p className="text-gray-400 font-medium text-lg">Manage and track all customer rental records.</p>
             </div>
             
@@ -76,7 +76,7 @@ export default function StaffHistory() {
                 <button 
                   key={f} 
                   onClick={() => setFilter(f)}
-                  className={`px-8 py-3 rounded-xl font-bold transition-all ${filter === f ? 'bg-white text-[#bf4a53] shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
+                  className={`px-8 py-3 rounded-xl font-bold transition-all ${filter === f ? 'bg-white text-primary shadow-md' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   {f}
                 </button>
@@ -84,7 +84,7 @@ export default function StaffHistory() {
             </div>
           </header>
 
-          <div className="bg-[#faf6f6] rounded-[40px] p-10 overflow-hidden">
+          <div className="bg-app-bg rounded-[40px] p-10 overflow-hidden">
             <table className="w-full text-left border-separate border-spacing-y-4">
               <thead>
                 <tr className="text-gray-400 text-sm font-black uppercase tracking-widest px-6">
@@ -99,12 +99,12 @@ export default function StaffHistory() {
               <tbody>
                 {MOCK_HISTORY.map(tx => (
                   <tr key={tx.id} className="bg-white group cursor-pointer">
-                    <td className="py-6 pl-8 rounded-l-[24px] font-bold text-gray-400 group-hover:text-[#bf4a53] transition-colors">{tx.id}</td>
-                    <td className="py-6 font-black text-[#111010]">{tx.customer}</td>
+                    <td className="py-6 pl-8 rounded-l-3xl font-bold text-gray-400 group-hover:text-primary transition-colors">{tx.id}</td>
+                    <td className="py-6 font-black text-text-main">{tx.customer}</td>
                     <td className="py-6 font-bold text-gray-500">{tx.item}</td>
                     <td className="py-6 font-medium text-gray-400">{tx.date}</td>
                     <td className="py-6 text-right font-black text-lg">₱{tx.total}</td>
-                    <td className="py-6 pr-8 rounded-r-[24px] text-center">
+                    <td className="py-6 pr-8 rounded-r-3xl text-center">
                       <span className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider
                         ${tx.status === 'Active' ? 'bg-blue-50 text-blue-600' : 
                           tx.status === 'Overdue' ? 'bg-red-50 text-red-600' : 

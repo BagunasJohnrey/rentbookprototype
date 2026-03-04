@@ -6,12 +6,13 @@ import AdminBottomNav from '../components/AdminBottomNav';
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
-  // Dynamic Metric Calculations
   const activeCount = TRANSACTIONS.filter(t => t.status === 'active').length;
   const overdueCount = TRANSACTIONS.filter(t => t.status === 'overdue').length;
   const catalogCount = CATALOG_ITEMS.length;
   
-  // Get recent 4 transactions
+  // Calculate revenue dynamically from transactions
+  const totalRevenue = TRANSACTIONS.reduce((acc, curr) => acc + (curr.total || 0), 0);
+  
   const recentTx = TRANSACTIONS.slice(0, 4).map(tx => {
     const item = CATALOG_ITEMS.find(i => i.id === tx.itemId);
     return { ...tx, item };
@@ -22,84 +23,85 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      {/* RESPONSIVE FIX: Centered wrapper with max-w-7xl */}
+    <div className="flex flex-col h-full relative bg-white">
       <div className="grow overflow-y-auto px-4 md:px-8 pt-8 md:pt-12 pb-28 md:pb-12 md:max-w-7xl md:mx-auto md:w-full">
         
         {/* Header */}
-        <div className="mb-6 md:mb-8 animate-slide-up">
-          <p className="text-sm font-semibold text-text-muted mb-1">Welcome back, Admin</p>
-          <h1 className="text-[32px] md:text-4xl font-extrabold text-text-main tracking-tight">Store Today</h1>
+        <div className="mb-8 animate-in fade-in slide-in-from-left-4 duration-700">
+          <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">Management Terminal</p>
+          <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter">Store Today</h1>
         </div>
 
-        {/* RESPONSIVE FIX: 
-          Grid goes from 2 columns on mobile to 4 columns on desktop 
-        */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 md:gap-6 mb-8">
-          <StatCard icon={<><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></>} value={activeCount} label="Active" delay="0.1s" />
-          <StatCard icon={<><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></>} value="₱38.5k" label="Revenue" delay="0.2s" />
-          <StatCard icon={<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>} value={catalogCount} label="Catalog" delay="0.3s" />
-          <StatCard icon={<><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></>} value={overdueCount} label="Overdue" delay="0.4s" />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
+          <StatCard icon={<circle cx="12" cy="12" r="10"></circle>} value={activeCount} label="Active" color="text-blue-500" />
+          <StatCard icon={<path d="M12 2v20m10-10H2"></path>} value={`₱${(totalRevenue/1000).toFixed(1)}k`} label="Revenue" color="text-emerald-500" />
+          <StatCard icon={<path d="M20 7h-9"></path>} value={catalogCount} label="Catalog" color="text-primary" />
+          <StatCard icon={<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>} value={overdueCount} label="Overdue" color="text-orange-500" />
         </div>
 
         {/* Recent Transactions Section */}
-        <div className="flex justify-between items-center mb-4 animate-fade-in-down" style={{ animationDelay: '0.5s' }}>
-          <h2 className="text-lg md:text-xl font-bold text-text-main">Recent Transactions</h2>
-          <span onClick={() => navigate('/admin-history')} className="text-sm font-bold text-primary hover:text-primary-light transition-colors cursor-pointer">See All</span>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl md:text-2xl font-black text-gray-900">Recent Transactions</h2>
+          <button 
+            onClick={() => navigate('/admin-history')} 
+            className="px-5 py-2 rounded-full bg-gray-50 text-xs font-black text-primary hover:bg-primary hover:text-white transition-all duration-300 shadow-sm uppercase tracking-wider"
+          >
+            See All Records
+          </button>
         </div>
 
-        {/* RESPONSIVE FIX: 
-          List on mobile, 2-column grid on tablet/desktop 
-        */}
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-3.5 md:gap-6 animate-fade-in-down" style={{ animationDelay: '0.6s' }}>
+        {/* Transaction List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recentTx.map((task) => {
             const isOverdue = task.status === 'overdue';
             return (
               <div 
                 key={task.txId} 
-                onClick={() => navigate('/admin-history')}
-                className="bg-white rounded-[20px] p-3 md:p-4 flex items-center gap-4 shadow-sm hover:shadow-md active:scale-[0.98] transition-all cursor-pointer"
+                className="group bg-white rounded-3xl p-4 flex items-center gap-4 border border-gray-100 hover:border-primary/20 hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-500"
               >
-                <img src={task.item?.imageUrl} alt={task.item?.name} className="w-14 h-14 md:w-16 md:h-16 rounded-xl object-cover shrink-0" />
-                <div className="grow">
-                  <div className="text-[15px] font-bold text-text-main mb-0.5">{task.customerName}</div>
-                  <div className="text-[12px] md:text-[13px] text-text-muted font-medium">{task.item?.name} • Due {task.dueDate}</div>
+                <img src={task.item?.imageUrl} alt={task.item?.name} className="w-16 h-16 rounded-2xl object-cover shrink-0 grayscale group-hover:grayscale-0 transition-all" />
+                <div className="grow min-w-0">
+                  <div className="text-[15px] font-black text-gray-900 truncate mb-0.5">{task.customerName}</div>
+                  <div className="text-[11px] text-gray-400 font-bold uppercase tracking-tight truncate">
+                    {task.item?.name} • Due {task.dueDate}
+                  </div>
                 </div>
                 
-                <span className={`text-[10px] md:text-[11px] font-extrabold px-2.5 py-1.5 rounded-lg uppercase whitespace-nowrap ${isOverdue ? 'bg-[#fff3e0] text-[#e65100]' : 'bg-[#e8f5e9] text-[#2e7d32]'}`}>
-                  {isOverdue ? 'Overdue' : 'Active'}
+                <span className={`text-[10px] font-black px-3 py-1.5 rounded-xl uppercase whitespace-nowrap ${isOverdue ? 'bg-orange-50 text-orange-600' : 'bg-green-50 text-green-600'}`}>
+                  {task.status}
                 </span>
                 
                 <button 
                   onClick={(e) => { e.stopPropagation(); sendPing(task.customerName); }} 
-                  className="p-2 ml-1 rounded-xl hover:bg-red-50 transition-colors active:bg-red-100 shrink-0"
+                  className="p-3 rounded-2xl bg-gray-50 text-primary hover:bg-primary hover:text-white transition-all active:scale-90"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" className="w-5 h-5 stroke-[2.5px]">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                   </svg>
                 </button>
               </div>
             );
           })}
         </div>
-
       </div>
-
       <AdminBottomNav />
     </div>
   );
 }
 
-// Reusable Sub-component for the 2x2 Grid
-function StatCard({ icon, value, label, delay }) {
+function StatCard({ icon, value, label, color }) {
   return (
-    <div className="bg-white rounded-[22px] p-5 shadow-sm border border-gray-50 flex flex-col gap-3 animate-slide-up hover:-translate-y-1 transition-transform" style={{ animationDelay: delay }}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-7 h-7 text-primary-light stroke-[2.5px]">
-        {icon}
-      </svg>
+    <div className="bg-white rounded-4xl p-6 shadow-sm border border-gray-100 flex flex-col gap-4 hover:-translate-y-2 hover:shadow-lg transition-all duration-500 group">
+      <div className={`p-3 rounded-2xl bg-gray-50 w-fit group-hover:bg-white transition-colors ${color}`}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 stroke-[3px]">
+          {icon}
+        </svg>
+      </div>
       <div>
-        <div className="text-2xl md:text-3xl font-extrabold text-text-main leading-none mb-1.5">{value}</div>
-        <div className="text-[11px] font-bold text-text-muted uppercase tracking-[0.5px]">{label}</div>
+        <div className="text-3xl font-black text-gray-900 leading-none mb-2">{value}</div>
+        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{label}</div>
       </div>
     </div>
   );
