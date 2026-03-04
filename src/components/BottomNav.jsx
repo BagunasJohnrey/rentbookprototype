@@ -10,7 +10,7 @@ export default function BottomNav() {
   const isActive = (route) => path === route;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 h-22.5 rounded-t-4xl bg-white flex justify-around items-center px-4 pb-6 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-50 border-t border-gray-50">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 h-20 rounded-t-3xl bg-white flex justify-around items-center px-4 pb-4 shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-50 border-t border-gray-50">
       
       {/* Home */}
       <button 
@@ -44,18 +44,18 @@ export default function BottomNav() {
         </button>
       </div>
 
-      {/* History */}
+      {/* History - PATH FIXED to match App.jsx */}
       <button 
-        onClick={() => navigate('/staff/history')} 
-        className={`flex flex-col items-center gap-1 w-14 text-[10px] font-black uppercase tracking-tighter transition-colors ${isActive('/staff/history') ? 'text-primary' : 'text-gray-300'}`}
+        onClick={() => navigate('/staff-history')} 
+        className={`flex flex-col items-center gap-1 w-14 text-[10px] font-black uppercase tracking-tighter transition-colors ${isActive('/staff-history') ? 'text-primary' : 'text-gray-300'}`}
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`w-6 h-6 stroke-[2.5px] transition-transform ${isActive('/staff/history') ? '-translate-y-1' : ''}`}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`w-6 h-6 stroke-[2.5px] transition-transform ${isActive('/staff-history') ? '-translate-y-1' : ''}`}>
           <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
         </svg>
         History
       </button>
 
-      {/* Profile */}
+      {/* Profile/Settings (Optional Placeholder) */}
       <button className="flex flex-col items-center gap-1 w-14 text-[10px] font-black uppercase tracking-tighter text-gray-300">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 stroke-[2.5px]">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
