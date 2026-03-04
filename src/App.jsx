@@ -1,3 +1,4 @@
+// src/App.jsx
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -17,12 +18,15 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="w-full max-w-107.5 h-full max-h-233 bg-linear-to-b from-app-bg to-white relative flex flex-col shadow-[0_4px_24px_rgba(0,0,0,0.3)] overflow-hidden mx-auto">
+      {/* Refactored Wrapper: 
+        Removed fixed w-107.5 and max-h-233.
+        Added min-h-screen and responsive background colors.
+      */}
+      <div className="w-full min-h-screen bg-app-bg md:bg-gray-100 flex flex-col relative overflow-x-hidden">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login setGlobalRole={setGlobalRole} />} />
           
-          {/* FIX: Pass globalRole as a prop so it is actively used by the app */}
           <Route path="/staff-dashboard" element={<StaffDashboard role={globalRole} />} />
           <Route path="/catalog" element={<InventoryCatalog />} />
           <Route path="/staff-new-rental" element={<StaffNewRental />} />
