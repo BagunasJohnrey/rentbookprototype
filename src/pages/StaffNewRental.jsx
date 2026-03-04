@@ -7,12 +7,17 @@ export default function StaffNewRental() {
   const navigate = useNavigate();
   const query = new URLSearchParams(useLocation().search);
   const initialItemId = query.get('itemId');
+  
+  // Look up the item first
+  const preFilledItem = CATALOG_ITEMS.find(i => i.id === initialItemId) || null;
 
-  const [step, setStep] = useState(1);
-  const [selectedItem, setSelectedItem] = useState(
-    CATALOG_ITEMS.find(i => i.id === initialItemId) || null
-  );
+  // If a valid item was passed via URL, jump straight to step 2. Otherwise, start at 1.
+  const [step, setStep] = useState(preFilledItem ? 2 : 1);
+  const [selectedItem, setSelectedItem] = useState(preFilledItem);
   const [showToast, setShowToast] = useState(false);
+  
+  // OCR Simulation State
+  const [isScanning, setIsScanning] = useState(false);
 
   const [customer, setCustomer] = useState(() => {
     const now = new Date();
@@ -23,6 +28,20 @@ export default function StaffNewRental() {
       returnDate: returnDate.toISOString().split('T')[0]
     };
   });
+
+  // OCR Mock Function
+  const simulateOCR = () => {
+    setIsScanning(true);
+    // Simulate a 1.5s processing delay
+    setTimeout(() => {
+      setCustomer(prev => ({
+        ...prev,
+        name: 'Maria Clara',
+        contact: '0917-123-4567'
+      }));
+      setIsScanning(false);
+    }, 1500);
+  };
 
   const handleNext = () => {
     if (step === 1 && !selectedItem) return alert('Please select an item');
@@ -52,7 +71,7 @@ export default function StaffNewRental() {
   return (
     <div className="min-h-screen w-full bg-app-bg font-sans flex flex-col items-center">
       
-      {/* MAIN CONTAINER: Constrained width for desktop readability */}
+      {/* MAIN CONTAINER */}
       <div className="relative flex flex-col w-full max-w-5xl grow bg-app-bg">
         
         {/* Toast Notification */}
@@ -94,9 +113,10 @@ export default function StaffNewRental() {
           </div>
         </div>
 
-        {/* Content Area: Added pb-48 for mobile scroll clearance */}
+        {/* Content Area */}
         <main className="grow px-6 pt-4 pb-48 md:pb-12 md:px-12">
           <div className="max-w-4xl mx-auto">
+            
             {/* STEP 1: Select Item */}
             {step === 1 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -127,17 +147,64 @@ export default function StaffNewRental() {
 
             {/* STEP 2: Customer Info */}
             {step === 2 && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto w-full">
                 <h2 className="text-2xl md:text-3xl font-extrabold text-text-main">Customer Info</h2>
                 <p className="text-sm md:text-base text-gray-500 font-medium mb-6">Enter details or scan government ID</p>
-                <div className="space-y-5">
+                
+                {/* ==========================================
+                    OCR SCANNER UI
+                ========================================== */}
+                <div 
+                  onClick={!isScanning ? simulateOCR : undefined}
+                  className={`mb-8 w-full border-2 border-dashed rounded-[32px] p-8 flex flex-col items-center justify-center transition-all duration-300 select-none
+                    ${isScanning ? 'border-primary bg-primary/5 cursor-wait' : 'border-gray-300 hover:border-primary hover:bg-white cursor-pointer hover:shadow-sm'}`}
+                >
+                  {isScanning ? (
+                    <div className="flex flex-col items-center">
+                      <div className="relative w-16 h-16 mb-4 text-primary">
+                        <svg className="w-full h-full animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        {/* Scanning Laser Line */}
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-primary/80 shadow-[0_0_8px_rgba(191,74,83,0.8)] animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                      </div>
+                      <p className="text-sm font-bold text-primary animate-pulse tracking-wide">Extracting ID Details...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-gray-100 mb-4 text-gray-400 group-hover:text-primary transition-colors">
+                        <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
+                          <circle cx="8" cy="10" r="2"></circle>
+                          <path d="M14 8h4M14 12h4M4 16h16"></path>
+                        </svg>
+                      </div>
+                      <p className="text-base font-bold text-gray-700">Tap to Scan Government ID</p>
+                      <p className="text-xs text-gray-400 mt-1 font-medium">Auto-fills the form instantly</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-4 mb-8 opacity-60">
+                  <div className="h-px bg-gray-300 flex-1"></div>
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Or enter manually</span>
+                  <div className="h-px bg-gray-300 flex-1"></div>
+                </div>
+
+                {/* Manual Form Inputs */}
+                <div className="space-y-5 relative">
+                  {/* Overlay to block inputs during scan */}
+                  {isScanning && <div className="absolute inset-0 z-10 bg-white/40 backdrop-blur-[1px] rounded-3xl"></div>}
+                  
                   <div className="flex flex-col gap-2">
                     <label className="text-xs font-bold text-text-main ml-1 uppercase">Full Name</label>
                     <input 
                         type="text" 
                         value={customer.name} 
                         onChange={e => setCustomer({...customer, name: e.target.value})} 
-                        className="w-full p-4 md:p-5 rounded-2xl bg-white shadow-sm border border-transparent focus:border-primary/20 outline-none text-lg" 
+                        className={`w-full p-4 md:p-5 rounded-2xl shadow-sm border outline-none text-lg transition-colors
+                          ${customer.name ? 'bg-green-50/50 border-green-200 focus:border-green-400' : 'bg-white border-transparent focus:border-primary/20'}`}
                         placeholder="e.g. Liza Soberano" 
                     />
                   </div>
@@ -147,7 +214,8 @@ export default function StaffNewRental() {
                         type="tel" 
                         value={customer.contact} 
                         onChange={e => setCustomer({...customer, contact: e.target.value})} 
-                        className="w-full p-4 md:p-5 rounded-2xl bg-white shadow-sm border border-transparent focus:border-primary/20 outline-none text-lg" 
+                        className={`w-full p-4 md:p-5 rounded-2xl shadow-sm border outline-none text-lg transition-colors
+                          ${customer.contact ? 'bg-green-50/50 border-green-200 focus:border-green-400' : 'bg-white border-transparent focus:border-primary/20'}`}
                         placeholder="e.g. 0917-123-4567" 
                     />
                   </div>
@@ -177,9 +245,9 @@ export default function StaffNewRental() {
 
             {/* STEP 3: Confirm Summary */}
             {step === 3 && selectedItem && (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
                 <h2 className="text-2xl md:text-3xl font-extrabold text-text-main">Confirm Rental</h2>
-                <div className="bg-white rounded-3xl md:rounded-4xl p-6 md:p-10 shadow-sm border border-gray-100">
+                <div className="bg-white rounded-3xl md:rounded-4xl p-6 md:p-10 shadow-sm border border-gray-100 mt-6">
                   <div className="flex items-center gap-6 mb-8">
                     <img src={selectedItem.imageUrl} className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-3xl object-cover" alt="" />
                     <div>
@@ -192,6 +260,10 @@ export default function StaffNewRental() {
                       <span className="text-gray-400 font-bold text-xs uppercase">Customer</span>
                       <span className="text-text-main font-bold md:text-lg">{customer.name}</span>
                     </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-3">
+                      <span className="text-gray-400 font-bold text-xs uppercase">Contact</span>
+                      <span className="text-text-main font-bold md:text-lg">{customer.contact}</span>
+                    </div>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 gap-2">
                       <span className="text-lg md:text-xl font-black text-gray-400">Total Due</span>
                       <span className="text-4xl md:text-5xl font-black text-primary">₱{selectedItem.baseRate + selectedItem.deposit}</span>
@@ -203,14 +275,24 @@ export default function StaffNewRental() {
           </div>
         </main>
 
-        {/* ACTION BAR: Fixed on mobile, relative on desktop */}
+        {/* ACTION BAR */}
         <div className="fixed bottom-0 left-0 right-0 p-6 pb-10 md:relative md:p-12 md:bg-transparent bg-white/80 backdrop-blur-lg rounded-t-[40px] md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.04)] md:shadow-none z-40">
           <div className="max-w-2xl mx-auto flex flex-col md:flex-row-reverse gap-3">
-            <button onClick={handleNext} className="w-full md:flex-2 bg-primary text-white py-5 md:py-6 rounded-2xl md:rounded-3xl font-bold text-base md:text-xl shadow-xl shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all">
+            <button 
+              disabled={isScanning}
+              onClick={handleNext} 
+              className={`w-full md:flex-2 py-5 md:py-6 rounded-2xl md:rounded-3xl font-bold text-base md:text-xl shadow-xl transition-all
+                ${isScanning ? 'bg-gray-300 text-gray-500 shadow-none cursor-not-allowed' : 'bg-primary text-white shadow-primary/20 hover:brightness-110 active:scale-[0.98]'}`}
+            >
               {step === 3 ? 'Confirm & Generate Receipt' : 'Continue to Next Step'}
             </button>
             {step > 1 && (
-              <button onClick={() => setStep(step - 1)} className="w-full md:flex-1 py-4 text-gray-400 font-bold text-sm md:text-lg hover:text-text-main transition-colors">
+              <button 
+                disabled={isScanning}
+                onClick={() => setStep(step - 1)} 
+                className={`w-full md:flex-1 py-4 font-bold text-sm md:text-lg transition-colors
+                  ${isScanning ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-text-main'}`}
+              >
                 Go Back
               </button>
             )}

@@ -1,4 +1,4 @@
-// src/components/Sidenav.jsx
+// src/components/SideNav.jsx
 import { Link, useLocation } from 'react-router-dom';
 
 export default function Sidenav({ role, setRole }) {
@@ -11,7 +11,8 @@ export default function Sidenav({ role, setRole }) {
       : 'text-gray-600 hover:bg-gray-50 hover:text-primary';
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen bg-white sticky top-0 border-r border-gray-100 shadow-sm z-50">
+    // ADDED `shrink-0` HERE to prevent the charts from squishing the sidebar
+    <aside className="hidden md:flex flex-col w-64 shrink-0 h-screen bg-white sticky top-0 border-r border-gray-100 shadow-sm z-50">
       
       {/* Brand & Role Section */}
       <div className="p-6 border-b border-gray-50">

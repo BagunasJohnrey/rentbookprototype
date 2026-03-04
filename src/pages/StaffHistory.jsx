@@ -13,15 +13,24 @@ export default function StaffHistory() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('All');
 
+  const filteredHistory = filter === 'All' 
+    ? MOCK_HISTORY 
+    : MOCK_HISTORY.filter(tx => tx.status === filter);
+
   return (
     <div className="min-h-screen bg-app-bg font-sans">
       
-      {/* --- MOBILE NATIVE UI --- */}
+      {/* ==========================================
+          MOBILE DESIGN (Retained)
+          Visible only on screens < md
+      ========================================== */}
       <div className="flex md:hidden flex-col h-screen">
         <header className="pt-12 px-6 pb-4 bg-white shrink-0 shadow-sm">
           <div className="flex justify-between items-center mb-4">
             <button onClick={() => navigate(-1)} className="p-2 -ml-2 text-text-main">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
             </button>
             <h1 className="text-[17px] font-bold">History</h1>
             <div className="w-10"></div>
@@ -43,7 +52,7 @@ export default function StaffHistory() {
 
         <main className="grow overflow-y-auto px-6 py-4 pb-24">
           <div className="space-y-4">
-            {MOCK_HISTORY.map(tx => (
+            {filteredHistory.map(tx => (
               <div key={tx.id} className="bg-white p-5 rounded-3xl shadow-sm flex justify-between items-center active:scale-95 transition-all">
                 <div className="flex gap-4 items-center">
                   <div className={`w-2 h-10 rounded-full ${tx.status === 'Active' ? 'bg-blue-400' : tx.status === 'Overdue' ? 'bg-red-400' : 'bg-green-400'}`}></div>
@@ -62,7 +71,11 @@ export default function StaffHistory() {
         </main>
       </div>
 
-      {/* --- DESKTOP FULL VIEW UI --- */}
+
+      {/* ==========================================
+          DESKTOP DESIGN
+          Visible only on screens >= md
+      ========================================== */}
       <div className="hidden md:flex flex-col h-screen p-12 bg-white">
         <div className="max-w-7xl mx-auto w-full">
           <header className="flex justify-between items-end mb-12">
@@ -84,7 +97,7 @@ export default function StaffHistory() {
             </div>
           </header>
 
-          <div className="bg-app-bg rounded-[40px] p-10 overflow-hidden">
+          <div className="bg-app-bg rounded-[40px] p-10 overflow-hidden shadow-inner min-h-[600px]">
             <table className="w-full text-left border-separate border-spacing-y-4">
               <thead>
                 <tr className="text-gray-400 text-sm font-black uppercase tracking-widest px-6">
@@ -97,23 +110,31 @@ export default function StaffHistory() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_HISTORY.map(tx => (
-                  <tr key={tx.id} className="bg-white group cursor-pointer">
-                    <td className="py-6 pl-8 rounded-l-3xl font-bold text-gray-400 group-hover:text-primary transition-colors">{tx.id}</td>
-                    <td className="py-6 font-black text-text-main">{tx.customer}</td>
-                    <td className="py-6 font-bold text-gray-500">{tx.item}</td>
-                    <td className="py-6 font-medium text-gray-400">{tx.date}</td>
-                    <td className="py-6 text-right font-black text-lg">₱{tx.total}</td>
-                    <td className="py-6 pr-8 rounded-r-3xl text-center">
-                      <span className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider
-                        ${tx.status === 'Active' ? 'bg-blue-50 text-blue-600' : 
-                          tx.status === 'Overdue' ? 'bg-red-50 text-red-600' : 
-                          'bg-green-50 text-green-600'}`}>
-                        {tx.status}
-                      </span>
+                {filteredHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="py-20 text-center text-gray-400 font-bold text-xl">
+                      No records found for "{filter}"
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredHistory.map(tx => (
+                    <tr key={tx.id} className="bg-white group hover:shadow-lg transition-all">
+                      <td className="py-6 pl-8 rounded-l-[28px] font-bold text-gray-400 group-hover:text-primary transition-colors">{tx.id}</td>
+                      <td className="py-6 font-black text-text-main">{tx.customer}</td>
+                      <td className="py-6 font-bold text-gray-500">{tx.item}</td>
+                      <td className="py-6 font-medium text-gray-400">{tx.date}</td>
+                      <td className="py-6 text-right font-black text-lg">₱{tx.total}</td>
+                      <td className="py-6 pr-8 rounded-r-[28px] text-center">
+                        <span className={`px-5 py-2 rounded-full text-[10px] font-black uppercase tracking-wider
+                          ${tx.status === 'Active' ? 'bg-blue-50 text-blue-600' : 
+                            tx.status === 'Overdue' ? 'bg-red-50 text-red-600' : 
+                            'bg-green-50 text-green-600'}`}>
+                          {tx.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

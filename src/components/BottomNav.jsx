@@ -44,7 +44,7 @@ export default function BottomNav() {
         </button>
       </div>
 
-      {/* History - PATH FIXED to match App.jsx */}
+      {/* History */}
       <button 
         onClick={() => navigate('/staff-history')} 
         className={`flex flex-col items-center gap-1 w-14 text-[10px] font-black uppercase tracking-tighter transition-colors ${isActive('/staff-history') ? 'text-primary' : 'text-gray-300'}`}
@@ -55,13 +55,19 @@ export default function BottomNav() {
         History
       </button>
 
-      {/* Profile/Settings (Optional Placeholder) */}
-      <button className="flex flex-col items-center gap-1 w-14 text-[10px] font-black uppercase tracking-tighter text-gray-300">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 stroke-[2.5px]">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+      {/* Reports */}
+      <button 
+        onClick={() => navigate('/admin-reports')} 
+        className={`flex flex-col items-center gap-1 w-14 text-[10px] font-black uppercase tracking-tighter transition-colors ${isActive('/admin-reports') ? 'text-primary' : 'text-gray-300'}`}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`w-6 h-6 stroke-[2.5px] transition-transform ${isActive('/admin-reports') ? '-translate-y-1' : ''}`}>
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
         </svg>
-        Profile
+        Reports
       </button>
+      
     </div>
   );
 }
