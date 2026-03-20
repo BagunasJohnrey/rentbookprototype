@@ -24,6 +24,9 @@ export default function StaffNewRental() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showToast, setShowToast] = useState(false);
+  
+  // NEW: State to track if the mobile action bar is minimized
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(true);
 
   const [customer, setCustomer] = useState(() => {
     const now = new Date();
@@ -49,7 +52,6 @@ export default function StaffNewRental() {
 
   const handleNext = () => {
     if (step === 1 && !selectedItem) return alert('Please select an item');
-    // Updated validation to require address
     if (step === 2 && (!customer.name || !customer.contact || !customer.address)) return alert('Details required');
     if (step === 3) {
       setShowToast(true);
@@ -72,6 +74,16 @@ export default function StaffNewRental() {
       return;
     }
     setStep(prev => prev + 1);
+    setIsMobileMenuOpen(true); // Expand menu automatically when moving to the next step
+  };
+
+  const handleBack = () => {
+    if (step > 1) {
+      setStep(step - 1);
+      setIsMobileMenuOpen(true);
+    } else {
+      navigate(-1);
+    }
   };
 
   return (
@@ -90,7 +102,7 @@ export default function StaffNewRental() {
 
         {/* Header */}
         <div className="pt-8 px-6 pb-4 flex justify-between items-center md:px-12 md:pt-12">
-          <button onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)} className="text-text-main hover:scale-110 transition-transform">
+          <button onClick={handleBack} className="text-text-main hover:scale-110 transition-transform">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-6 h-6"><polyline points="15 18 9 12 15 6"></polyline></svg>
           </button>
           <h1 className="text-xl md:text-2xl font-black tracking-[-0.03em] text-[#111010]">New Rental</h1>
@@ -227,7 +239,6 @@ export default function StaffNewRental() {
                     />
                   </div>
                   
-                  {/* Added Address Field Here */}
                   <div className="flex flex-col gap-2">
                     <label className="text-[11px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Address</label>
                     <input 
@@ -323,25 +334,63 @@ export default function StaffNewRental() {
               </div>
             )}
           </div>
-        </main>
-
-        {/* ACTION BAR */}
-        <div className="fixed bottom-20 left-0 right-0 p-4 pb-6 md:bottom-auto md:relative md:p-12 md:bg-transparent bg-white/95 backdrop-blur-xl rounded-t-[32px] md:rounded-none shadow-[0_-15px_40px_rgba(0,0,0,0.08)] md:shadow-none z-40">
-          <div className="max-w-2xl mx-auto flex flex-col md:flex-row-reverse gap-3">
-            <button 
-              onClick={handleNext} 
-              className="w-full md:flex-2 py-4 md:py-6 rounded-2xl md:rounded-[24px] font-black text-base md:text-xl shadow-xl transition-all bg-primary text-white shadow-primary/20 hover:brightness-110 active:scale-[0.98] tracking-tight"
-            >
-              {step === 3 ? 'Confirm & Process' : 'Continue to Details'}
-            </button>
+          
+          {/* DESKTOP ACTION BAR (Inline, Hidden on Mobile) */}
+          <div className="hidden md:flex max-w-2xl mx-auto mt-12 gap-4 pb-12">
             {step > 1 && (
               <button 
-                onClick={() => setStep(step - 1)} 
-                className="w-full md:flex-1 py-3 font-black text-sm md:text-lg text-[#8e8e93] hover:text-[#111010] transition-colors tracking-tight"
+                onClick={handleBack} 
+                className="flex-1 py-5 rounded-3xl font-black text-sm uppercase tracking-widest transition-all bg-white border border-gray-200 text-[#8e8e93] hover:text-[#111010] hover:border-gray-300 hover:shadow-sm"
               >
                 Go Back
               </button>
             )}
+            <button 
+              onClick={handleNext} 
+              className="flex-2 py-5 rounded-3xl font-black text-sm uppercase tracking-widest shadow-xl transition-all bg-primary text-white shadow-primary/20 hover:brightness-110 active:scale-[0.98]"
+            >
+              {step === 3 ? 'Confirm & Process' : 'Continue to Next Step'}
+            </button>
+          </div>
+
+        </main>
+
+        {/* COLLAPSIBLE MOBILE FLOATING ACTION BAR */}
+        <div className="md:hidden fixed bottom-[70px] sm:bottom-0 left-0 right-0 z-40">
+          <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] shadow-[0_-15px_40px_rgba(0,0,0,0.08)] border-t border-gray-100 px-5 transition-all duration-300 overflow-hidden">
+            
+            {/* Drawer Drag Handle */}
+            <div 
+              className="w-full flex flex-col items-center justify-center py-4 cursor-pointer"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <div className="w-10 h-1.5 bg-gray-200 rounded-full mb-2"></div>
+              <div className="flex items-center gap-1.5">
+                <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isMobileMenuOpen ? 'text-gray-400' : 'text-primary'}`}>
+                  {isMobileMenuOpen ? 'Minimize' : 'Show Actions'}
+                </span>
+                <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180 text-gray-400' : 'text-primary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+              </div>
+            </div>
+
+            {/* Action Buttons (Collapses when minimized) */}
+            <div className={`flex flex-col-reverse gap-3 transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-[200px] pb-6 opacity-100' : 'max-h-0 pb-0 opacity-0 pointer-events-none'}`}>
+              {step > 1 && (
+                <button 
+                  onClick={handleBack} 
+                  className="w-full py-3.5 font-black text-sm text-[#8e8e93] hover:text-[#111010] bg-gray-50 rounded-[16px] transition-colors tracking-tight border border-gray-100"
+                >
+                  Go Back
+                </button>
+              )}
+              <button 
+                onClick={handleNext} 
+                className="w-full py-4 rounded-[20px] font-black text-base shadow-xl transition-all bg-primary text-white shadow-primary/20 active:scale-[0.98] tracking-tight uppercase tracking-widest"
+              >
+                {step === 3 ? 'Confirm & Process' : 'Continue'}
+              </button>
+            </div>
+
           </div>
         </div>
 

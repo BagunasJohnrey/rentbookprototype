@@ -5,6 +5,12 @@ import { CATALOG_ITEMS } from '../data/mockData';
 
 const MOTIFS = ['Rustic', 'Modern Minimalist', 'Royal Blue', 'Pastel Pink', 'Bohemian', 'Classic Filipiniana'];
 const ROLES = ['Maid of Honor', 'Best Man', 'Bridesmaid', 'Groomsman', 'Flower Girl', 'Bearer', 'Parent of Bride', 'Parent of Groom'];
+const CATALOG_CATEGORIES = [
+  { id: 'all', label: 'All Items' },
+  { id: 'gowns', label: 'Gowns & Dresses (Female)' },
+  { id: 'suits', label: 'Suits & Tuxedos (Male)' },
+  { id: 'barong', label: 'Barong Tagalog (Male)' }
+];
 
 export default function StaffWeddingOrder() {
   const navigate = useNavigate();
@@ -12,7 +18,12 @@ export default function StaffWeddingOrder() {
   const [showCatalog, setShowCatalog] = useState(false);
   const [activeSelection, setActiveSelection] = useState(null); 
   
+  // Mobile Action Bar State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(true);
+
+  // Catalog Filter States
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
 
   const [weddingData, setWeddingData] = useState({
     brideName: '', 
@@ -25,7 +36,16 @@ export default function StaffWeddingOrder() {
   });
 
   const getItem = (id) => CATALOG_ITEMS.find(item => item.id === id) || { name: 'Not Selected', baseRate: 0, deposit: 0 };
-  const availableItems = useMemo(() => CATALOG_ITEMS.filter(i => i.status === 'Available'), []);
+  
+  // Filter items for the overlay based on search and category
+  const filteredCatalogItems = useMemo(() => {
+    return CATALOG_ITEMS.filter(item => {
+      if (item.status !== 'Available') return false;
+      const matchesCategory = activeCategory === 'all' || item.category?.toLowerCase() === activeCategory.toLowerCase();
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [activeCategory, searchQuery]);
 
   const totals = useMemo(() => {
     const brideItem = getItem(weddingData.brideOutfitId);
@@ -43,6 +63,8 @@ export default function StaffWeddingOrder() {
 
   const openCatalog = (type, index = null) => {
     setActiveSelection({ type, index });
+    setSearchQuery(''); // Reset search when opening
+    setActiveCategory('all'); // Reset category when opening
     setShowCatalog(true);
   };
 
@@ -116,7 +138,7 @@ export default function StaffWeddingOrder() {
       {/* Main Scrollable Content */}
       <div className="grow overflow-y-auto px-5 md:px-12 pt-8 md:pt-12 pb-48 md:pb-12 md:max-w-6xl md:mx-auto w-full scrollbar-hide">
         
-        {/* PROGRESS HEADER (Matching StaffNewRental) */}
+        {/* PROGRESS HEADER */}
         <div className="mb-10 md:mb-16 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <button 
@@ -128,14 +150,13 @@ export default function StaffWeddingOrder() {
             <div className="text-center">
               <h1 className="text-2xl md:text-3xl font-black text-[#111010] tracking-tight">Wedding Package</h1>
             </div>
-            <div className="w-10 md:w-12 h-10 md:h-12"></div> {/* Spacer for perfect centering */}
+            <div className="w-10 md:w-12 h-10 md:h-12"></div>
           </div>
           
-          {/* Circular Step Indicator */}
           <div className="relative flex items-center justify-between max-w-sm mx-auto px-2">
             <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full -z-0"></div>
             <div 
-              className="absolute top-1/2 left-0 h-1 bg-[#bf4a53] -translate-y-1/2 rounded-full -z-0 transition-all duration-500 ease-out" 
+              className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full -z-0 transition-all duration-500 ease-out" 
               style={{ width: `${((step - 1) / 3) * 100}%` }}
             ></div>
             
@@ -143,33 +164,40 @@ export default function StaffWeddingOrder() {
               <div 
                 key={num} 
                 className={`relative z-10 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full font-black text-xs md:text-sm transition-all duration-300 shadow-sm border-2
-                  ${step >= num ? 'bg-[#bf4a53] border-[#bf4a53] text-white' : 'bg-white border-gray-200 text-gray-400'}`}
+                  ${step >= num ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}
               >
-                {num}
+                {step > num ? '✓' : num}
               </div>
             ))}
           </div>
+          <div className="flex justify-between max-w-sm mx-auto mt-2 px-1">
+             {['Client', 'Attire', 'Entourage', 'Confirm'].map((label, idx) => (
+                <span key={label} className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest text-center w-12 md:w-14 ${step >= (idx + 1) ? 'text-primary' : 'text-gray-400'}`}>
+                   {label}
+                </span>
+             ))}
+          </div>
         </div>
 
-        <main className="w-full pb-8">
+        <main className="w-full pb-8 max-w-6xl mx-auto">
           
           {/* STEP 1: EVENT INFO */}
           {step === 1 && (
             <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500">
               <div className="text-center mb-8 md:mb-10">
-                <h2 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">The Happy Couple</h2>
-                <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Let's start with the basic wedding details.</p>
+                <h2 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">Client Information</h2>
+                <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Enter the primary client details for this event.</p>
               </div>
               
               <div className="bg-white p-6 md:p-10 rounded-4xl shadow-sm border border-gray-100 space-y-6 md:space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
                   <div className="space-y-2">
                     <label className="text-[10px] md:text-xs font-black text-[#8e8e93] uppercase tracking-widest ml-1">Bride's Name</label>
-                    <input type="text" placeholder="Maria Clara" value={weddingData.brideName} onChange={e => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full p-4 md:p-5 rounded-2xl bg-gray-50 border-none font-bold text-base md:text-lg outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
+                    <input type="text" placeholder="Maria Clara" value={weddingData.brideName} onChange={e => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full p-4 md:p-5 rounded-2xl bg-gray-50 border-none font-bold text-base md:text-lg outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] md:text-xs font-black text-[#8e8e93] uppercase tracking-widest ml-1">Groom's Name</label>
-                    <input type="text" placeholder="Juan Luna" value={weddingData.groomName} onChange={e => setWeddingData({...weddingData, groomName: e.target.value})} className="w-full p-4 md:p-5 rounded-2xl bg-gray-50 border-none font-bold text-base md:text-lg outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
+                    <input type="text" placeholder="Juan Luna" value={weddingData.groomName} onChange={e => setWeddingData({...weddingData, groomName: e.target.value})} className="w-full p-4 md:p-5 rounded-2xl bg-gray-50 border-none font-bold text-base md:text-lg outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
                   </div>
                 </div>
 
@@ -177,7 +205,7 @@ export default function StaffWeddingOrder() {
                   <label className="text-[10px] md:text-xs font-black text-[#8e8e93] uppercase tracking-widest block mb-3 md:mb-4 ml-1">Choose Motif</label>
                   <div className="flex flex-wrap gap-2 md:gap-3 mb-6">
                     {MOTIFS.map(m => (
-                      <button key={m} onClick={() => setWeddingData({...weddingData, motif: m})} className={`px-4 md:px-6 py-3 md:py-3.5 rounded-2xl text-xs md:text-sm font-black transition-all border-2 ${weddingData.motif === m ? 'bg-[#bf4a53] border-[#bf4a53] text-white shadow-lg shadow-[#bf4a53]/20' : 'bg-gray-50 border-transparent text-[#8e8e93] hover:bg-gray-100 hover:text-[#111010]'}`}>
+                      <button key={m} onClick={() => setWeddingData({...weddingData, motif: m})} className={`px-4 md:px-6 py-3 md:py-3.5 rounded-2xl text-xs md:text-sm font-black transition-all border-2 ${weddingData.motif === m ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-50 border-transparent text-[#8e8e93] hover:bg-gray-100 hover:text-[#111010]'}`}>
                         {m}
                       </button>
                     ))}
@@ -189,7 +217,7 @@ export default function StaffWeddingOrder() {
                       placeholder="e.g. Strictly pastel shades, no neon colors..." 
                       value={weddingData.motifNotes} 
                       onChange={e => setWeddingData({...weddingData, motifNotes: e.target.value})} 
-                      className="w-full p-4 md:p-5 rounded-2xl bg-gray-50 border-none font-bold text-sm md:text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all min-h-[100px] resize-none tracking-tight" 
+                      className="w-full p-4 md:p-5 rounded-2xl bg-gray-50 border-none font-bold text-sm md:text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all min-h-[100px] resize-none tracking-tight" 
                     />
                   </div>
                 </div>
@@ -207,8 +235,8 @@ export default function StaffWeddingOrder() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 max-w-4xl mx-auto">
                 {['bride', 'groom'].map(role => (
-                  <div key={role} className="bg-white p-5 md:p-8 rounded-4xl shadow-sm border border-gray-100 flex flex-col items-center group transition-all hover:border-[#bf4a53]/20 hover:shadow-md">
-                    <div className="w-full aspect-3/4 rounded-3xl bg-gray-50 overflow-hidden mb-5 md:mb-8 border border-gray-100 relative transition-all">
+                  <div key={role} className="bg-white p-5 md:p-8 rounded-4xl shadow-sm border border-gray-100 flex flex-col items-center group transition-all hover:border-primary/20 hover:shadow-md">
+                    <div className="w-full aspect-[3/4] rounded-3xl bg-gray-50 overflow-hidden mb-5 md:mb-8 border border-gray-100 relative transition-all">
                       {weddingData[`${role}OutfitId`] ? (
                         <img src={getItem(weddingData[`${role}OutfitId`]).imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
                       ) : (
@@ -220,7 +248,7 @@ export default function StaffWeddingOrder() {
                         </div>
                       )}
                     </div>
-                    <button onClick={() => openCatalog(role)} className={`w-full py-3.5 md:py-5 rounded-2xl md:rounded-3xl font-black text-xs md:text-sm uppercase tracking-widest transition-colors ${weddingData[`${role}OutfitId`] ? 'bg-gray-50 text-[#111010] hover:bg-gray-100' : 'bg-[#bf4a53]/10 text-[#bf4a53] hover:bg-[#bf4a53]/20'}`}>
+                    <button onClick={() => openCatalog(role)} className={`w-full py-3.5 md:py-5 rounded-2xl md:rounded-3xl font-black text-xs md:text-sm uppercase tracking-widest transition-colors ${weddingData[`${role}OutfitId`] ? 'bg-gray-50 text-[#111010] hover:bg-gray-100' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>
                       {weddingData[`${role}OutfitId`] ? 'Change Outfit' : 'Browse Catalog'}
                     </button>
                   </div>
@@ -255,11 +283,11 @@ export default function StaffWeddingOrder() {
                         <svg className="w-3.5 h-3.5 md:w-5 md:h-5" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" /></svg>
                       </button>
 
-                      <button onClick={() => openCatalog('participant', idx)} className="w-20 h-28 md:w-24 md:h-32 rounded-2xl bg-gray-50 overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center hover:border-[#bf4a53]/30 transition-colors relative">
+                      <button onClick={() => openCatalog('participant', idx)} className="w-20 h-28 md:w-24 md:h-32 rounded-2xl bg-gray-50 overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center hover:border-primary/30 transition-colors relative">
                         {p.itemId ? (
                           <img src={getItem(p.itemId).imageUrl} className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" alt="" />
                         ) : (
-                          <div className="flex flex-col items-center text-gray-300 group-hover:text-[#bf4a53] transition-colors">
+                          <div className="flex flex-col items-center text-gray-300 group-hover:text-primary transition-colors">
                             <svg className="w-5 h-5 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                             <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest">Assign</span>
                           </div>
@@ -268,10 +296,10 @@ export default function StaffWeddingOrder() {
                       <div className="grow space-y-2 md:space-y-3 min-w-0 pr-8 md:pr-0">
                         <input placeholder="Participant Name" value={p.name} onChange={e => {
                           const n = [...weddingData.participants]; n[idx].name = e.target.value; setWeddingData({...weddingData, participants: n});
-                        }} className="w-full p-2.5 md:p-3.5 bg-gray-50 rounded-xl font-bold text-xs md:text-sm outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all border border-transparent focus:border-[#bf4a53]/10 truncate" />
+                        }} className="w-full p-2.5 md:p-3.5 bg-gray-50 rounded-xl font-bold text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all border border-transparent focus:border-primary/10 truncate" />
                         <select value={p.role} onChange={e => {
                           const n = [...weddingData.participants]; n[idx].role = e.target.value; setWeddingData({...weddingData, participants: n});
-                        }} className="w-full p-2.5 md:p-3.5 bg-gray-50 rounded-xl font-bold text-xs md:text-sm outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all border border-transparent focus:border-[#bf4a53]/10 appearance-none truncate">
+                        }} className="w-full p-2.5 md:p-3.5 bg-gray-50 rounded-xl font-bold text-xs md:text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all border border-transparent focus:border-primary/10 appearance-none truncate">
                           <option value="">Select Role</option>
                           {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
@@ -291,9 +319,9 @@ export default function StaffWeddingOrder() {
                 <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Review bulk order details before confirming.</p>
               </div>
 
-              <div className="bg-white rounded-4xl md:rounded-[40px] shadow-2xl shadow-[#bf4a53]/5 overflow-hidden border border-gray-100">
+              <div className="bg-white rounded-4xl md:rounded-[40px] shadow-2xl shadow-primary/5 overflow-hidden border border-gray-100">
                 <div className="bg-[#111010] p-6 md:p-10 text-white relative overflow-hidden">
-                  <div className="absolute -right-20 -top-20 w-48 h-48 bg-[#bf4a53] rounded-full blur-[60px] opacity-30"></div>
+                  <div className="absolute -right-20 -top-20 w-48 h-48 bg-primary rounded-full blur-[60px] opacity-30"></div>
                   <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-start gap-3 md:gap-4">
                     <div>
                       <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-[#8e8e93] mb-1.5">Wedding Of</p>
@@ -317,7 +345,7 @@ export default function StaffWeddingOrder() {
                   )}
 
                   <div className="space-y-4">
-                    <h4 className="text-[10px] md:text-xs font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-100 pb-3">Primary Attire</h4>
+                    <h4 className="text-[10px] md:text-xs font-black text-primary uppercase tracking-widest border-b border-gray-100 pb-3">Primary Attire</h4>
                     <div className="flex justify-between items-center py-1">
                       <div>
                         <p className="font-black text-sm md:text-base text-[#111010]">Bride: {getItem(weddingData.brideOutfitId).name}</p>
@@ -336,7 +364,7 @@ export default function StaffWeddingOrder() {
 
                   {weddingData.participants.length > 0 && (
                     <div className="space-y-4 pt-4 md:pt-6">
-                      <h4 className="text-[10px] md:text-xs font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-100 pb-3">Entourage ({weddingData.participants.length})</h4>
+                      <h4 className="text-[10px] md:text-xs font-black text-primary uppercase tracking-widest border-b border-gray-100 pb-3">Entourage ({weddingData.participants.length})</h4>
                       <div className="space-y-3 md:space-y-4">
                         {weddingData.participants.map((p, i) => (
                           <div key={i} className="flex justify-between items-center text-xs md:text-base">
@@ -359,7 +387,7 @@ export default function StaffWeddingOrder() {
                     </div>
                     <div className="flex justify-between items-end pt-4 md:pt-6 mt-3 md:mt-4 border-t border-gray-100">
                       <span className="text-lg md:text-2xl font-black text-[#111010] tracking-tight">Grand Total</span>
-                      <span className="text-2xl md:text-4xl font-black text-[#bf4a53] tracking-tighter">₱{totals.grandTotal.toLocaleString()}</span>
+                      <span className="text-2xl md:text-4xl font-black text-primary tracking-tighter">₱{totals.grandTotal.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -386,7 +414,7 @@ export default function StaffWeddingOrder() {
               )}
               <button 
                 onClick={handleNext} 
-                className="flex-2 py-5 rounded-3xl font-black text-sm uppercase tracking-widest shadow-xl transition-all bg-[#bf4a53] text-white shadow-[#bf4a53]/20 hover:brightness-110 active:scale-[0.98]"
+                className="flex-2 py-5 rounded-3xl font-black text-sm uppercase tracking-widest shadow-xl transition-all bg-primary text-white shadow-primary/20 hover:brightness-110 active:scale-[0.98]"
               >
                 {step === 4 ? 'Confirm & Process' : 'Continue to Next Step'}
               </button>
@@ -407,10 +435,10 @@ export default function StaffWeddingOrder() {
             >
               <div className="w-10 h-1.5 bg-gray-200 rounded-full mb-2"></div>
               <div className="flex items-center gap-1.5">
-                <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isMobileMenuOpen ? 'text-gray-400' : 'text-[#bf4a53]'}`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isMobileMenuOpen ? 'text-gray-400' : 'text-primary'}`}>
                   {isMobileMenuOpen ? 'Minimize' : 'Show Actions'}
                 </span>
-                <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180 text-gray-400' : 'text-[#bf4a53]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180 text-gray-400' : 'text-primary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
               </div>
             </div>
 
@@ -426,7 +454,7 @@ export default function StaffWeddingOrder() {
               )}
               <button 
                 onClick={handleNext} 
-                className="w-full py-4 rounded-[20px] font-black text-base shadow-xl transition-all bg-[#bf4a53] text-white shadow-[#bf4a53]/20 active:scale-[0.98] tracking-tight uppercase tracking-widest"
+                className="w-full py-4 rounded-[20px] font-black text-base shadow-xl transition-all bg-primary text-white shadow-primary/20 active:scale-[0.98] tracking-tight uppercase tracking-widest"
               >
                 {step === 4 ? 'Confirm & Process' : 'Continue'}
               </button>
@@ -438,39 +466,84 @@ export default function StaffWeddingOrder() {
 
       {/* CATALOG OVERLAY */}
       {showCatalog && (
-        <div className="fixed inset-0 z-100 bg-[#faf6f6] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] bg-[#faf6f6] flex flex-col animate-in fade-in zoom-in-95 duration-200">
           
-          <div className="bg-[#faf6f6]/90 backdrop-blur-xl border-b border-gray-200/50 px-5 py-4 md:px-10 md:py-6 flex justify-between items-center z-10 shrink-0">
-            <div>
-              <h3 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">Catalog</h3>
-              <p className="text-[10px] md:text-sm font-bold text-[#8e8e93] mt-0.5">Assigning outfit for <span className="text-[#bf4a53] uppercase tracking-widest">{activeSelection?.type}</span></p>
+          {/* Overlay Sticky Header */}
+          <div className="bg-[#faf6f6]/90 backdrop-blur-xl border-b border-gray-200/50 px-5 pt-4 pb-3 md:px-12 md:pt-8 md:pb-6 z-10 shrink-0">
+            <div className="max-w-6xl mx-auto w-full">
+              {/* Top row: Title and Close Button */}
+              <div className="flex justify-between items-center mb-5 md:mb-8">
+                <div>
+                  <h3 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">Catalog</h3>
+                  <p className="text-[10px] md:text-sm font-bold text-[#8e8e93] mt-0.5">Assigning outfit for <span className="text-primary uppercase tracking-widest">{activeSelection?.type}</span></p>
+                </div>
+                <button 
+                  onClick={() => setShowCatalog(false)} 
+                  className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full font-black text-lg md:text-xl shadow-sm border border-gray-200 flex items-center justify-center text-[#111010] hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Smart Search Bar & Categories */}
+              <div className="flex flex-col items-center w-full">
+                <div className="relative w-full max-w-2xl mb-4">
+                  <input 
+                    type="text" 
+                    placeholder="Search outfits..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full py-3.5 pr-4 pl-11 border border-gray-200 rounded-2xl bg-white shadow-sm outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all font-bold text-sm tracking-tight"
+                  />
+                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+
+                {/* Category Scroll */}
+                <div className="flex overflow-x-auto w-full max-w-full justify-start md:justify-center gap-2 pb-2 no-scrollbar scrollbar-hide">
+                  {CATALOG_CATEGORIES.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={`px-5 py-2.5 rounded-full whitespace-nowrap text-[11px] font-black uppercase tracking-widest transition-all border shrink-0
+                        ${activeCategory === cat.id 
+                          ? 'bg-primary border-primary text-white shadow-lg shadow-primary/10' 
+                          : 'bg-white border-gray-200 text-[#8e8e93] hover:border-gray-300 hover:text-[#111010]'}`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={() => setShowCatalog(false)} 
-              className="w-10 h-10 md:w-14 md:h-14 bg-white rounded-full font-black text-lg md:text-xl shadow-sm border border-gray-200 flex items-center justify-center text-[#111010] hover:bg-gray-50 hover:scale-105 active:scale-95 transition-all"
-            >
-              ✕
-            </button>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 md:p-10 pb-32">
-            <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
-              {availableItems.map(item => (
-                <div 
-                  key={item.id} 
-                  onClick={() => selectFromCatalog(item.id)} 
-                  className="bg-white p-3 md:p-4 rounded-[24px] md:rounded-3xl shadow-sm border-2 border-transparent hover:border-[#bf4a53]/50 cursor-pointer transition-all group hover:shadow-md flex flex-col h-full"
-                >
-                  <div className="aspect-3/4 rounded-2xl overflow-hidden mb-3 bg-gray-50 relative shrink-0">
-                    <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
-                    <div className="absolute inset-0 bg-[#bf4a53]/0 group-hover:bg-[#bf4a53]/10 transition-colors duration-300"></div>
-                  </div>
-                  <div className="flex flex-col grow justify-between">
-                    <p className="font-black text-[11px] md:text-sm text-[#111010] tracking-tight leading-snug px-1 line-clamp-2">{item.name}</p>
-                    <p className="text-[#bf4a53] font-black text-[10px] md:text-xs mt-1.5 px-1">₱{item.baseRate.toLocaleString()}</p>
-                  </div>
+          {/* Overlay Scrollable Grid */}
+          <div className="flex-1 overflow-y-auto p-5 md:p-12 pb-32">
+            <div className="max-w-6xl mx-auto w-full">
+              {filteredCatalogItems.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-4xl border border-dashed border-gray-200">
+                  <p className="text-[#8e8e93] font-bold text-sm">No items found matching your criteria.</p>
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+                  {filteredCatalogItems.map(item => (
+                    <div 
+                      key={item.id} 
+                      onClick={() => selectFromCatalog(item.id)} 
+                      className="bg-white p-3 md:p-4 rounded-[24px] md:rounded-3xl shadow-sm border-2 border-transparent hover:border-primary/50 cursor-pointer transition-all group hover:shadow-md flex flex-col h-full"
+                    >
+                      <div className="aspect-[3/4] rounded-2xl overflow-hidden mb-3 md:mb-4 bg-gray-50 relative shrink-0">
+                        <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
+                        <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300"></div>
+                      </div>
+                      <div className="flex flex-col grow justify-between">
+                        <p className="font-black text-[11px] md:text-sm text-[#111010] tracking-tight leading-snug px-1 line-clamp-2">{item.name}</p>
+                        <p className="text-primary font-black text-[10px] md:text-xs mt-1.5 px-1">₱{item.baseRate.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
