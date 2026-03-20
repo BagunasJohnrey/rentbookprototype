@@ -174,7 +174,7 @@ function TicketCard({ txData }) {
       <div className="space-y-4 mb-6">
         <Drow label="TX ID" value={txData.id} />
         <Drow label="Customer" value={txData.customer} />
-        <Drow label="Return" value="Mar 07, 2026" color="var(--primary)" />
+        <Drow label="Return" value={txData.returnDate} color="var(--primary)" />
       </div>
 
       <div className="border-t-2 border-dashed border-gray-100 my-6"></div>

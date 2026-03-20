@@ -23,7 +23,7 @@ function AppContent({ globalRole, setGlobalRole }) {
   const isPublicPage = path === '/' || path === '/login';
   
   // Logic to hide BottomNav on specific pages (like the New Rental form)
-  const hideBottomNav = path === '/staff-new-rental';
+  const hideBottomNav = path === '/staff-new-rental' || path === '/receipt';
 
   return (
     <div className="w-full min-h-screen bg-gray-50 md:flex md:flex-row relative overflow-x-hidden">

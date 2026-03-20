@@ -11,7 +11,11 @@ export default function AdminDashboard() {
   const catalogCount = CATALOG_ITEMS.length;
   
   // Calculate revenue dynamically from transactions
-  const totalRevenue = TRANSACTIONS.reduce((acc, curr) => acc + (curr.total || 0), 0);
+  const totalRevenue = TRANSACTIONS.reduce((acc, curr) => {
+  const item = CATALOG_ITEMS.find(i => i.id === curr.itemId);
+  const itemTotal = item ? (item.baseRate + item.deposit) : 0;
+  return acc + itemTotal;
+  }, 0);
   
   const recentTx = TRANSACTIONS.slice(0, 4).map(tx => {
     const item = CATALOG_ITEMS.find(i => i.id === tx.itemId);

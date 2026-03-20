@@ -6,7 +6,9 @@ import BottomNav from '../components/BottomNav';
 export default function StaffDashboard() {
   const navigate = useNavigate();
 
-  const priorityTasks = TRANSACTIONS.map(tx => {
+const priorityTasks = TRANSACTIONS
+  .filter(tx => tx.status !== 'completed')
+  .map(tx => {
     const item = CATALOG_ITEMS.find(i => i.id === tx.itemId);
     return { ...tx, item };
   });

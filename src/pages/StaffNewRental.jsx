@@ -54,6 +54,7 @@ export default function StaffNewRental() {
             txData: {
               id: `TXN-${Date.now()}`,
               date: new Date().toLocaleDateString(),
+              returnDate: customer.returnDate,
               customer: customer.name,
               item: selectedItem.name,
               baseRate: selectedItem.baseRate,
@@ -224,6 +225,7 @@ export default function StaffNewRental() {
                       <label className="text-xs font-bold text-text-main ml-1 uppercase">Rental Date</label>
                       <input 
                         type="date" 
+                        min={new Date().toISOString().split('T')[0]}
                         value={customer.rentalDate} 
                         onChange={e => setCustomer({...customer, rentalDate: e.target.value})} 
                         className="w-full p-4 rounded-2xl bg-white shadow-sm outline-none" 
@@ -263,6 +265,12 @@ export default function StaffNewRental() {
                     <div className="flex justify-between border-b border-gray-50 pb-3">
                       <span className="text-gray-400 font-bold text-xs uppercase">Contact</span>
                       <span className="text-text-main font-bold md:text-lg">{customer.contact}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-3">
+                      <span className="text-gray-400 font-bold text-xs uppercase">Rental Period</span>
+                      <span className="text-text-main font-bold md:text-lg">
+                        {customer.rentalDate} to {customer.returnDate}
+                      </span>
                     </div>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 gap-2">
                       <span className="text-lg md:text-xl font-black text-gray-400">Total Due</span>
