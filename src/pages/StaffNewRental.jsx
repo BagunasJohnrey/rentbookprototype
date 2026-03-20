@@ -49,7 +49,8 @@ export default function StaffNewRental() {
 
   const handleNext = () => {
     if (step === 1 && !selectedItem) return alert('Please select an item');
-    if (step === 2 && (!customer.name || !customer.contact)) return alert('Details required');
+    // Updated validation to require address
+    if (step === 2 && (!customer.name || !customer.contact || !customer.address)) return alert('Details required');
     if (step === 3) {
       setShowToast(true);
       setTimeout(() => {
@@ -225,6 +226,19 @@ export default function StaffNewRental() {
                       placeholder="09xx-xxx-xxxx" 
                     />
                   </div>
+                  
+                  {/* Added Address Field Here */}
+                  <div className="flex flex-col gap-2">
+                    <label className="text-[11px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Address</label>
+                    <input 
+                      type="text" 
+                      value={customer.address} 
+                      onChange={e => setCustomer({...customer, address: e.target.value})} 
+                      className="w-full p-4 md:p-5 rounded-2xl bg-white border-none shadow-sm outline-none focus:ring-2 focus:ring-primary/20 text-lg font-bold tracking-tight"
+                      placeholder="e.g. 123 Rizal St, Brgy. San Jose" 
+                    />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col gap-2">
                       <label className="text-[11px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Rental Date</label>

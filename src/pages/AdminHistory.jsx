@@ -238,6 +238,18 @@ export default function AdminHistory() {
                     <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-tighter">Due Date</p>
                     <p className="font-bold text-sm sm:text-base text-[#111010]">{viewingTx.dueDate}</p>
                   </div>
+                  
+                  {/* Added Contact Number */}
+                  <div className="col-span-2 p-4 bg-white border border-gray-100 rounded-2xl">
+                    <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-tighter">Contact Number</p>
+                    <p className="font-bold text-sm sm:text-base text-[#111010]">{viewingTx.contactNumber || 'N/A'}</p>
+                  </div>
+
+                  {/* Added Address */}
+                  <div className="col-span-2 p-4 bg-white border border-gray-100 rounded-2xl">
+                    <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-tighter">Address</p>
+                    <p className="font-bold text-sm sm:text-base text-[#111010]">{viewingTx.address || 'N/A'}</p>
+                  </div>
                 </div>
 
                 {/* RETURN PROOF SECTION */}
