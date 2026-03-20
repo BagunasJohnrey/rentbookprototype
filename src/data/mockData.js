@@ -225,22 +225,6 @@ export const CATALOG_ITEMS = [
 
 export const TRANSACTIONS = [
   {
-    txId: "TXN-W-5001",
-    type: "wedding",
-    customerName: "Isabella Rossi & Matteo Chen",
-    motif: "Ethereal Garden",
-    dueDate: "2026-05-20",
-    status: "active",
-    totalAmount: 52400,
-    isPaid: false,
-    items: [
-      { role: "Bride", name: "Isabella Rossi", itemId: "ITEM-1001", returned: false, isPaid: false },
-      { role: "Groom", name: "Matteo Chen", itemId: "ITEM-1003", returned: false, isPaid: false },
-      { role: "Maid of Honor", name: "Sofia", itemId: "ITEM-1002", returned: false, isPaid: false },
-      { role: "Best Man", name: "Lucas", itemId: "ITEM-1004", returned: false, isPaid: false }
-    ]
-  },
-  {
     txId: "TXN-4001",
     type: "standard",
     customerName: "Julian Estrada",
@@ -278,6 +262,141 @@ export const TRANSACTIONS = [
     dueDate: "2026-03-30",
     status: "active",
     isPaid: false
+  },
+  // --- ADDITIONAL DATA ---
+  {
+    txId: "TXN-4005",
+    type: "standard",
+    customerName: "Pia Wurtzbach",
+    itemId: "ITEM-1017",
+    dueDate: "2026-03-12",
+    status: "completed",
+    isPaid: true,
+    notes: "Worn for a cultural gala. Returned in pristine condition.",
+    returnPhotoUrl: "https://i.pinimg.com/564x/ce/ef/eb/ceefebb85aae02b7b79a05707f2db74a.jpg"
+  },
+  {
+    txId: "TXN-4006",
+    type: "standard",
+    customerName: "Dingdong Dantes",
+    itemId: "ITEM-1014",
+    dueDate: "2026-03-18",
+    status: "active",
+    isPaid: true
+  },
+  {
+    txId: "TXN-4007",
+    type: "standard",
+    customerName: "Marian Rivera",
+    itemId: "ITEM-1018",
+    dueDate: "2026-03-22",
+    status: "active",
+    isPaid: false
+  },
+  {
+    txId: "TXN-4008",
+    type: "standard",
+    customerName: "Enchong Dee",
+    itemId: "ITEM-1011",
+    dueDate: "2026-02-28",
+    status: "overdue",
+    isPaid: true,
+    notes: "Called customer; promised to return by end of week."
+  },
+  {
+    txId: "TXN-4009",
+    type: "standard",
+    customerName: "Anne Curtis",
+    itemId: "ITEM-1010",
+    dueDate: "2026-04-05",
+    status: "active",
+    isPaid: false
+  },
+  {
+    txId: "TXN-4010",
+    type: "standard",
+    customerName: "Vice Ganda",
+    itemId: "ITEM-1021",
+    dueDate: "2026-03-10",
+    status: "completed",
+    isPaid: true,
+    notes: "Halloween party rental."
+  },
+  {
+    txId: "TXN-W-5002",
+    type: "wedding",
+    customerName: "Bea Alonzo & Dominic Roque",
+    motif: "Classic White",
+    dueDate: "2026-06-15",
+    status: "active",
+    totalAmount: 65000,
+    isPaid: true,
+    items: [
+      { role: "Bride", name: "Bea Alonzo", itemId: "ITEM-1001", returned: false, isPaid: true },
+      { role: "Groom", name: "Dominic Roque", itemId: "ITEM-1014", returned: false, isPaid: true },
+      { role: "Maid of Honor", name: "Angel", itemId: "ITEM-1012", returned: false, isPaid: true },
+      { role: "Best Man", name: "Paulo", itemId: "ITEM-1011", returned: false, isPaid: true }
+    ]
+  },
+  {
+    txId: "TXN-B-6001",
+    type: "bulk",
+    customerName: "Inabel Corporate Event",
+    dueDate: "2026-03-28",
+    status: "active",
+    totalAmount: 12600,
+    isPaid: false,
+    items: [
+      { name: "Manager 1", itemId: "ITEM-1019", returned: false, isPaid: false },
+      { name: "Manager 2", itemId: "ITEM-1019", returned: false, isPaid: false },
+      { name: "Manager 3", itemId: "ITEM-1019", returned: false, isPaid: false }
+    ]
+  },
+  {
+    txId: "TXN-4011",
+    type: "standard",
+    customerName: "Kathryn Bernardo",
+    itemId: "ITEM-1012",
+    dueDate: "2026-01-20",
+    status: "completed",
+    isPaid: true
+  },
+  {
+    txId: "TXN-4012",
+    type: "standard",
+    customerName: "Daniel Padilla",
+    itemId: "ITEM-1024",
+    dueDate: "2026-03-05",
+    status: "overdue",
+    isPaid: false
+  },
+  {
+    txId: "TXN-4013",
+    type: "standard",
+    customerName: "Nadine Lustre",
+    itemId: "ITEM-1015",
+    dueDate: "2026-03-15",
+    status: "completed",
+    isPaid: true
+  },
+  {
+    txId: "TXN-4014",
+    type: "standard",
+    customerName: "James Reid",
+    itemId: "ITEM-1013",
+    dueDate: "2026-04-10",
+    status: "active",
+    isPaid: false
+  },
+  {
+    txId: "TXN-4015",
+    type: "standard",
+    customerName: "Coco Martin",
+    itemId: "ITEM-1023",
+    dueDate: "2025-12-26",
+    status: "completed",
+    isPaid: true,
+    notes: "Holiday event rental."
   }
 ];
 
