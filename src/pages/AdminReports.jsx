@@ -57,12 +57,15 @@ export default function AdminReports() {
 
   return (
     // Changed here: min-h-screen for mobile, md:h-screen for desktop
-    <div className="flex flex-col min-h-screen md:h-screen relative bg-[#f8f9fa]">
+    <div className="flex flex-col min-h-screen md:h-screen relative bg-app-bg">
       <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-12 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full">
         
         {/* Header Section */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
           <div>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.25em] mb-2 opacity-80">
+            Business Reports
+            </p>
             <h1 className="text-3xl md:text-4xl font-black text-[#111010] tracking-tight">
               Analytics Overview
             </h1>
