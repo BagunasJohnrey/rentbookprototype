@@ -1,17 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #bf4a53;
-  --color-primary-light: #ff6b76;
-  --color-app-bg: #faf6f6;
+  /* Professional Red Palette */
+  --color-primary: #991b1b;       /* Deep Crimson (Tailwind Red-800) */
+  --color-primary-light: #ef4444; /* Bright Red for accents (Tailwind Red-500) */
+  --color-primary-dark: #7f1d1d;  /* Darker shade for hover states */
+  
+  /* Neutral Palette */
+  --color-app-bg: #fdfcfc;        /* Off-white with a hint of warmth */
   --color-app-card: #ffffff;
-  --color-text-main: #111010;
-  --color-text-muted: #8e8e93;
-  --color-success: #34c759;
+  --color-text-main: #18181b;     /* Slate-900 for high readability */
+  --color-text-muted: #71717a;    /* Zinc-500 for secondary text */
+  --color-success: #15803d;
+  --color-border-soft: #f4f4f5;
 }
 
 body {
-  background-color: #333;
+  background-color: var(--color-app-bg);
+  color: var(--color-text-main);
   min-height: 100vh;
   margin: 0;min-height: 100vh;
   margin: 0;
