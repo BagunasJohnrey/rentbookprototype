@@ -45,7 +45,7 @@ export default function Login({ setGlobalRole }) {
         {/* Branding Panel */}
         <div className="w-full h-[35%] md:h-full md:w-[40%] bg-linear-to-b from-primary-light to-primary p-8 md:p-16 flex flex-col justify-center text-white shrink-0">
           <div className="animate-fade-in-down">
-            <h1 className="text-[40px] md:text-[64px] font-extrabold tracking-tighter mb-2 leading-none">RentBook</h1>
+            <h1 className="text-[40px] md:text-[64px] font-extrabold tracking-tighter mb-2 leading-none">RenTech</h1>
             <p className="text-[16px] md:text-[20px] opacity-90 leading-relaxed max-w-xs">
               Digital Rental Management with Smart Analytics
             </p>

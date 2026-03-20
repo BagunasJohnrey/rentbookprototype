@@ -38,7 +38,7 @@ export default function AdminSettings({ setGlobalRole }) {
           </div>
           <div className="grow">
             <h2 className="text-xl font-black text-[#111010] tracking-tight">Administrator</h2>
-            <p className="text-sm text-[#8e8e93] font-bold tracking-tight mb-2">admin@rentbook.app</p>
+            <p className="text-sm text-[#8e8e93] font-bold tracking-tight mb-2">admin@renttech.app</p>
             <span className="inline-block px-3 py-1 bg-[#34c759]/10 text-[#34c759] text-[10px] font-black uppercase tracking-widest rounded-lg">
               Full Access
             </span>

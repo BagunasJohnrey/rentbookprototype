@@ -28,7 +28,7 @@ export default function Sidenav({ role, setRole }) {
       <div className="p-6 border-b border-gray-50 shrink-0">
         <div className="font-bold text-2xl flex flex-col gap-2 text-primary">
           <div className="flex items-center gap-2">
-            📘 <span className="tracking-tight">RentBook</span>
+            📘 <span className="tracking-tight">RenTech</span>
           </div>
           {role && (
             <span className="w-fit text-[10px] bg-blue-100 text-blue-800 px-2 py-1 rounded-md uppercase tracking-widest font-bold">

@@ -5,7 +5,7 @@ export default function StaffSettings({ setGlobalRole }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    const confirmLogout = window.confirm("Are you sure you want to log out of RentBook?");
+    const confirmLogout = window.confirm("Are you sure you want to log out of RenTech?");
     if (confirmLogout) {
       if (setGlobalRole) setGlobalRole(null);
       navigate('/login');
@@ -35,7 +35,7 @@ export default function StaffSettings({ setGlobalRole }) {
           </div>
           <div className="grow">
             <h2 className="text-xl font-black text-[#111010] tracking-tight">Staff Associate</h2>
-            <p className="text-sm text-[#8e8e93] font-bold tracking-tight mb-2">frontdesk@rentbook.app</p>
+            <p className="text-sm text-[#8e8e93] font-bold tracking-tight mb-2">frontdesk@renttech.app</p>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 bg-[#34c759] rounded-full animate-pulse"></span>
               <span className="text-[#34c759] text-[10px] font-black uppercase tracking-widest">
