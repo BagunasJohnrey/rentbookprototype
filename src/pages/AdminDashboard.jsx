@@ -56,13 +56,6 @@ export default function AdminDashboard() {
           <p className="text-xs font-black text-[#bf4a53] uppercase tracking-[0.2em] mb-2">{today}</p>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <h1 className="text-4xl md:text-5xl font-black text-[#111010] tracking-tight">Store Overview</h1>
-            <button 
-              onClick={() => navigate('/admin-add-item')}
-              className="bg-[#111010] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-[#bf4a53] hover:shadow-lg hover:shadow-[#bf4a53]/20 transition-all active:scale-95 flex items-center justify-center gap-2 w-full md:w-auto shrink-0"
-            >
-              <svg className="w-5 h-5 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              Add New Item
-            </button>
           </div>
         </div>
 
