@@ -193,22 +193,22 @@ export default function StaffHistory() {
       </div>
 
       {/* ==========================================
-          MODAL: VIEW TRANSACTION DETAILS
+          MODAL: VIEW TRANSACTION DETAILS (Responsive)
       ========================================== */}
       {viewingTx && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/40 backdrop-blur-sm transition-all"
           onClick={() => setViewingTx(null)}
         >
           <div 
-            className="bg-white w-full max-w-lg rounded-[40px] shadow-2xl animate-scale-in max-h-[90vh] overflow-y-auto scrollbar-hide"
+            className="bg-white w-full max-w-lg rounded-t-[32px] sm:rounded-[40px] shadow-2xl animate-slide-up sm:animate-scale-in max-h-[90vh] overflow-y-auto scrollbar-hide pb-safe"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-8">
+            <div className="p-6 sm:p-8">
               {/* Modal Header */}
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h2 className="text-2xl font-black text-[#111010]">Transaction Details</h2>
+                  <h2 className="text-xl sm:text-2xl font-black text-[#111010]">Transaction Details</h2>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase ${
                       viewingTx.status === 'completed' ? 'bg-gray-100 text-gray-500' : 
@@ -224,53 +224,48 @@ export default function StaffHistory() {
                 </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {/* Item Info Card */}
-                <div className="flex gap-4 p-5 bg-gray-50 rounded-3xl border border-gray-100">
-                  <img src={viewingTx.item?.imageUrl} className="w-20 h-20 rounded-2xl object-cover shadow-sm" alt="" />
+                <div className="flex gap-4 p-4 sm:p-5 bg-gray-50 rounded-[24px] sm:rounded-3xl border border-gray-100">
+                  <img src={viewingTx.item?.imageUrl} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm" alt="" />
                   <div className="flex flex-col justify-center">
-                    <h3 className="font-black text-lg text-[#111010] leading-tight">{viewingTx.item?.name}</h3>
-                    <p className="text-[#bf4a53] font-bold text-sm mt-1">Item ID: {viewingTx.itemId}</p>
+                    <h3 className="font-black text-base sm:text-lg text-[#111010] leading-tight">{viewingTx.item?.name}</h3>
+                    <p className="text-[#bf4a53] font-bold text-xs sm:text-sm mt-1">Item ID: {viewingTx.itemId}</p>
                   </div>
                 </div>
 
                 {/* Transaction Metadata */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
                   <div className="p-4 bg-white border border-gray-100 rounded-2xl">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Customer</p>
-                    <p className="font-bold text-[#111010]">{viewingTx.customerName}</p>
+                    <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-tighter">Customer</p>
+                    <p className="font-bold text-sm sm:text-base text-[#111010]">{viewingTx.customerName}</p>
                   </div>
                   <div className="p-4 bg-white border border-gray-100 rounded-2xl">
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Due Date</p>
-                    <p className="font-bold text-[#111010]">{viewingTx.dueDate}</p>
+                    <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-tighter">Due Date</p>
+                    <p className="font-bold text-sm sm:text-base text-[#111010]">{viewingTx.dueDate}</p>
                   </div>
                 </div>
 
-                {/* ==========================================
-                    RETURN PROOF SECTION (Visible if Completed)
-                ========================================== */}
+                {/* RETURN PROOF SECTION */}
                 {viewingTx.status === 'completed' && (
-                  <div className="mt-8 pt-8 border-t border-dashed border-gray-200 animate-slide-up">
+                  <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-dashed border-gray-200 animate-slide-up">
                     <div className="flex items-center gap-2 mb-4 text-[#34c759]">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      <h4 className="font-black text-sm uppercase tracking-widest">Return Proof Archive</h4>
+                      <h4 className="font-black text-xs sm:text-sm uppercase tracking-widest">Return Proof Archive</h4>
                     </div>
 
                     <div className="space-y-4">
-                      {/* The Captured Photo */}
-                      <div className="rounded-[28px] overflow-hidden border-4 border-white shadow-md">
-                        {/* In a real app, tx.returnPhotoUrl would be used here */}
+                      <div className="rounded-[24px] sm:rounded-[28px] overflow-hidden border-4 border-white shadow-md">
                         <img 
                           src={viewingTx.returnPhotoUrl || "https://images.unsplash.com/photo-1581539250439-c96689b516dd?auto=format&fit=crop&w=800"} 
-                          className="w-full h-48 object-cover grayscale-[20%]" 
+                          className="w-full h-36 sm:h-48 object-cover grayscale-[20%]" 
                           alt="Proof of return" 
                         />
                       </div>
 
-                      {/* The Captured Notes */}
-                      <div className="p-5 bg-green-50/50 rounded-2xl border border-green-100">
-                        <p className="text-[10px] font-black text-green-700 uppercase mb-1">Staff Notes</p>
-                        <p className="text-sm font-medium text-gray-700 italic">
+                      <div className="p-4 sm:p-5 bg-green-50/50 rounded-2xl border border-green-100">
+                        <p className="text-[9px] sm:text-[10px] font-black text-green-700 uppercase mb-1">Staff Notes</p>
+                        <p className="text-xs sm:text-sm font-medium text-gray-700 italic">
                           "{viewingTx.returnNotes || "Item returned in original condition. Verified by staff."}"
                         </p>
                       </div>
@@ -281,7 +276,7 @@ export default function StaffHistory() {
 
               <button 
                 onClick={() => setViewingTx(null)} 
-                className="w-full mt-8 py-4 bg-[#111010] hover:bg-black text-white rounded-2xl font-bold transition-all active:scale-95"
+                className="w-full mt-6 sm:mt-8 py-3.5 sm:py-4 bg-[#111010] hover:bg-black text-white rounded-[20px] sm:rounded-2xl font-bold transition-all active:scale-95"
               >
                 Dismiss Details
               </button>
@@ -291,25 +286,25 @@ export default function StaffHistory() {
       )}
 
       {/* ==========================================
-          MODAL: RETURN CAPTURE (PROOF)
+          MODAL: RETURN CAPTURE (Responsive)
       ========================================== */}
       {returningTx && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-md transition-all"
           onClick={() => setReturningTx(null)}
         >
           <form 
             onSubmit={submitReturn} 
-            className="bg-white w-full max-w-md rounded-[40px] overflow-hidden shadow-2xl animate-slide-up"
+            className="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl animate-slide-up sm:animate-scale-in max-h-[90vh] overflow-y-auto scrollbar-hide pb-safe"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-8">
-              <h2 className="text-2xl font-black text-[#111010] mb-1">Return Item</h2>
-              <p className="text-gray-500 font-medium mb-6">Capture proof of condition for <span className="text-black font-bold">{returningTx.item?.name}</span></p>
+            <div className="p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-black text-[#111010] mb-1">Return Item</h2>
+              <p className="text-sm sm:text-base text-gray-500 font-medium mb-6">Capture proof of condition for <span className="text-black font-bold">{returningTx.item?.name}</span></p>
               
               <div className="space-y-4">
                 {/* Photo Upload Area */}
-                <div className="relative h-48 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
+                <div className="relative h-40 sm:h-48 bg-gray-50 rounded-[24px] sm:rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center overflow-hidden group">
                   {imagePreview ? (
                     <>
                       <img src={imagePreview} className="w-full h-full object-cover" alt="Proof" />
@@ -320,29 +315,29 @@ export default function StaffHistory() {
                   ) : (
                     <>
                       <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-                      <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-2 text-gray-400 group-hover:text-[#bf4a53] transition-colors">
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-2 text-gray-400 group-hover:text-[#bf4a53] transition-colors">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                       </div>
-                      <p className="text-xs font-black text-gray-400 uppercase tracking-wider">Tap to Take/Upload Photo</p>
+                      <p className="text-[10px] sm:text-xs font-black text-gray-400 uppercase tracking-wider">Tap to Take Photo</p>
                     </>
                   )}
                 </div>
 
                 {/* Notes Input */}
                 <div>
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Condition Notes</label>
+                  <label className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Condition Notes</label>
                   <textarea 
                     value={returnNotes}
                     onChange={(e) => setReturnNotes(e.target.value)}
-                    placeholder="e.g. Returned in perfect condition, no scratches..."
-                    className="w-full mt-1 p-4 bg-gray-50 border-none rounded-2xl text-sm font-medium focus:ring-2 focus:ring-[#bf4a53] outline-none min-h-[100px]"
+                    placeholder="e.g. Returned in perfect condition..."
+                    className="w-full mt-1 p-3.5 sm:p-4 bg-gray-50 border-none rounded-2xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-[#bf4a53] outline-none min-h-[80px] sm:min-h-[100px]"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-8">
-                <button type="button" onClick={() => setReturningTx(null)} className="flex-1 py-4 text-gray-500 font-bold hover:bg-gray-50 rounded-2xl transition-colors">Cancel</button>
-                <button type="submit" className="flex-[2] py-4 bg-[#34c759] text-white rounded-2xl font-black shadow-lg shadow-green-200 active:scale-95 transition-all">Confirm Return</button>
+              <div className="flex gap-2 sm:gap-3 mt-6 sm:mt-8">
+                <button type="button" onClick={() => setReturningTx(null)} className="flex-1 py-3.5 sm:py-4 text-xs sm:text-sm text-gray-500 font-bold hover:bg-gray-50 rounded-[20px] sm:rounded-2xl transition-colors">Cancel</button>
+                <button type="submit" className="flex-[2] py-3.5 sm:py-4 text-xs sm:text-sm bg-[#34c759] text-white rounded-[20px] sm:rounded-2xl font-black shadow-lg shadow-green-200 active:scale-95 transition-all">Confirm Return</button>
               </div>
             </div>
           </form>

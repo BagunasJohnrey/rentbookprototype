@@ -41,7 +41,8 @@ export default function InventoryCatalog({ globalRole }) {
 
   return (
     <div className="flex flex-col h-full relative bg-[#faf6f6]">
-      <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full custom-scrollbar">
+      {/* Replaced custom-scrollbar with scrollbar-hide */}
+      <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full scrollbar-hide">
         
         {/* ==========================================
             SHARED HEADER (Responsive)
@@ -63,7 +64,7 @@ export default function InventoryCatalog({ globalRole }) {
                <SummaryChip label="Ready to Wear" value={availableCount} color="text-[#34c759]" />
             </div>
             
-            {/* NEW: Admin Only - Add New Item Button */}
+            {/* Admin Only - Add New Item Button */}
             {globalRole === 'admin' && (
               <button 
                 onClick={() => navigate('/admin-add-item')}
@@ -96,7 +97,7 @@ export default function InventoryCatalog({ globalRole }) {
           </div>
 
           {/* Filter Pills */}
-          <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
             <div className="flex gap-2 w-max pr-4 md:pr-0">
               {categories.map(cat => (
                 <button 
@@ -167,18 +168,19 @@ export default function InventoryCatalog({ globalRole }) {
       </div>
 
       {/* ==========================================
-          SHARED DETAIL MODAL (Boutique Style)
+          SHARED DETAIL MODAL (Responsive Bottom Sheet)
       ========================================== */}
       {detailItem && (
-        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 transition-all">
+          {/* Background Overlay */}
           <div className="absolute inset-0 bg-[#111010]/60 backdrop-blur-md transition-opacity" onClick={() => setDetailItem(null)} />
           
-          <div className="relative bg-white w-full md:max-w-5xl md:rounded-[40px] rounded-t-[40px] overflow-hidden max-h-[95vh] md:max-h-[85vh] flex flex-col shadow-2xl animate-slide-up">
+          <div className="relative bg-white w-full sm:max-w-5xl rounded-t-[32px] sm:rounded-[40px] overflow-hidden max-h-[90vh] flex flex-col shadow-2xl animate-slide-up sm:animate-scale-in z-10 pb-safe">
             
             {/* Elegant Close Button */}
             <button 
               onClick={() => setDetailItem(null)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/80 backdrop-blur-md p-3 rounded-full text-gray-900 hover:bg-[#111010] hover:text-white transition-all z-20 shadow-sm"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-white/80 backdrop-blur-md p-2.5 sm:p-3 rounded-full text-gray-900 hover:bg-[#111010] hover:text-white transition-all z-20 shadow-sm"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[3px]">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -186,32 +188,35 @@ export default function InventoryCatalog({ globalRole }) {
               </svg>
             </button>
 
-            <div className="flex flex-col md:flex-row h-full overflow-y-auto custom-scrollbar">
-               {/* Left: Huge Image */}
-               <div className="w-full md:w-1/2 h-[45vh] md:h-auto relative bg-gray-50 shrink-0">
+            <div className="flex flex-col sm:flex-row h-full overflow-y-auto scrollbar-hide">
+               {/* Left: Image Container */}
+               <div className="w-full sm:w-1/2 h-[40vh] sm:h-auto sm:min-h-[500px] relative bg-gray-50 shrink-0">
+                  {/* Subtle mobile drag indicator */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/50 backdrop-blur-md rounded-full sm:hidden z-10"></div>
+                  
                   <img src={detailItem.imageUrl} className="w-full h-full object-cover" alt={detailItem.name} />
                </div>
                
                {/* Right: Details */}
-               <div className="p-8 md:p-14 md:w-1/2 flex flex-col bg-white">
+               <div className="p-6 sm:p-10 lg:p-14 sm:w-1/2 flex flex-col bg-white">
                   <div className="mb-2">
                     <span className="text-[10px] font-black text-[#bf4a53] uppercase tracking-[0.2em]">{detailItem.category}</span>
                   </div>
-                  <h2 className="text-3xl md:text-5xl font-black text-[#111010] leading-tight pr-8 mb-6">{detailItem.name}</h2>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#111010] leading-tight pr-8 mb-4 sm:mb-6">{detailItem.name}</h2>
                   
-                  <p className="text-gray-500 text-sm md:text-base leading-relaxed mb-10">
+                  <p className="text-gray-500 text-xs sm:text-sm lg:text-base leading-relaxed mb-8 sm:mb-10">
                     {detailItem.description || "An exquisite piece from our premium collection, perfect for making a statement at your next special event. Carefully maintained and professionally cleaned after every use."}
                   </p>
                   
                   {/* Pricing Cards */}
-                  <div className="grid grid-cols-2 gap-4 mb-10 mt-auto">
-                    <div className="bg-[#faf6f6] p-5 rounded-[24px] border border-gray-100">
-                       <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Rental Rate</p>
-                       <p className="text-2xl font-black text-[#111010]">₱{detailItem.baseRate}</p>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-10 mt-auto">
+                    <div className="bg-[#faf6f6] p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-gray-100">
+                       <p className="text-[9px] sm:text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Rental Rate</p>
+                       <p className="text-xl sm:text-2xl font-black text-[#111010]">₱{detailItem.baseRate}</p>
                     </div>
-                    <div className="bg-[#faf6f6] p-5 rounded-[24px] border border-gray-100">
-                       <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Security Deposit</p>
-                       <p className="text-2xl font-black text-[#111010]">₱{detailItem.deposit}</p>
+                    <div className="bg-[#faf6f6] p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-gray-100">
+                       <p className="text-[9px] sm:text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Security Deposit</p>
+                       <p className="text-xl sm:text-2xl font-black text-[#111010]">₱{detailItem.deposit}</p>
                     </div>
                   </div>
                   
@@ -220,7 +225,7 @@ export default function InventoryCatalog({ globalRole }) {
                     <button 
                       disabled={detailItem.status !== 'Available'}
                       onClick={() => navigate(`/staff-new-rental?itemId=${detailItem.id}`)}
-                      className={`w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${
+                      className={`w-full py-4 sm:py-5 rounded-[20px] sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${
                         detailItem.status === 'Available' 
                           ? 'bg-[#111010] text-white hover:bg-[#bf4a53] hover:shadow-xl hover:shadow-[#bf4a53]/20 active:scale-95' 
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
@@ -232,7 +237,7 @@ export default function InventoryCatalog({ globalRole }) {
                       )}
                     </button>
                   ) : (
-                    <div className={`w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest text-center border-2 ${
+                    <div className={`w-full py-4 sm:py-5 rounded-[20px] sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest text-center border-2 ${
                       detailItem.status === 'Available'
                         ? 'border-[#34c759]/20 bg-[#34c759]/5 text-[#34c759]'
                         : 'border-gray-200 bg-gray-50 text-gray-400'
@@ -250,7 +255,7 @@ export default function InventoryCatalog({ globalRole }) {
   );
 }
 
-// Retained Helper Component with styling update
+// Helper Component
 function SummaryChip({ label, value, color = "text-[#111010]" }) {
   return (
     <div className="flex-1 md:flex-none md:min-w-[120px] bg-white rounded-2xl p-3 md:p-4 text-center shadow-sm border border-gray-100">
