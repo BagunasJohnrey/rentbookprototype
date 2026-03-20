@@ -9,7 +9,7 @@ export default function InventoryCatalog({ globalRole }) {
   const [search, setSearch] = useState('');
   const [detailItem, setDetailItem] = useState(null);
 
-  // Robust filtering for categories and search
+  // AI Semantic Search Logic
   const filteredItems = useMemo(() => {
     let items = [...CATALOG_ITEMS];
     
@@ -21,16 +21,23 @@ export default function InventoryCatalog({ globalRole }) {
     
     if (search.trim()) {
       const q = search.toLowerCase();
-      items = items.filter(item => 
-        (item.name + ' ' + (item.category || '')).toLowerCase().includes(q)
-      );
+      items = items.filter(item => {
+        // Include AI tags in the search index
+        const searchableString = (item.name + ' ' + (item.category || '') + ' ' + (item.tags ? item.tags.join(' ') : '')).toLowerCase();
+        
+        // Faked Semantic Rules for Demo purposes
+        if (q === 'marriage' && searchableString.includes('wedding')) return true;
+        if (q === 'prom' && searchableString.includes('evening')) return true;
+        if (q === 'party' && searchableString.includes('debut')) return true;
+        
+        return searchableString.includes(q);
+      });
     }
     return items;
   }, [filter, search]);
 
   const availableCount = CATALOG_ITEMS.filter(i => i.status === 'Available').length;
 
-  // Boutique-style categories
   const categories = [
     { id: 'all', label: 'All Collection' },
     { id: 'available', label: 'Available Now' },
@@ -41,12 +48,9 @@ export default function InventoryCatalog({ globalRole }) {
 
   return (
     <div className="flex flex-col h-full relative bg-[#faf6f6]">
-      {/* Replaced custom-scrollbar with scrollbar-hide */}
       <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full scrollbar-hide">
         
-        {/* ==========================================
-            SHARED HEADER (Responsive)
-        ========================================== */}
+        {/* SHARED HEADER */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12 animate-slide-up">
           <div>
             <p className="text-xs font-black text-[#bf4a53] uppercase tracking-[0.2em] mb-2">The Collection</p>
@@ -64,7 +68,6 @@ export default function InventoryCatalog({ globalRole }) {
                <SummaryChip label="Ready to Wear" value={availableCount} color="text-[#34c759]" />
             </div>
             
-            {/* Admin Only - Add New Item Button */}
             {globalRole === 'admin' && (
               <button 
                 onClick={() => navigate('/admin-add-item')}
@@ -80,23 +83,19 @@ export default function InventoryCatalog({ globalRole }) {
           </div>
         </div>
 
-        {/* ==========================================
-            SEARCH & FILTERS
-        ========================================== */}
+        {/* SEARCH & FILTERS */}
         <div className="flex flex-col md:flex-row gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.05s' }}>
-          {/* Search Bar */}
+          {/* ✨ AI Search Bar */}
           <div className="relative w-full md:w-80 shrink-0">
             <input 
               type="text" 
-              placeholder="Search by name or category..." 
+              placeholder="Semantic Search..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full py-3.5 pr-4 pl-12 border border-gray-200 rounded-2xl bg-white shadow-sm outline-none focus:border-[#bf4a53] focus:ring-4 focus:ring-[#bf4a53]/10 transition-all font-medium text-sm text-gray-900"
+              className="w-full py-3.5 pr-4 pl-4 border border-purple-200 rounded-2xl bg-white shadow-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm text-gray-900"
             />
-            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           </div>
 
-          {/* Filter Pills */}
           <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
             <div className="flex gap-2 w-max pr-4 md:pr-0">
               {categories.map(cat => (
@@ -116,9 +115,7 @@ export default function InventoryCatalog({ globalRole }) {
           </div>
         </div>
 
-        {/* ==========================================
-            FASHION GRID
-        ========================================== */}
+        {/* FASHION GRID */}
         {filteredItems.length === 0 ? (
           <div className="text-center py-32 bg-white rounded-[40px] border border-gray-100 shadow-sm animate-slide-up">
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
@@ -136,18 +133,15 @@ export default function InventoryCatalog({ globalRole }) {
                 className="group cursor-pointer animate-slide-up flex flex-col"
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
-                {/* Image Container (3:4 Aspect Ratio for Fashion) */}
                 <div className="relative aspect-[3/4] rounded-[24px] md:rounded-[32px] overflow-hidden mb-4 shadow-sm group-hover:shadow-2xl transition-all duration-500 bg-white">
                   <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
                   
-                  {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center backdrop-blur-[2px]">
                     <span className="bg-white/90 text-[#111010] px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">
                       Quick View
                     </span>
                   </div>
 
-                  {/* Status Badge */}
                   <div className={`absolute top-3 right-3 md:top-4 md:right-4 px-3 py-1.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-sm border border-white/20 ${
                     item.status === 'Available' ? 'bg-[#34c759]/90 text-white' : 'bg-[#111010]/80 text-white'
                   }`}>
@@ -155,7 +149,6 @@ export default function InventoryCatalog({ globalRole }) {
                   </div>
                 </div>
                 
-                {/* Details */}
                 <div className="px-2 grow flex flex-col">
                   <h3 className="font-black text-sm md:text-lg text-[#111010] leading-tight mb-1">{item.name}</h3>
                   <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">{item.category}</p>
@@ -167,17 +160,13 @@ export default function InventoryCatalog({ globalRole }) {
         )}
       </div>
 
-      {/* ==========================================
-          SHARED DETAIL MODAL (Responsive Bottom Sheet)
-      ========================================== */}
+      {/* SHARED DETAIL MODAL */}
       {detailItem && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 transition-all">
-          {/* Background Overlay */}
           <div className="absolute inset-0 bg-[#111010]/60 backdrop-blur-md transition-opacity" onClick={() => setDetailItem(null)} />
           
           <div className="relative bg-white w-full sm:max-w-5xl rounded-t-[32px] sm:rounded-[40px] overflow-hidden max-h-[90vh] flex flex-col shadow-2xl animate-slide-up sm:animate-scale-in z-10 pb-safe">
             
-            {/* Elegant Close Button */}
             <button 
               onClick={() => setDetailItem(null)}
               className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-white/80 backdrop-blur-md p-2.5 sm:p-3 rounded-full text-gray-900 hover:bg-[#111010] hover:text-white transition-all z-20 shadow-sm"
@@ -189,26 +178,35 @@ export default function InventoryCatalog({ globalRole }) {
             </button>
 
             <div className="flex flex-col sm:flex-row h-full overflow-y-auto scrollbar-hide">
-               {/* Left: Image Container */}
                <div className="w-full sm:w-1/2 h-[40vh] sm:h-auto sm:min-h-[500px] relative bg-gray-50 shrink-0">
-                  {/* Subtle mobile drag indicator */}
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-white/50 backdrop-blur-md rounded-full sm:hidden z-10"></div>
-                  
                   <img src={detailItem.imageUrl} className="w-full h-full object-cover" alt={detailItem.name} />
                </div>
                
-               {/* Right: Details */}
                <div className="p-6 sm:p-10 lg:p-14 sm:w-1/2 flex flex-col bg-white">
                   <div className="mb-2">
                     <span className="text-[10px] font-black text-[#bf4a53] uppercase tracking-[0.2em]">{detailItem.category}</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#111010] leading-tight pr-8 mb-4 sm:mb-6">{detailItem.name}</h2>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#111010] leading-tight pr-8 mb-4">{detailItem.name}</h2>
                   
+                  {/* ✨ AI Auto-Tagging Display */}
+                  {detailItem.tags && (
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest flex items-center gap-1 bg-purple-50 px-2 py-1 rounded-lg">
+                        AI Tags:
+                      </span>
+                      {detailItem.tags.map(tag => (
+                        <span key={tag} className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-lg text-[10px] font-bold tracking-wider">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
                   <p className="text-gray-500 text-xs sm:text-sm lg:text-base leading-relaxed mb-8 sm:mb-10">
                     {detailItem.description || "An exquisite piece from our premium collection, perfect for making a statement at your next special event. Carefully maintained and professionally cleaned after every use."}
                   </p>
                   
-                  {/* Pricing Cards */}
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-10 mt-auto">
                     <div className="bg-[#faf6f6] p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-gray-100">
                        <p className="text-[9px] sm:text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Rental Rate</p>
@@ -220,7 +218,6 @@ export default function InventoryCatalog({ globalRole }) {
                     </div>
                   </div>
                   
-                  {/* Action Button */}
                   {globalRole === 'staff' ? (
                     <button 
                       disabled={detailItem.status !== 'Available'}
@@ -255,7 +252,6 @@ export default function InventoryCatalog({ globalRole }) {
   );
 }
 
-// Helper Component
 function SummaryChip({ label, value, color = "text-[#111010]" }) {
   return (
     <div className="flex-1 md:flex-none md:min-w-[120px] bg-white rounded-2xl p-3 md:p-4 text-center shadow-sm border border-gray-100">
