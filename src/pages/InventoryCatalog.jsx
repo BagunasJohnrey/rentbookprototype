@@ -14,16 +14,26 @@ export default function InventoryCatalog({ globalRole }) {
     let items = [...CATALOG_ITEMS];
     
     if (filter === 'available') {
-      items = items.filter(i => i.status.toLowerCase() === 'available');
+      // Fix: Use optional chaining to prevent crash if status is undefined
+      items = items.filter(i => i.status?.toLowerCase() === 'available');
     } else if (filter !== 'all') {
-      items = items.filter(i => i.category?.toLowerCase() === filter.toLowerCase());
+      // FIX for White Screen: Check if filter is an array (Barong & Filipiniana case)
+      if (Array.isArray(filter)) {
+        items = items.filter(i => filter.includes(i.category?.toLowerCase()));
+      } else {
+        items = items.filter(i => i.category?.toLowerCase() === filter.toLowerCase());
+      }
     }
     
     if (search.trim()) {
       const q = search.toLowerCase();
       items = items.filter(item => {
-        // Include AI tags in the search index
-        const searchableString = (item.name + ' ' + (item.category || '') + ' ' + (item.tags ? item.tags.join(' ') : '')).toLowerCase();
+        // Safe string building to prevent crash on null properties
+        const searchableString = (
+          (item.name || '') + ' ' + 
+          (item.category || '') + ' ' + 
+          (item.tags ? item.tags.join(' ') : '')
+        ).toLowerCase();
         
         // Faked Semantic Rules for Demo purposes
         if (q === 'marriage' && searchableString.includes('wedding')) return true;
@@ -36,14 +46,16 @@ export default function InventoryCatalog({ globalRole }) {
     return items;
   }, [filter, search]);
 
-  const availableCount = CATALOG_ITEMS.filter(i => i.status === 'Available').length;
+  // Fix: Safe status check for count
+  const availableCount = CATALOG_ITEMS.filter(i => i.status?.toLowerCase() === 'available').length;
 
   const categories = [
     { id: 'all', label: 'All Collection' },
     { id: 'available', label: 'Available Now' },
     { id: 'gowns', label: 'Evening Gowns' },
     { id: 'suits', label: 'Suits & Tuxedos' },
-    { id: 'barong', label: 'Filipiñana & Barong' }
+    { id: ['barong', 'filipiniana'], label: 'Barong & Filipiniana' },
+    { id: 'costumes', label: 'Costumes' },
   ];
 
   return (
@@ -98,19 +110,26 @@ export default function InventoryCatalog({ globalRole }) {
 
           <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
             <div className="flex gap-2 w-max pr-4 md:pr-0">
-              {categories.map(cat => (
-                <button 
-                  key={cat.id} 
-                  onClick={() => setFilter(cat.id)}
-                  className={`shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-                    filter === cat.id 
-                      ? 'bg-[#111010] text-white shadow-lg shadow-black/10' 
-                      : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-900'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
+              {categories.map(cat => {
+                // FIX for White Screen: Correctly compare active state for array IDs
+                const isActive = Array.isArray(cat.id) 
+                  ? Array.isArray(filter) && cat.id.join(',') === filter.join(',')
+                  : filter === cat.id;
+
+                return (
+                  <button 
+                    key={Array.isArray(cat.id) ? cat.id.join('-') : cat.id} 
+                    onClick={() => setFilter(cat.id)}
+                    className={`shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                      isActive 
+                        ? 'bg-[#111010] text-white shadow-lg shadow-black/10' 
+                        : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-900'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -143,14 +162,14 @@ export default function InventoryCatalog({ globalRole }) {
                   </div>
 
                   <div className={`absolute top-3 right-3 md:top-4 md:right-4 px-3 py-1.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-sm border border-white/20 ${
-                    item.status === 'Available' ? 'bg-[#34c759]/90 text-white' : 'bg-[#111010]/80 text-white'
+                    item.status?.toLowerCase() === 'available' ? 'bg-[#34c759]/90 text-white' : 'bg-[#111010]/80 text-white'
                   }`}>
-                    {item.status === 'Available' ? 'Ready' : 'Rented'}
+                    {item.status?.toLowerCase() === 'available' ? 'Ready' : 'Rented'}
                   </div>
                 </div>
                 
                 <div className="px-2 grow flex flex-col">
-                  <h3 className="font-black text-sm md:text-lg text-[#111010] leading-tight mb-1">{item.name}</h3>
+                  <h3 className="font-black text-sm md:text-base text-[#111010] leading-tight mb-1">{item.name}</h3>
                   <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">{item.category}</p>
                   <p className="text-[#bf4a53] font-black text-sm md:text-base mt-auto">₱{item.baseRate}</p>
                 </div>
@@ -220,26 +239,26 @@ export default function InventoryCatalog({ globalRole }) {
                   
                   {globalRole === 'staff' ? (
                     <button 
-                      disabled={detailItem.status !== 'Available'}
+                      disabled={detailItem.status?.toLowerCase() !== 'available'}
                       onClick={() => navigate(`/staff-new-rental?itemId=${detailItem.id}`)}
                       className={`w-full py-4 sm:py-5 rounded-[20px] sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${
-                        detailItem.status === 'Available' 
+                        detailItem.status?.toLowerCase() === 'available' 
                           ? 'bg-[#111010] text-white hover:bg-[#bf4a53] hover:shadow-xl hover:shadow-[#bf4a53]/20 active:scale-95' 
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      {detailItem.status === 'Available' ? 'Proceed to Rental' : 'Currently Rented'}
-                      {detailItem.status === 'Available' && (
+                      {detailItem.status?.toLowerCase() === 'available' ? 'Proceed to Rental' : 'Currently Rented'}
+                      {detailItem.status?.toLowerCase() === 'available' && (
                         <svg className="w-4 h-4 stroke-[3px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                       )}
                     </button>
                   ) : (
                     <div className={`w-full py-4 sm:py-5 rounded-[20px] sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest text-center border-2 ${
-                      detailItem.status === 'Available'
+                      detailItem.status?.toLowerCase() === 'available'
                         ? 'border-[#34c759]/20 bg-[#34c759]/5 text-[#34c759]'
                         : 'border-gray-200 bg-gray-50 text-gray-400'
                     }`}>
-                      {detailItem.status === 'Available' ? 'Available in Store' : 'Currently Rented'}
+                      {detailItem.status?.toLowerCase() === 'available' ? 'Available in Store' : 'Currently Rented'}
                     </div>
                   )}
 
