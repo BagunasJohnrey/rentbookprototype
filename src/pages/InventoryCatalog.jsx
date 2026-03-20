@@ -89,7 +89,7 @@ export default function InventoryCatalog({ globalRole }) {
           <div className="relative w-full md:w-80 shrink-0">
             <input 
               type="text" 
-              placeholder="Semantic Search..." 
+              placeholder="Search..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full py-3.5 pr-4 pl-4 border border-purple-200 rounded-2xl bg-white shadow-sm outline-none focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all font-medium text-sm text-gray-900"

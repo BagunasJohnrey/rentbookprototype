@@ -5,6 +5,7 @@ import { CATALOG_ITEMS } from '../data/mockData';
 
 const MOTIFS = ['Traditional', 'Fantasy', 'Modern', 'Rustic', 'Bohemian', 'Filipiniana', 'Other'];
 const ROLES = ['Maid of Honor', 'Best Man', 'Bridesmaid', 'Groomsman', 'Flower Girl', 'Bearer', 'Parent of Bride', 'Parent of Groom'];
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Custom / Measurements'];
 const CATALOG_CATEGORIES = [
   { id: 'all', label: 'All Items' },
   { id: 'gowns', label: 'Gowns & Dresses (Female)' },
@@ -29,9 +30,15 @@ export default function StaffWeddingOrder() {
     brideName: '', 
     brideContact: '',
     brideAddress: '',
+    brideSize: '', 
+    brideMeasurements: { bust: '', waist: '', hips: '', shoulderToFloor: '', shoulderWidth: '' },
+    brideMeasurementsExpanded: true,
     groomName: '', 
     groomContact: '',
     groomAddress: '',
+    groomSize: '', 
+    groomMeasurements: { shoulder: '', chest: '', waist: '', sleeveLength: '', pantsLength: '', neck: '' },
+    groomMeasurementsExpanded: true,
     motif: '',
     motifColor: '',
     motifNotes: '', 
@@ -40,7 +47,7 @@ export default function StaffWeddingOrder() {
     participants: [] 
   });
 
-  const getItem = (id) => CATALOG_ITEMS.find(item => item.id === id) || { name: 'Not Selected', baseRate: 0, deposit: 0 };
+  const getItem = (id) => CATALOG_ITEMS.find(item => item.id === id) || { name: 'Not Selected', baseRate: 0, deposit: 0, category: '' };
   
   const filteredCatalogItems = useMemo(() => {
     return CATALOG_ITEMS.filter(item => {
@@ -90,6 +97,46 @@ export default function StaffWeddingOrder() {
     });
   };
 
+  // Helper to render measurement inputs dynamically with minimize toggle
+  const renderMeasurementFields = (type, category, data, updateFn, isExpanded, toggleFn) => {
+    const isFemale = category?.toLowerCase().includes('gown') || category?.toLowerCase().includes('dress') || category?.toLowerCase().includes('female');
+    
+    const fields = isFemale 
+      ? ['bust', 'waist', 'hips', 'shoulderToFloor', 'shoulderWidth']
+      : ['shoulder', 'chest', 'waist', 'sleeveLength', 'pantsLength', 'neck'];
+
+    return (
+      <div className="mt-3 pt-3 border-t border-gray-100 transition-all">
+        <button 
+          onClick={toggleFn}
+          className="w-full flex items-center justify-between focus:outline-none pb-1 group"
+        >
+          <p className="text-[10px] font-black text-[#bf4a53] uppercase tracking-widest group-hover:opacity-80">Custom Measurements</p>
+          <div className="w-6 h-6 flex items-center justify-center bg-[#bf4a53]/5 rounded-full text-[#bf4a53] group-hover:bg-[#bf4a53]/10 transition-colors">
+            <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </button>
+
+        <div className={`grid grid-cols-2 gap-3 transition-all duration-300 ease-in-out overflow-hidden ${isExpanded ? 'max-h-125 opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'}`}>
+          {fields.map((field) => (
+            <div key={field}>
+              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">
+                {field.replace(/([A-Z])/g, ' $1').trim()}
+              </label>
+              <input 
+                type="text" placeholder="in" value={data?.[field] || ''} 
+                onChange={e => updateFn(field, e.target.value)}
+                className="w-full p-2.5 bg-gray-50 rounded-xl font-bold text-xs border border-transparent focus:border-[#bf4a53]/20 outline-none transition-all" 
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const handleNext = () => {
     if (step === 1) {
       if (!weddingData.brideName.trim() || !weddingData.groomName.trim()) {
@@ -105,13 +152,16 @@ export default function StaffWeddingOrder() {
       if (!weddingData.brideOutfitId || !weddingData.groomOutfitId) {
         return alert("Please assign outfits for both the Bride and Groom.");
       }
+      if (!weddingData.brideSize || !weddingData.groomSize) {
+        return alert("Please select sizes for both the Bride and Groom.");
+      }
       setStep(3);
       setIsMobileMenuOpen(true);
     } 
     else if (step === 3) {
-      const hasIncomplete = weddingData.participants.some(p => !p.name.trim() || !p.role || !p.itemId);
+      const hasIncomplete = weddingData.participants.some(p => !p.name.trim() || !p.role || !p.itemId || !p.size);
       if (hasIncomplete) {
-        return alert("Please ensure all entourage members have a name, role, and outfit.");
+        return alert("Please ensure all entourage members have a name, role, size, and outfit.");
       }
       setStep(4);
       setIsMobileMenuOpen(true);
@@ -128,18 +178,26 @@ export default function StaffWeddingOrder() {
         status: "active",
         totalAmount: totals.grandTotal,
         clientDetails: {
-          bride: { name: weddingData.brideName, contact: weddingData.brideContact, address: weddingData.brideAddress },
-          groom: { name: weddingData.groomName, contact: weddingData.groomContact, address: weddingData.groomAddress }
+          bride: { 
+            name: weddingData.brideName, contact: weddingData.brideContact, address: weddingData.brideAddress, 
+            size: weddingData.brideSize, measurements: weddingData.brideSize === 'Custom / Measurements' ? weddingData.brideMeasurements : null 
+          },
+          groom: { 
+            name: weddingData.groomName, contact: weddingData.groomContact, address: weddingData.groomAddress, 
+            size: weddingData.groomSize, measurements: weddingData.groomSize === 'Custom / Measurements' ? weddingData.groomMeasurements : null 
+          }
         },
         items: [
-          { role: "Bride", name: weddingData.brideName, itemId: weddingData.brideOutfitId, returned: false },
-          { role: "Groom", name: weddingData.groomName, itemId: weddingData.groomOutfitId, returned: false },
+          { role: "Bride", name: weddingData.brideName, itemId: weddingData.brideOutfitId, size: weddingData.brideSize, measurements: weddingData.brideSize === 'Custom / Measurements' ? weddingData.brideMeasurements : null, returned: false },
+          { role: "Groom", name: weddingData.groomName, itemId: weddingData.groomOutfitId, size: weddingData.groomSize, measurements: weddingData.groomSize === 'Custom / Measurements' ? weddingData.groomMeasurements : null, returned: false },
           ...weddingData.participants.map(p => ({ 
             role: p.role, 
             name: p.name, 
             itemId: p.itemId, 
             contact: p.contact, 
-            address: p.address, 
+            address: p.address,
+            size: p.size,
+            measurements: p.size === 'Custom / Measurements' ? p.measurements : null,
             returned: false 
           }))
         ]
@@ -151,10 +209,10 @@ export default function StaffWeddingOrder() {
   return (
     <div className="flex flex-col min-h-screen relative bg-[#faf6f6]" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif' }}>
       
-      {/* Main Content Area */}
+      {/* Main Content Scroll Area */}
       <div className="grow overflow-y-auto px-5 md:px-12 pt-8 md:pt-12 pb-48 md:pb-12 md:max-w-6xl md:mx-auto w-full scrollbar-hide">
         
-        {/* Progress Tracker */}
+        {/* PROGRESS TRACKER */}
         <div className="mb-10 md:mb-16 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <button 
@@ -169,10 +227,10 @@ export default function StaffWeddingOrder() {
             <div className="w-10 md:w-12 h-10 md:h-12"></div>
           </div>
           
-          <div className="relative flex items-center justify-between max-w-sm mx-auto px-2">
-            <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full -z-0"></div>
+          <div className="relative flex items-center justify-between max-sm mx-auto px-2">
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full z-0"></div>
             <div 
-              className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 rounded-full -z-0 transition-all duration-500 ease-out" 
+              className="absolute top-1/2 left-0 h-1 bg-[#bf4a53] -translate-y-1/2 rounded-full z-0 transition-all duration-500 ease-out" 
               style={{ width: `${((step - 1) / 3) * 100}%` }}
             ></div>
             
@@ -180,7 +238,7 @@ export default function StaffWeddingOrder() {
               <div 
                 key={num} 
                 className={`relative z-10 w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full font-black text-xs md:text-sm transition-all duration-300 shadow-sm border-2
-                  ${step >= num ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}
+                  ${step >= num ? 'bg-[#bf4a53] border-[#bf4a53] text-white' : 'bg-white border-gray-200 text-gray-400'}`}
               >
                 {step > num ? '✓' : num}
               </div>
@@ -195,54 +253,54 @@ export default function StaffWeddingOrder() {
             <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-500">
               <div className="text-center mb-8 md:mb-10">
                 <h2 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">Client Information</h2>
-                <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Provide the details for the couple and the event theme.</p>
+                <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Provide details for the couple and the wedding theme.</p>
               </div>
               
               <div className="bg-white p-6 md:p-10 rounded-4xl shadow-sm border border-gray-100 space-y-8">
-                {/* Bride Details */}
+                {/* Bride Section */}
                 <div className="space-y-5">
-                  <h3 className="text-sm font-black text-primary uppercase tracking-widest border-b border-gray-50 pb-2">Bride's Details</h3>
+                  <h3 className="text-sm font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-50 pb-2">Bride's Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Full Name</label>
-                      <input type="text" placeholder="Maria Clara" value={weddingData.brideName} onChange={e => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+                      <input type="text" placeholder="Maria Clara" value={weddingData.brideName} onChange={e => setWeddingData({...weddingData, brideName: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Contact Number</label>
-                      <input type="text" placeholder="09XX XXX XXXX" value={weddingData.brideContact} onChange={e => setWeddingData({...weddingData, brideContact: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+                      <input type="text" placeholder="09XX XXX XXXX" value={weddingData.brideContact} onChange={e => setWeddingData({...weddingData, brideContact: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Current Address</label>
-                    <input type="text" placeholder="House No, Barangay, City" value={weddingData.brideAddress} onChange={e => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+                    <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Address</label>
+                    <input type="text" placeholder="e.g. 123 Rizal St, Brgy. San Jose" value={weddingData.brideAddress} onChange={e => setWeddingData({...weddingData, brideAddress: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
                   </div>
                 </div>
 
-                {/* Groom Details */}
+                {/* Groom Section */}
                 <div className="space-y-5 pt-4">
-                  <h3 className="text-sm font-black text-primary uppercase tracking-widest border-b border-gray-50 pb-2">Groom's Details</h3>
+                  <h3 className="text-sm font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-50 pb-2">Groom's Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Full Name</label>
-                      <input type="text" placeholder="Juan Luna" value={weddingData.groomName} onChange={e => setWeddingData({...weddingData, groomName: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+                      <input type="text" placeholder="Juan Luna" value={weddingData.groomName} onChange={e => setWeddingData({...weddingData, groomName: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Contact Number</label>
-                      <input type="text" placeholder="09XX XXX XXXX" value={weddingData.groomContact} onChange={e => setWeddingData({...weddingData, groomContact: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+                      <input type="text" placeholder="09XX XXX XXXX" value={weddingData.groomContact} onChange={e => setWeddingData({...weddingData, groomContact: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Current Address</label>
-                    <input type="text" placeholder="House No, Barangay, City" value={weddingData.groomAddress} onChange={e => setWeddingData({...weddingData, groomAddress: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all" />
+                    <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Address</label>
+                    <input type="text" placeholder="e.g. 123 Rizal St, Brgy. San Jose" value={weddingData.groomAddress} onChange={e => setWeddingData({...weddingData, groomAddress: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
                   </div>
                 </div>
 
                 {/* Motif Section */}
                 <div className="pt-6 border-t border-gray-50">
-                  <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest block mb-4 ml-1">Choose Wedding Theme</label>
+                  <h3 className="text-sm font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-50 pb-2">Choose Wedding Theme</h3>
                   <div className="flex flex-wrap gap-2 mb-6">
                     {MOTIFS.map(m => (
-                      <button key={m} onClick={() => setWeddingData({...weddingData, motif: m})} className={`px-4 py-3 rounded-2xl text-xs md:text-sm font-black transition-all border-2 ${weddingData.motif === m ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-gray-50 border-transparent text-[#8e8e93] hover:bg-gray-100 hover:text-[#111010]'}`}>
+                      <button key={m} onClick={() => setWeddingData({...weddingData, motif: m})} className={`px-4 py-3 rounded-2xl text-xs md:text-sm font-black transition-all border-2 ${weddingData.motif === m ? 'bg-[#bf4a53] border-[#bf4a53] text-white shadow-lg shadow-[#bf4a53]/20' : 'bg-gray-50 border-transparent text-[#8e8e93] hover:bg-gray-100 hover:text-[#111010]'}`}>
                         {m}
                       </button>
                     ))}
@@ -250,22 +308,11 @@ export default function StaffWeddingOrder() {
 
                   {weddingData.motif && (
                     <div className="space-y-2 mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Specific Color Scheme</label>
+                      <h3 className="text-sm font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-50 pb-2">Specific Color Scheme</h3>
                       <div className="flex gap-3">
-                        <input 
-                          type="text" 
-                          placeholder="e.g. Sage Green, Champagne, etc." 
-                          value={weddingData.motifColor} 
-                          onChange={e => setWeddingData({...weddingData, motifColor: e.target.value})} 
-                          className="grow p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
-                        />
+                        <input type="text" placeholder="e.g. Sage Green, Champagne, etc." value={weddingData.motifColor} onChange={e => setWeddingData({...weddingData, motifColor: e.target.value})} className="grow p-4 rounded-2xl bg-gray-50 border-none font-bold text-base outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all" />
                         <div className="relative w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden shrink-0">
-                          <input 
-                            type="color" 
-                            value={weddingData.motifColor.startsWith('#') ? weddingData.motifColor : '#6366f1'} 
-                            onChange={e => setWeddingData({...weddingData, motifColor: e.target.value})}
-                            className="absolute inset-0 w-full h-full p-0 border-none cursor-pointer scale-150"
-                          />
+                          <input type="color" value={weddingData.motifColor.startsWith('#') ? weddingData.motifColor : '#bf4a53'} onChange={e => setWeddingData({...weddingData, motifColor: e.target.value})} className="absolute inset-0 w-full h-full p-0 border-none cursor-pointer scale-150" />
                         </div>
                       </div>
                     </div>
@@ -273,12 +320,7 @@ export default function StaffWeddingOrder() {
                   
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest ml-1">Notes / Special Instructions</label>
-                    <textarea 
-                      placeholder="Specify additional motif details or requirements..." 
-                      value={weddingData.motifNotes} 
-                      onChange={e => setWeddingData({...weddingData, motifNotes: e.target.value})} 
-                      className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all min-h-[100px] resize-none" 
-                    />
+                    <textarea placeholder="Specify additional motif details or requirements..." value={weddingData.motifNotes} onChange={e => setWeddingData({...weddingData, motifNotes: e.target.value})} className="w-full p-4 rounded-2xl bg-gray-50 border-none font-bold text-sm outline-none focus:ring-2 focus:ring-[#bf4a53]/20 transition-all min-h-25 resize-none" />
                   </div>
                 </div>
               </div>
@@ -290,13 +332,13 @@ export default function StaffWeddingOrder() {
             <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6 md:space-y-10">
               <div className="text-center max-w-2xl mx-auto">
                 <h2 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">Main Attire</h2>
-                <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Assign the outfits for the Bride and Groom.</p>
+                <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Assign outfits and select sizes for the Bride and Groom.</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 max-w-4xl mx-auto">
                 {['bride', 'groom'].map(role => (
-                  <div key={role} className="bg-white p-5 md:p-8 rounded-4xl shadow-sm border border-gray-100 flex flex-col items-center group transition-all hover:border-primary/20 hover:shadow-md">
-                    <div className="w-full aspect-[3/4] rounded-3xl bg-gray-50 overflow-hidden mb-5 md:mb-8 border border-gray-100 relative transition-all">
+                  <div key={role} className="bg-white p-5 md:p-8 rounded-4xl shadow-sm border border-gray-100 flex flex-col items-center group transition-all hover:border-[#bf4a53]/20 hover:shadow-md">
+                    <div className="w-full aspect-3/4 rounded-3xl bg-gray-50 overflow-hidden mb-5 md:mb-6 border border-gray-100 relative transition-all">
                       {weddingData[`${role}OutfitId`] ? (
                         <img src={getItem(weddingData[`${role}OutfitId`]).imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
                       ) : (
@@ -308,9 +350,33 @@ export default function StaffWeddingOrder() {
                         </div>
                       )}
                     </div>
-                    <button onClick={() => openCatalog(role)} className={`w-full py-4 rounded-2xl md:rounded-3xl font-black text-xs md:text-sm uppercase tracking-widest transition-colors ${weddingData[`${role}OutfitId`] ? 'bg-gray-50 text-[#111010] hover:bg-gray-100' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}>
-                      {weddingData[`${role}OutfitId`] ? 'Change Outfit' : 'Browse Catalog'}
-                    </button>
+                    
+                    <div className="w-full space-y-3">
+                      <select 
+                        value={weddingData[`${role}Size`]} 
+                        onChange={e => setWeddingData({...weddingData, [`${role}Size`]: e.target.value})} 
+                        className="w-full p-3.5 bg-gray-50 rounded-2xl font-black text-xs uppercase tracking-widest outline-none border border-transparent focus:border-[#bf4a53]/20 appearance-none text-center"
+                      >
+                        <option value="">Select Size for {role}</option>
+                        {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>
+
+                      {/* Custom Measurements UI with Collapse/Expand */}
+                      {weddingData[`${role}Size`] === 'Custom / Measurements' && weddingData[`${role}OutfitId`] &&
+                        renderMeasurementFields(
+                          role, 
+                          getItem(weddingData[`${role}OutfitId`]).category, 
+                          weddingData[`${role}Measurements`],
+                          (f, v) => setWeddingData({...weddingData, [`${role}Measurements`]: {...weddingData[`${role}Measurements`], [f]: v}}),
+                          weddingData[`${role}MeasurementsExpanded`] !== false, // Defaults to true
+                          () => setWeddingData({...weddingData, [`${role}MeasurementsExpanded`]: !weddingData[`${role}MeasurementsExpanded`]})
+                        )
+                      }
+                      
+                      <button onClick={() => openCatalog(role)} className={`w-full py-4 rounded-2xl md:rounded-3xl font-black text-xs md:text-sm uppercase tracking-widest transition-colors ${weddingData[`${role}OutfitId`] ? 'bg-[#111010] text-white hover:bg-black' : 'bg-[#bf4a53]/10 text-[#bf4a53] hover:bg-[#bf4a53]/20'}`}>
+                        {weddingData[`${role}OutfitId`] ? 'Change Outfit' : 'Browse Catalog'}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -323,9 +389,9 @@ export default function StaffWeddingOrder() {
               <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-3 md:gap-4 mb-2">
                 <div>
                   <h2 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">Entourage</h2>
-                  <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Add members and assign their roles, contact info, and attire.</p>
+                  <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Add members and assign their roles, sizes, and attire.</p>
                 </div>
-                <button onClick={() => setWeddingData({...weddingData, participants: [...weddingData.participants, {name: '', role: '', itemId: '', contact: '', address: ''}]})} className="w-full md:w-auto bg-[#111010] text-white px-8 py-3.5 md:py-4 rounded-2xl md:rounded-3xl font-black text-xs md:text-sm uppercase tracking-widest shadow-xl transition-all hover:bg-black">
+                <button onClick={() => setWeddingData({...weddingData, participants: [...weddingData.participants, {name: '', role: '', itemId: '', contact: '', address: '', size: '', measurements: {}, measurementsExpanded: true}]})} className="w-full md:w-auto bg-[#111010] text-white px-8 py-3.5 md:py-4 rounded-2xl md:rounded-3xl font-black text-xs md:text-sm uppercase tracking-widest shadow-xl transition-all hover:bg-black">
                   + Add Member
                 </button>
               </div>
@@ -343,7 +409,7 @@ export default function StaffWeddingOrder() {
                       </button>
 
                       <div className="flex gap-4">
-                        <button onClick={() => openCatalog('participant', idx)} className="w-24 h-32 rounded-2xl bg-gray-50 overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center hover:border-primary/30 transition-colors relative">
+                        <button onClick={() => openCatalog('participant', idx)} className="w-24 h-32 rounded-2xl bg-gray-50 overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center hover:border-[#bf4a53]/30 transition-colors relative">
                           {p.itemId ? (
                             <img src={getItem(p.itemId).imageUrl} className="w-full h-full object-cover transition-opacity" alt="" />
                           ) : (
@@ -356,22 +422,50 @@ export default function StaffWeddingOrder() {
                         <div className="grow space-y-2">
                           <input placeholder="Member Full Name" value={p.name} onChange={e => {
                             const n = [...weddingData.participants]; n[idx].name = e.target.value; setWeddingData({...weddingData, participants: n});
-                          }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-sm outline-none border border-transparent focus:border-primary/10" />
+                          }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-sm outline-none border border-transparent focus:border-[#bf4a53]/10" />
                           <select value={p.role} onChange={e => {
                             const n = [...weddingData.participants]; n[idx].role = e.target.value; setWeddingData({...weddingData, participants: n});
-                          }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-sm outline-none border border-transparent focus:border-primary/10 appearance-none">
+                          }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-sm outline-none border border-transparent focus:border-[#bf4a53]/10 appearance-none">
                             <option value="">Select Role</option>
                             {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                           </select>
+                          <select value={p.size} onChange={e => {
+                            const n = [...weddingData.participants]; n[idx].size = e.target.value; setWeddingData({...weddingData, participants: n});
+                          }} className="w-full p-3 bg-[#bf4a53]/5 text-[#bf4a53] rounded-xl font-black text-[11px] uppercase tracking-widest outline-none border border-transparent focus:border-[#bf4a53]/20 appearance-none">
+                            <option value="">Select Size</option>
+                            {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
                         </div>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+
+                      {/* Custom Measurements UI with Collapse/Expand for Participant */}
+                      {p.size === 'Custom / Measurements' && p.itemId &&
+                        renderMeasurementFields(
+                          'participant', 
+                          getItem(p.itemId).category, 
+                          p.measurements || {},
+                          (f, v) => { 
+                            const n = [...weddingData.participants]; 
+                            if (!n[idx].measurements) n[idx].measurements = {};
+                            n[idx].measurements[f] = v; 
+                            setWeddingData({...weddingData, participants: n}); 
+                          },
+                          p.measurementsExpanded !== false, // Defaults to true
+                          () => {
+                            const n = [...weddingData.participants];
+                            n[idx].measurementsExpanded = !(p.measurementsExpanded !== false);
+                            setWeddingData({...weddingData, participants: n});
+                          }
+                        )
+                      }
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
                          <input placeholder="Contact Number" value={p.contact} onChange={e => {
                             const n = [...weddingData.participants]; n[idx].contact = e.target.value; setWeddingData({...weddingData, participants: n});
-                         }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-xs outline-none border border-transparent focus:border-primary/10" />
-                         <input placeholder="Current Address" value={p.address} onChange={e => {
+                         }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-xs outline-none border border-transparent focus:border-[#bf4a53]/10" />
+                         <input placeholder="e.g. 123 Rizal St, Brgy. San Jose" value={p.address} onChange={e => {
                             const n = [...weddingData.participants]; n[idx].address = e.target.value; setWeddingData({...weddingData, participants: n});
-                         }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-xs outline-none border border-transparent focus:border-primary/10" />
+                         }} className="w-full p-3 bg-gray-50 rounded-xl font-bold text-xs outline-none border border-transparent focus:border-[#bf4a53]/10" />
                       </div>
                     </div>
                   ))}
@@ -380,7 +474,7 @@ export default function StaffWeddingOrder() {
             </div>
           )}
 
-          {/* STEP 4: SUMMARY & CONFIRMATION */}
+          {/* STEP 4: SUMMARY RECEIPT */}
           {step === 4 && (
             <div className="max-w-2xl mx-auto animate-slide-up">
               <div className="text-center mb-8 md:mb-10">
@@ -388,9 +482,9 @@ export default function StaffWeddingOrder() {
                 <p className="text-sm md:text-base font-semibold text-[#8e8e93] mt-1 md:mt-2">Final review before processing the rental package.</p>
               </div>
 
-              <div className="bg-white rounded-4xl md:rounded-[40px] shadow-2xl shadow-primary/5 overflow-hidden border border-gray-100">
+              <div className="bg-white rounded-4xl md:rounded-[40px] shadow-2xl shadow-[#bf4a53]/5 overflow-hidden border border-gray-100">
                 <div className="bg-[#111010] p-6 md:p-10 text-white relative overflow-hidden">
-                  <div className="absolute -right-20 -top-20 w-48 h-48 bg-primary rounded-full blur-[60px] opacity-30"></div>
+                  <div className="absolute -right-20 -top-20 w-48 h-48 bg-[#bf4a53] rounded-full blur-[60px] opacity-30"></div>
                   <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-start gap-4">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8e8e93] mb-1.5">Wedding Of</p>
@@ -416,17 +510,28 @@ export default function StaffWeddingOrder() {
                 </div>
 
                 <div className="p-5 md:p-10 space-y-8">
-                  {/* Client Contact Details */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-gray-100">
                     <div>
                        <h4 className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest mb-2">Bride Info</h4>
-                       <p className="text-sm font-bold text-[#111010]">{weddingData.brideContact || 'No contact provided'}</p>
-                       <p className="text-[11px] text-[#8e8e93] mt-1">{weddingData.brideAddress || 'No address'}</p>
+                       <p className="text-sm font-bold text-[#111010]">{weddingData.brideContact || 'No Contact'}</p>
+                       <p className="text-[11px] text-[#8e8e93] mt-1">Size: <span className="text-[#bf4a53] font-black">{weddingData.brideSize}</span></p>
+                       {weddingData.brideSize === 'Custom / Measurements' && (
+                         <p className="text-[10px] text-[#111010] font-bold mt-0.5 bg-gray-50 p-1.5 rounded-md">
+                           {Object.entries(weddingData.brideMeasurements).filter(([, v]) => v).map(([k, v]) => `${k.replace(/([A-Z])/g, ' $1').trim()}: ${v}"`).join(', ') || 'No measurements entered'}
+                         </p>
+                       )}
+                       <p className="text-[11px] text-[#8e8e93] mt-1">{weddingData.brideAddress || 'No Address'}</p>
                     </div>
                     <div>
                        <h4 className="text-[10px] font-black text-[#8e8e93] uppercase tracking-widest mb-2">Groom Info</h4>
-                       <p className="text-sm font-bold text-[#111010]">{weddingData.groomContact || 'No contact provided'}</p>
-                       <p className="text-[11px] text-[#8e8e93] mt-1">{weddingData.groomAddress || 'No address'}</p>
+                       <p className="text-sm font-bold text-[#111010]">{weddingData.groomContact || 'No Contact'}</p>
+                       <p className="text-[11px] text-[#8e8e93] mt-1">Size: <span className="text-[#bf4a53] font-black">{weddingData.groomSize}</span></p>
+                       {weddingData.groomSize === 'Custom / Measurements' && (
+                         <p className="text-[10px] text-[#111010] font-bold mt-0.5 bg-gray-50 p-1.5 rounded-md">
+                           {Object.entries(weddingData.groomMeasurements).filter(([, v]) => v).map(([k, v]) => `${k.replace(/([A-Z])/g, ' $1').trim()}: ${v}"`).join(', ') || 'No measurements entered'}
+                         </p>
+                       )}
+                       <p className="text-[11px] text-[#8e8e93] mt-1">{weddingData.groomAddress || 'No Address'}</p>
                     </div>
                   </div>
 
@@ -438,7 +543,7 @@ export default function StaffWeddingOrder() {
                   )}
 
                   <div className="space-y-4">
-                    <h4 className="text-[10px] font-black text-primary uppercase tracking-widest border-b border-gray-100 pb-3">Primary Attire</h4>
+                    <h4 className="text-[10px] font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-100 pb-3">Primary Attire</h4>
                     <div className="flex justify-between items-center py-1">
                       <div>
                         <p className="font-black text-sm text-[#111010]">Bride: {getItem(weddingData.brideOutfitId).name}</p>
@@ -457,15 +562,22 @@ export default function StaffWeddingOrder() {
 
                   {weddingData.participants.length > 0 && (
                     <div className="space-y-4 pt-6">
-                      <h4 className="text-[10px] font-black text-primary uppercase tracking-widest border-b border-gray-100 pb-3">Entourage ({weddingData.participants.length})</h4>
+                      <h4 className="text-[10px] font-black text-[#bf4a53] uppercase tracking-widest border-b border-gray-100 pb-3">Entourage ({weddingData.participants.length})</h4>
                       <div className="space-y-4">
                         {weddingData.participants.map((p, i) => (
                           <div key={i} className="flex justify-between items-start text-xs md:text-sm">
                             <div className="grow pr-4">
                               <p className="font-black text-[#111010]">{p.role}: {p.name}</p>
-                              <p className="text-[10px] text-[#8e8e93] font-bold mt-0.5">{p.contact || 'No Contact'} • {p.address || 'No Address'}</p>
+                              <div className="text-[10px] text-[#8e8e93] font-bold mt-0.5 space-y-1">
+                                <div>Size: <span className="text-[#bf4a53]">{p.size}</span> • {p.contact || 'No Contact'} • {p.address || 'No Address'}</div>
+                                {p.size === 'Custom / Measurements' && p.measurements && (
+                                  <div className="text-[#111010] bg-gray-50 p-1.5 rounded-md inline-block">
+                                    {Object.entries(p.measurements).filter(([, v]) => v).map(([k, v]) => `${k.replace(/([A-Z])/g, ' $1').trim()}: ${v}"`).join(', ') || 'No measurements entered'}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <p className="font-black text-[#111010] shrink-0">₱{getItem(p.itemId).baseRate.toLocaleString()}</p>
+                            <p className="font-black text-[#111010] shrink-0 mt-1">₱{getItem(p.itemId).baseRate.toLocaleString()}</p>
                           </div>
                         ))}
                       </div>
@@ -483,7 +595,7 @@ export default function StaffWeddingOrder() {
                     </div>
                     <div className="flex justify-between items-end pt-6 mt-4 border-t border-gray-100">
                       <span className="text-xl md:text-2xl font-black text-[#111010] tracking-tight">Grand Total</span>
-                      <span className="text-2xl md:text-4xl font-black text-primary tracking-tighter">₱{totals.grandTotal.toLocaleString()}</span>
+                      <span className="text-2xl md:text-4xl font-black text-[#bf4a53] tracking-tighter">₱{totals.grandTotal.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -505,7 +617,7 @@ export default function StaffWeddingOrder() {
                   Go Back
                 </button>
               )}
-              <button onClick={handleNext} className="flex-2 py-5 rounded-3xl font-black text-sm uppercase tracking-widest shadow-xl transition-all bg-primary text-white shadow-primary/20 hover:brightness-110 active:scale-[0.98]">
+              <button onClick={handleNext} className="flex-2 py-5 rounded-3xl font-black text-sm uppercase tracking-widest shadow-xl transition-all bg-[#bf4a53] text-white shadow-[#bf4a53]/20 hover:brightness-110 active:scale-[0.98]">
                 {step === 4 ? 'Confirm & Process' : 'Continue to Next Step'}
               </button>
             </div>
@@ -515,24 +627,24 @@ export default function StaffWeddingOrder() {
 
       {/* MOBILE FLOATING ACTION BAR */}
       {!showCatalog && (
-        <div className="md:hidden fixed bottom-[70px] sm:bottom-0 left-0 right-0 z-40">
-          <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] shadow-[0_-15px_40px_rgba(0,0,0,0.08)] border-t border-gray-100 px-5 transition-all duration-300 overflow-hidden">
+        <div className="md:hidden fixed bottom-17.5 sm:bottom-0 left-0 right-0 z-40">
+          <div className="bg-white/95 backdrop-blur-xl rounded-t-4xl shadow-[0_-15px_40px_rgba(0,0,0,0.08)] border-t border-gray-100 px-5 transition-all duration-300 overflow-hidden">
             <div className="w-full flex flex-col items-center justify-center py-4 cursor-pointer" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               <div className="w-10 h-1.5 bg-gray-200 rounded-full mb-2"></div>
               <div className="flex items-center gap-1.5">
-                <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isMobileMenuOpen ? 'text-gray-400' : 'text-primary'}`}>
+                <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isMobileMenuOpen ? 'text-gray-400' : 'text-[#bf4a53]'}`}>
                   {isMobileMenuOpen ? 'Minimize' : 'Show Actions'}
                 </span>
-                <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180 text-gray-400' : 'text-primary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180 text-gray-400' : 'text-[#bf4a53]'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
               </div>
             </div>
-            <div className={`flex flex-col-reverse gap-3 transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-[200px] pb-6 opacity-100' : 'max-h-0 pb-0 opacity-0 pointer-events-none'}`}>
+            <div className={`flex flex-col-reverse gap-3 transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-50 pb-6 opacity-100' : 'max-h-0 pb-0 opacity-0 pointer-events-none'}`}>
               {step > 1 && (
-                <button onClick={() => setStep(step - 1)} className="w-full py-3.5 font-black text-sm text-[#8e8e93] bg-gray-50 rounded-[16px] border border-gray-100">
+                <button onClick={() => setStep(step - 1)} className="w-full py-3.5 font-black text-sm text-[#8e8e93] bg-gray-50 rounded-2xl border border-gray-100">
                   Go Back
                 </button>
               )}
-              <button onClick={handleNext} className="w-full py-4 rounded-[20px] font-black text-base shadow-xl bg-primary text-white shadow-primary/20 uppercase tracking-widest">
+              <button onClick={handleNext} className="w-full py-4 rounded-[20px] font-black text-base shadow-xl bg-[#bf4a53] text-white shadow-[#bf4a53]/20 uppercase tracking-widest">
                 {step === 4 ? 'Confirm & Process' : 'Continue'}
               </button>
             </div>
@@ -542,24 +654,24 @@ export default function StaffWeddingOrder() {
 
       {/* CATALOG OVERLAY */}
       {showCatalog && (
-        <div className="fixed inset-0 z-[100] bg-[#faf6f6] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-100 bg-[#faf6f6] flex flex-col animate-in fade-in zoom-in-95 duration-200">
           <div className="bg-[#faf6f6]/90 backdrop-blur-xl border-b border-gray-200/50 px-5 pt-4 pb-3 md:px-12 md:pt-8 md:pb-6 z-10 shrink-0">
             <div className="max-w-6xl mx-auto w-full">
               <div className="flex justify-between items-center mb-5 md:mb-8">
                 <div>
                   <h3 className="text-2xl md:text-4xl font-black text-[#111010] tracking-tight">Catalog</h3>
-                  <p className="text-[10px] md:text-sm font-bold text-[#8e8e93] mt-0.5">Assigning for <span className="text-primary uppercase tracking-widest">{activeSelection?.type}</span></p>
+                  <p className="text-[10px] md:text-sm font-bold text-[#8e8e93] mt-0.5">Assigning for <span className="text-[#bf4a53] uppercase tracking-widest">{activeSelection?.type}</span></p>
                 </div>
-                <button onClick={() => setShowCatalog(false)} className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full font-black text-lg md:text-xl shadow-sm border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all">✕</button>
+                <button onClick={() => setShowCatalog(false)} className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full font-black text-lg md:text-xl shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">✕</button>
               </div>
               <div className="flex flex-col items-center w-full">
                 <div className="relative w-full max-w-2xl mb-4">
-                  <input type="text" placeholder="Search outfits..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full py-3.5 pr-4 pl-11 border border-gray-200 rounded-2xl bg-white shadow-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all font-bold text-sm" />
+                  <input type="text" placeholder="Search outfits..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full py-3.5 pr-4 pl-11 border border-gray-200 rounded-2xl bg-white shadow-sm outline-none focus:ring-4 focus:ring-[#bf4a53]/10 transition-all font-bold text-sm" />
                   <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 </div>
                 <div className="flex overflow-x-auto w-full max-w-full justify-start md:justify-center gap-2 pb-2 scrollbar-hide">
                   {CATALOG_CATEGORIES.map(cat => (
-                    <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-5 py-2.5 rounded-full whitespace-nowrap text-[11px] font-black uppercase tracking-widest transition-all border ${activeCategory === cat.id ? 'bg-primary border-primary text-white shadow-lg' : 'bg-white border-gray-200 text-[#8e8e93] hover:text-[#111010]'}`}>
+                    <button key={cat.id} onClick={() => setActiveCategory(cat.id)} className={`px-5 py-2.5 rounded-full whitespace-nowrap text-[11px] font-black uppercase tracking-widest transition-all border ${activeCategory === cat.id ? 'bg-[#bf4a53] border-[#bf4a53] text-white shadow-lg' : 'bg-white border-gray-200 text-[#8e8e93] hover:text-[#111010]'}`}>
                       {cat.label}
                     </button>
                   ))}
@@ -576,13 +688,13 @@ export default function StaffWeddingOrder() {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
                   {filteredCatalogItems.map(item => (
-                    <div key={item.id} onClick={() => selectFromCatalog(item.id)} className="bg-white p-3 md:p-4 rounded-[24px] shadow-sm border-2 border-transparent hover:border-primary/50 cursor-pointer transition-all group hover:shadow-md flex flex-col h-full">
-                      <div className="aspect-[3/4] rounded-2xl overflow-hidden mb-3 md:mb-4 bg-gray-50 relative shrink-0">
+                    <div key={item.id} onClick={() => selectFromCatalog(item.id)} className="bg-white p-3 md:p-4 rounded-3xl shadow-sm border-2 border-transparent hover:border-[#bf4a53]/50 cursor-pointer transition-all group hover:shadow-md flex flex-col h-full">
+                      <div className="aspect-3/4 rounded-2xl overflow-hidden mb-3 md:mb-4 bg-gray-50 relative shrink-0">
                         <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="" />
                       </div>
                       <div className="flex flex-col grow justify-between">
                         <p className="font-black text-[11px] md:text-sm text-[#111010] line-clamp-2">{item.name}</p>
-                        <p className="text-primary font-black text-[10px] md:text-xs mt-1.5">₱{item.baseRate.toLocaleString()}</p>
+                        <p className="text-[#bf4a53] font-black text-[10px] md:text-xs mt-1.5">₱{item.baseRate.toLocaleString()}</p>
                       </div>
                     </div>
                   ))}
