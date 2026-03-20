@@ -213,7 +213,7 @@ export default function InventoryCatalog({ globalRole }) {
                        <p className="text-xl sm:text-2xl font-black text-[#111010]">₱{detailItem.baseRate}</p>
                     </div>
                     <div className="bg-[#faf6f6] p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-gray-100">
-                       <p className="text-[9px] sm:text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Security Deposit</p>
+                       <p className="text-[9px] sm:text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Downpayment</p>
                        <p className="text-xl sm:text-2xl font-black text-[#111010]">₱{detailItem.deposit}</p>
                     </div>
                   </div>
