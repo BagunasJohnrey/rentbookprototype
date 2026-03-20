@@ -88,7 +88,6 @@ const priorityTasks = TRANSACTIONS
           })}
         </div>
       </div>
-      <BottomNav />
     </div>
   );
 }

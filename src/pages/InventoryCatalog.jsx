@@ -2,9 +2,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CATALOG_ITEMS } from '../data/mockData';
-import BottomNav from '../components/BottomNav';
 
-export default function InventoryCatalog() {
+export default function InventoryCatalog({ globalRole }) {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -166,20 +165,32 @@ export default function InventoryCatalog() {
             ))}
           </div>
         </div>
-        <BottomNav />
       </div>
 
-      {/* Shared Detail Modal (Works for both) */}
+      {/* Shared Detail Modal (Works for both desktop and mobile) */}
       {detailItem && (
         <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDetailItem(null)} />
+          
           <div className="relative bg-white w-full md:max-w-4xl md:rounded-[48px] rounded-t-[40px] overflow-hidden max-h-[95vh] md:max-h-[85vh] flex flex-col animate-slide-up">
+            
+            {/* CLOSE BUTTON MOVED HERE */}
+            <button 
+              onClick={() => setDetailItem(null)}
+              className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/50 backdrop-blur-md p-2 rounded-full text-gray-800 hover:bg-white hover:shadow-md transition-all z-10"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 stroke-[3px]">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
             <div className="flex flex-col md:flex-row h-full">
                <div className="w-full md:w-1/2 h-80 md:h-auto relative">
                   <img src={detailItem.imageUrl} className="w-full h-full object-cover" alt={detailItem.name} />
                </div>
                <div className="p-8 md:p-12 grow flex flex-col">
-                  <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight">{detailItem.name}</h2>
+                  <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight pr-8">{detailItem.name}</h2>
                   <p className="text-gray-500 text-base leading-relaxed grow mt-6">
                     {detailItem.description || "Premium selection for your special events."}
                   </p>
@@ -193,13 +204,30 @@ export default function InventoryCatalog() {
                        <p className="text-2xl font-black text-gray-900">₱{detailItem.deposit}</p>
                     </div>
                   </div>
-                  <button 
-                    disabled={detailItem.status !== 'Available'}
-                    onClick={() => navigate(`/staff-new-rental?itemId=${detailItem.id}`)}
-                    className={`w-full py-5 rounded-2xl font-black text-lg transition-all ${detailItem.status === 'Available' ? 'bg-[#bf4a53] text-white shadow-xl shadow-[#bf4a53]/20 hover:brightness-110' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
-                  >
-                    {detailItem.status === 'Available' ? 'Proceed to Rental' : 'Unavailable'}
-                  </button>
+                  
+                  {/* ROLE-BASED CONDITIONAL RENDERING */}
+                  {globalRole === 'staff' ? (
+                    <button 
+                      disabled={detailItem.status !== 'Available'}
+                      onClick={() => navigate(`/staff-new-rental?itemId=${detailItem.id}`)}
+                      className={`w-full py-5 rounded-2xl font-black text-lg transition-all ${
+                        detailItem.status === 'Available' 
+                          ? 'bg-[#bf4a53] text-white shadow-xl shadow-[#bf4a53]/20 hover:brightness-110' 
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {detailItem.status === 'Available' ? 'Proceed to Rental' : 'Unavailable'}
+                    </button>
+                  ) : (
+                    <div className={`w-full py-5 rounded-2xl font-black text-lg text-center ${
+                      detailItem.status === 'Available'
+                        ? 'bg-green-50 text-green-600 border border-green-200'
+                        : 'bg-gray-100 text-gray-400'
+                    }`}>
+                      {detailItem.status === 'Available' ? 'Item is Available' : 'Currently Unavailable'}
+                    </div>
+                  )}
+
                </div>
             </div>
           </div>

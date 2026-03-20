@@ -1,5 +1,5 @@
 // src/pages/StaffNewRental.jsx
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { CATALOG_ITEMS } from '../data/mockData';
 
@@ -11,10 +11,11 @@ export default function StaffNewRental() {
   // Look up the item first
   const preFilledItem = CATALOG_ITEMS.find(i => i.id === initialItemId) || null;
 
-  // If a valid item was passed via URL, jump straight to step 2. Otherwise, start at 1.
+  // State
   const [step, setStep] = useState(preFilledItem ? 2 : 1);
   const [selectedItem, setSelectedItem] = useState(preFilledItem);
   const [showToast, setShowToast] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(''); // NEW: Search state
   
   // OCR Simulation State
   const [isScanning, setIsScanning] = useState(false);
@@ -29,10 +30,22 @@ export default function StaffNewRental() {
     };
   });
 
+  // NEW: Filter items based on availability AND search query
+  const filteredItems = useMemo(() => {
+    return CATALOG_ITEMS.filter(item => {
+      // Must be available
+      if (item.status !== 'Available') return false;
+      // If there's a search query, match against item name
+      if (searchQuery.trim()) {
+        return item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      }
+      return true;
+    });
+  }, [searchQuery]);
+
   // OCR Mock Function
   const simulateOCR = () => {
     setIsScanning(true);
-    // Simulate a 1.5s processing delay
     setTimeout(() => {
       setCustomer(prev => ({
         ...prev,
@@ -54,7 +67,7 @@ export default function StaffNewRental() {
             txData: {
               id: `TXN-${Date.now()}`,
               date: new Date().toLocaleDateString(),
-              returnDate: customer.returnDate,
+              returnDate: customer.returnDate, // FIX: Pass return date dynamically
               customer: customer.name,
               item: selectedItem.name,
               baseRate: selectedItem.baseRate,
@@ -115,34 +128,58 @@ export default function StaffNewRental() {
         </div>
 
         {/* Content Area */}
-        <main className="grow px-6 pt-4 pb-48 md:pb-12 md:px-12">
+        <main className="grow px-6 pt-4 pb-64 md:pb-12 md:px-12"> {/* FIX: Increased pb-64 for mobile scrolling */}
           <div className="max-w-4xl mx-auto">
             
             {/* STEP 1: Select Item */}
             {step === 1 && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h2 className="text-2xl md:text-3xl font-extrabold text-text-main">Select Item</h2>
-                <p className="text-sm md:text-base text-gray-500 font-medium mb-6">Choose from available catalog items</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                  {CATALOG_ITEMS.filter(i => i.status === 'Available').map(item => (
-                    <div 
-                      key={item.id} 
-                      onClick={() => setSelectedItem(item)}
-                      className={`bg-white rounded-3xl p-4 flex items-center gap-4 cursor-pointer transition-all border-2 
-                        ${selectedItem?.id === item.id ? 'border-primary shadow-md scale-[1.01]' : 'border-transparent shadow-sm hover:border-gray-100'}`}
-                    >
-                      <img src={item.imageUrl} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover" alt="" />
-                      <div className="grow">
-                        <p className="font-bold text-base md:text-lg">{item.name}</p>
-                        <p className="text-sm text-gray-400 font-medium">₱{item.baseRate} / rental</p>
-                      </div>
-                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center 
-                        ${selectedItem?.id === item.id ? 'bg-primary border-primary' : 'border-gray-200'}`}>
-                        {selectedItem?.id === item.id && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>}
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-6 gap-4">
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-extrabold text-text-main">Select Item</h2>
+                    <p className="text-sm md:text-base text-gray-500 font-medium">Choose from available catalog items</p>
+                  </div>
+                  
+                  {/* NEW: Search Bar UI */}
+                  <div className="relative w-full md:w-72 shrink-0">
+                    <input 
+                      type="text" 
+                      placeholder="Search available items..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full py-3.5 pr-4 pl-11 border border-gray-200 rounded-2xl bg-white shadow-sm outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all font-medium text-sm"
+                    />
+                    <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                  </div>
                 </div>
+
+                {filteredItems.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-3xl border border-gray-100 border-dashed">
+                    <p className="text-gray-400 font-bold">No available items match your search.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                    {/* NEW: Mapping over filteredItems instead of raw catalog */}
+                    {filteredItems.map(item => (
+                      <div 
+                        key={item.id} 
+                        onClick={() => setSelectedItem(item)}
+                        className={`bg-white rounded-3xl p-4 flex items-center gap-4 cursor-pointer transition-all border-2 
+                          ${selectedItem?.id === item.id ? 'border-primary shadow-md scale-[1.01]' : 'border-transparent shadow-sm hover:border-gray-100'}`}
+                      >
+                        <img src={item.imageUrl} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl object-cover" alt="" />
+                        <div className="grow">
+                          <p className="font-bold text-base md:text-lg">{item.name}</p>
+                          <p className="text-sm text-gray-400 font-medium">₱{item.baseRate} / rental</p>
+                        </div>
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0
+                          ${selectedItem?.id === item.id ? 'bg-primary border-primary' : 'border-gray-200'}`}>
+                          {selectedItem?.id === item.id && <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -152,9 +189,7 @@ export default function StaffNewRental() {
                 <h2 className="text-2xl md:text-3xl font-extrabold text-text-main">Customer Info</h2>
                 <p className="text-sm md:text-base text-gray-500 font-medium mb-6">Enter details or scan government ID</p>
                 
-                {/* ==========================================
-                    OCR SCANNER UI
-                ========================================== */}
+                {/* OCR SCANNER UI */}
                 <div 
                   onClick={!isScanning ? simulateOCR : undefined}
                   className={`mb-8 w-full border-2 border-dashed rounded-[32px] p-8 flex flex-col items-center justify-center transition-all duration-300 select-none
@@ -167,7 +202,6 @@ export default function StaffNewRental() {
                           <rect x="3" y="4" width="18" height="16" rx="2" ry="2"></rect>
                           <line x1="3" y1="10" x2="21" y2="10"></line>
                         </svg>
-                        {/* Scanning Laser Line */}
                         <div className="absolute top-0 left-0 w-full h-0.5 bg-primary/80 shadow-[0_0_8px_rgba(191,74,83,0.8)] animate-[ping_1.5s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
                       </div>
                       <p className="text-sm font-bold text-primary animate-pulse tracking-wide">Extracting ID Details...</p>
@@ -195,7 +229,6 @@ export default function StaffNewRental() {
 
                 {/* Manual Form Inputs */}
                 <div className="space-y-5 relative">
-                  {/* Overlay to block inputs during scan */}
                   {isScanning && <div className="absolute inset-0 z-10 bg-white/40 backdrop-blur-[1px] rounded-3xl"></div>}
                   
                   <div className="flex flex-col gap-2">
@@ -225,7 +258,7 @@ export default function StaffNewRental() {
                       <label className="text-xs font-bold text-text-main ml-1 uppercase">Rental Date</label>
                       <input 
                         type="date" 
-                        min={new Date().toISOString().split('T')[0]}
+                        min={new Date().toISOString().split('T')[0]} // FIX: Prevent past dates
                         value={customer.rentalDate} 
                         onChange={e => setCustomer({...customer, rentalDate: e.target.value})} 
                         className="w-full p-4 rounded-2xl bg-white shadow-sm outline-none" 
@@ -235,6 +268,7 @@ export default function StaffNewRental() {
                       <label className="text-xs font-bold text-text-main ml-1 uppercase">Return Date</label>
                       <input 
                         type="date" 
+                        min={customer.rentalDate} // FIX: Return date must be after rental date
                         value={customer.returnDate} 
                         onChange={e => setCustomer({...customer, returnDate: e.target.value})} 
                         className="w-full p-4 rounded-2xl bg-white shadow-sm outline-none" 
@@ -266,12 +300,15 @@ export default function StaffNewRental() {
                       <span className="text-gray-400 font-bold text-xs uppercase">Contact</span>
                       <span className="text-text-main font-bold md:text-lg">{customer.contact}</span>
                     </div>
+                    
+                    {/* FIX: Show Dates in confirmation UI */}
                     <div className="flex justify-between border-b border-gray-50 pb-3">
-                      <span className="text-gray-400 font-bold text-xs uppercase">Rental Period</span>
+                      <span className="text-gray-400 font-bold text-xs uppercase">Period</span>
                       <span className="text-text-main font-bold md:text-lg">
-                        {customer.rentalDate} to {customer.returnDate}
+                        {new Date(customer.rentalDate).toLocaleDateString()} to {new Date(customer.returnDate).toLocaleDateString()}
                       </span>
                     </div>
+
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 gap-2">
                       <span className="text-lg md:text-xl font-black text-gray-400">Total Due</span>
                       <span className="text-4xl md:text-5xl font-black text-primary">₱{selectedItem.baseRate + selectedItem.deposit}</span>
@@ -283,13 +320,13 @@ export default function StaffNewRental() {
           </div>
         </main>
 
-        {/* ACTION BAR */}
-        <div className="fixed bottom-0 left-0 right-0 p-6 pb-10 md:relative md:p-12 md:bg-transparent bg-white/80 backdrop-blur-lg rounded-t-[40px] md:rounded-none shadow-[0_-10px_40px_rgba(0,0,0,0.04)] md:shadow-none z-40">
+        {/* ACTION BAR - FIX: Lifted from bottom to avoid overlapping navbar */}
+        <div className="fixed bottom-20 left-0 right-0 p-4 pb-6 md:bottom-auto md:relative md:p-12 md:bg-transparent bg-white/95 backdrop-blur-xl rounded-t-[32px] md:rounded-none shadow-[0_-15px_40px_rgba(0,0,0,0.08)] md:shadow-none z-40">
           <div className="max-w-2xl mx-auto flex flex-col md:flex-row-reverse gap-3">
             <button 
               disabled={isScanning}
               onClick={handleNext} 
-              className={`w-full md:flex-2 py-5 md:py-6 rounded-2xl md:rounded-3xl font-bold text-base md:text-xl shadow-xl transition-all
+              className={`w-full md:flex-2 py-4 md:py-6 rounded-2xl md:rounded-3xl font-bold text-base md:text-xl shadow-xl transition-all
                 ${isScanning ? 'bg-gray-300 text-gray-500 shadow-none cursor-not-allowed' : 'bg-primary text-white shadow-primary/20 hover:brightness-110 active:scale-[0.98]'}`}
             >
               {step === 3 ? 'Confirm & Generate Receipt' : 'Continue to Next Step'}
@@ -298,7 +335,7 @@ export default function StaffNewRental() {
               <button 
                 disabled={isScanning}
                 onClick={() => setStep(step - 1)} 
-                className={`w-full md:flex-1 py-4 font-bold text-sm md:text-lg transition-colors
+                className={`w-full md:flex-1 py-3 font-bold text-sm md:text-lg transition-colors
                   ${isScanning ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-text-main'}`}
               >
                 Go Back

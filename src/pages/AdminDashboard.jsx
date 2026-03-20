@@ -90,7 +90,6 @@ export default function AdminDashboard() {
           })}
         </div>
       </div>
-      <AdminBottomNav />
     </div>
   );
 }
