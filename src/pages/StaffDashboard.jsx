@@ -42,6 +42,10 @@ export default function StaffDashboard() {
     return TRANSACTIONS
       .filter(tx => tx.status !== 'completed')
       .map(tx => {
+        // Handle wedding packages with a placeholder item
+        if (tx.type === 'wedding') {
+           return { ...tx, item: { name: 'Wedding Package', imageUrl: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=500&q=80' } };
+        }
         const item = CATALOG_ITEMS.find(i => i.id === tx.itemId);
         return { ...tx, item };
       })
@@ -84,20 +88,41 @@ export default function StaffDashboard() {
           <h1 className="text-3xl md:text-5xl font-black text-[#111010] tracking-tight">Front Desk</h1>
         </div>
 
-        {/* Hero Action Banner */}
-        <div 
-          onClick={() => navigate('/staff-new-rental')}
-          className="group relative bg-[#111010] rounded-[28px] md:rounded-[32px] overflow-hidden p-6 md:p-10 text-white flex flex-row items-center justify-between mb-8 shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-800"
-        >
-          <div className="absolute -right-20 -top-20 w-64 h-64 bg-[#bf4a53] rounded-full blur-[80px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+        {/* Action Buttons Container */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
           
-          <div className="relative z-10">
-            <h2 className="text-xl md:text-4xl font-black mb-1 md:mb-2 tracking-tight">New Rental</h2>
-            <p className="text-[10px] md:text-sm text-gray-400 font-bold tracking-wide uppercase md:normal-case">Start the checkout wizard</p>
+          {/* Hero Action Banner - Standard Rental */}
+          <div 
+            onClick={() => navigate('/staff-new-rental')}
+            className="flex-1 group relative bg-[#111010] rounded-[28px] md:rounded-[32px] overflow-hidden p-6 md:p-8 text-white flex flex-row items-center justify-between shadow-xl hover:shadow-2xl transition-all duration-500 cursor-pointer border border-gray-800"
+          >
+            <div className="absolute -right-10 -top-10 w-48 h-48 bg-[#bf4a53] rounded-full blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity duration-700"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-xl md:text-3xl font-black mb-1 tracking-tight">Standard Rental</h2>
+              <p className="text-[10px] md:text-xs text-gray-400 font-bold tracking-wide uppercase">Single item checkout</p>
+            </div>
+            <div className="relative z-10 w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-[#bf4a53] transition-all duration-500 shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
           </div>
-          <div className="relative z-10 w-12 h-12 md:w-20 md:h-20 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 group-hover:scale-110 group-hover:bg-[#bf4a53] transition-all duration-500 shrink-0">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 md:w-10 md:h-10 stroke-[2.5px]"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+
+          {/* New Action Banner - Wedding Package */}
+          <div 
+            onClick={() => navigate('/staff-wedding-order')}
+            className="flex-1 group relative bg-white rounded-[28px] md:rounded-[32px] overflow-hidden p-6 md:p-8 text-[#111010] flex flex-row items-center justify-between shadow-sm hover:shadow-xl transition-all duration-500 cursor-pointer border border-gray-100"
+          >
+            <div className="absolute -right-10 -top-10 w-48 h-48 bg-purple-500 rounded-full blur-[60px] opacity-10 group-hover:opacity-20 transition-opacity duration-700"></div>
+            
+            <div className="relative z-10">
+              <h2 className="text-xl md:text-3xl font-black mb-1 tracking-tight">Wedding Package</h2>
+              <p className="text-[10px] md:text-xs text-gray-400 font-bold tracking-wide uppercase">Bulk order & entourage</p>
+            </div>
+            <div className="relative z-10 w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 group-hover:scale-110 group-hover:bg-purple-100 group-hover:text-purple-600 transition-all duration-500 shrink-0">
+               <span className="text-xl">💍</span>
+            </div>
           </div>
+
         </div>
 
         {/* Quick Stats Grid */}
@@ -151,11 +176,16 @@ export default function StaffDashboard() {
                         <span className="relative inline-flex rounded-full h-4 w-4 bg-[#ff9f0a] border-2 border-white"></span>
                       </span>
                     )}
+                    {task.type === 'wedding' && (
+                      <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm text-xs">💍</div>
+                    )}
                   </div>
                   
                   <div className="grow min-w-0">
                     <div className="text-[15px] md:text-xl font-black text-[#111010] truncate">{task.customerName}</div>
-                    <div className="text-[10px] md:text-sm text-[#8e8e93] font-bold truncate mb-1.5 md:mb-2">{task.item?.name}</div>
+                    <div className="text-[10px] md:text-sm text-[#8e8e93] font-bold truncate mb-1.5 md:mb-2">
+                       {task.item?.name} {task.type === 'wedding' ? `(${task.items?.length} items)` : ''}
+                    </div>
                     <span className={`inline-block px-2 md:px-3 py-1 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black uppercase tracking-widest ${isOverdue ? 'bg-orange-50 text-[#ff9f0a]' : 'bg-green-50 text-[#34c759]'}`}>
                       {isOverdue ? 'Overdue' : 'Due ' + task.dueDate}
                     </span>
@@ -231,7 +261,9 @@ export default function StaffDashboard() {
                   <img src={viewingTx.item?.imageUrl} className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm" alt="" />
                   <div className="flex flex-col justify-center">
                     <h3 className="font-black text-base sm:text-lg text-[#111010] leading-tight">{viewingTx.item?.name}</h3>
-                    <p className="text-[#bf4a53] font-bold text-xs sm:text-sm mt-1">Item ID: {viewingTx.itemId}</p>
+                    <p className="text-[#bf4a53] font-bold text-xs sm:text-sm mt-1">
+                       {viewingTx.type === 'wedding' ? 'Bulk Order' : `Item ID: ${viewingTx.itemId}`}
+                    </p>
                   </div>
                 </div>
 

@@ -16,6 +16,7 @@ import AdminHistory from './pages/AdminHistory';
 import AdminReports from './pages/AdminReports';
 import AdminSettings from './pages/AdminSettings';
 import StaffSettings from './pages/StaffSettings';
+import StaffWeddingOrder from './pages/StaffWeddingOrder';
 import Receipt from './pages/Receipt';
 
 function AppContent({ globalRole, setGlobalRole }) {
@@ -47,6 +48,7 @@ function AppContent({ globalRole, setGlobalRole }) {
           <Route path="/staff-new-rental" element={<StaffNewRental />} />
           <Route path="/staff-history" element={<StaffHistory />} />
           <Route path="/staff-settings" element={<StaffSettings setGlobalRole={setGlobalRole} />} />
+          <Route path="/staff-wedding-order" element={<StaffWeddingOrder />} />
           <Route path="/receipt" element={<Receipt />} />
           
           <Route path="/admin-dashboard" element={<AdminDashboard />} />

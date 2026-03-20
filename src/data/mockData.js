@@ -1,3 +1,5 @@
+// src/data/mockData.js
+
 export const CATALOG_ITEMS = [
   {
     id: "ITEM-1001",
@@ -91,8 +93,24 @@ export const CATALOG_ITEMS = [
   }
 ];
 
-// NEW: Add the transactions data
 export const TRANSACTIONS = [
+  // --- NEW: Sample Wedding/Bulk Order ---
+  {
+    txId: "TXN-W-3001",
+    type: "wedding",
+    customerName: "Maria Clara & Juan Luna",
+    motif: "Rustic",
+    dueDate: "2026-04-15",
+    status: "active",
+    totalAmount: 45000,
+    items: [
+      { role: "Bride", name: "Maria Clara", itemId: "ITEM-1001", returned: false },
+      { role: "Groom", name: "Juan Luna", itemId: "ITEM-1004", returned: false },
+      { role: "Maid of Honor", name: "Elena", itemId: "ITEM-1009", returned: false },
+      { role: "Best Man", name: "Crisostomo", itemId: "ITEM-1003", returned: true } // Example of a partially returned item
+    ]
+  },
+  // --- Standard Transactions ---
   {
     txId: "TXN-2001",
     customerName: "Kathryn Bernardo",
