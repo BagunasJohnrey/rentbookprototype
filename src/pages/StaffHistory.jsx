@@ -333,7 +333,7 @@ export default function StaffHistory() {
                     <img src={tx.item?.imageUrl} className="w-16 h-16 rounded-2xl object-cover shadow-inner" alt="" />
                     <div className={`absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full border-2 border-white ${getStatusDot(tx.status)}`} />
                     {tx.type === 'wedding' && (
-                      <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-0.5 shadow-sm text-xs">💍</div>
+                      <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm text-[10px] leading-none flex items-center justify-center">💍</div>
                     )}
                   </div>
                   
@@ -360,8 +360,15 @@ export default function StaffHistory() {
                           <svg className="w-4 h-4 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                         </button>
 
+                        {/* Add SMS Reminder Icon to Mobile */}
+                        {tx.status !== 'completed' && (
+                          <button onClick={() => sendPing(tx.customerName)} className="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-xl text-gray-400 active:bg-gray-200 active:text-[#111010] transition-colors" title="Send SMS Reminder">
+                            <svg className="w-4 h-4 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                          </button>
+                        )}
+
                         {!tx.isPaid && tx.status !== 'completed' && tx.type !== 'wedding' && (
-                          <button onClick={() => handleMarkPaid(tx)} className="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-xl text-gray-400 active:bg-gray-200 active:text-[#111010] transition-colors font-black">
+                          <button onClick={() => handleMarkPaid(tx)} className="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-xl text-gray-400 active:bg-gray-200 active:text-[#111010] transition-colors font-black text-sm" title="Mark Paid">
                              ₱
                           </button>
                         )}
