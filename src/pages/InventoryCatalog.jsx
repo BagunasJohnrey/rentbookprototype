@@ -9,17 +9,20 @@ export default function InventoryCatalog({ globalRole }) {
   const [search, setSearch] = useState('');
   const [detailItem, setDetailItem] = useState(null);
 
+  // Robust filtering for categories and search
   const filteredItems = useMemo(() => {
     let items = [...CATALOG_ITEMS];
+    
     if (filter === 'available') {
-      items = items.filter(i => i.status === 'Available');
+      items = items.filter(i => i.status.toLowerCase() === 'available');
     } else if (filter !== 'all') {
-      items = items.filter(i => i.category === filter);
+      items = items.filter(i => i.category?.toLowerCase() === filter.toLowerCase());
     }
+    
     if (search.trim()) {
       const q = search.toLowerCase();
       items = items.filter(item => 
-        (item.name + ' ' + item.category).toLowerCase().includes(q)
+        (item.name + ' ' + (item.category || '')).toLowerCase().includes(q)
       );
     }
     return items;
@@ -27,204 +30,214 @@ export default function InventoryCatalog({ globalRole }) {
 
   const availableCount = CATALOG_ITEMS.filter(i => i.status === 'Available').length;
 
+  // Boutique-style categories
+  const categories = [
+    { id: 'all', label: 'All Collection' },
+    { id: 'available', label: 'Available Now' },
+    { id: 'gowns', label: 'Evening Gowns' },
+    { id: 'suits', label: 'Suits & Tuxedos' },
+    { id: 'barong', label: 'Filipiñana & Barong' }
+  ];
+
   return (
-    <div className="flex flex-col h-full relative bg-gray-50">
-      
-      {/* ==========================================
-          DESKTOP DESIGN (Visible on md and up)
-      ========================================== */}
-      <div className="hidden md:flex flex-col grow p-10 max-w-7xl mx-auto w-full">
-        <header className="flex justify-between items-center mb-10">
+    <div className="flex flex-col h-full relative bg-[#faf6f6]">
+      <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full custom-scrollbar">
+        
+        {/* ==========================================
+            SHARED HEADER (Responsive)
+        ========================================== */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12 animate-slide-up">
           <div>
-            <h1 className="text-5xl font-black text-gray-900 tracking-tight">Inventory</h1>
-            <p className="text-gray-500 font-medium mt-2">Manage and monitor your rental assets</p>
+            <p className="text-xs font-black text-[#bf4a53] uppercase tracking-[0.2em] mb-2">The Collection</p>
+            <h1 className="text-[32px] md:text-5xl font-black text-[#111010] tracking-tight leading-none">
+              Lookbook
+            </h1>
+            <p className="text-sm md:text-base font-medium text-[#8e8e93] mt-3">
+              Browse our exclusive wardrobe of premium attire.
+            </p>
           </div>
-          <div className="flex gap-4">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 min-w-[160px]">
-              <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Total Items</p>
-              <p className="text-3xl font-black text-gray-900">{CATALOG_ITEMS.length}</p>
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 min-w-[160px]">
-              <p className="text-primary text-xs font-bold uppercase tracking-widest">Available</p>
-              <p className="text-3xl font-black text-primary">{availableCount}</p>
-            </div>
-          </div>
-        </header>
-
-        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 flex flex-col gap-8">
-          {/* Desktop Controls */}
-          <div className="flex gap-6 items-center">
-            <div className="relative flex-grow">
-              <input 
-                type="text" 
-                placeholder="Search inventory..." 
-                className="w-full bg-gray-50 border-none py-5 pl-14 rounded-2xl focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              <svg className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
-            <div className="flex bg-gray-50 p-1.5 rounded-2xl">
-              {['all', 'available', 'gowns', 'suits', 'barong'].map(f => (
-                <button 
-                  key={f} onClick={() => setFilter(f)}
-                  className={`px-8 py-3 rounded-xl text-sm font-bold transition-all ${filter === f ? 'bg-white text-primary shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  {f.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop Table-style Grid */}
-          <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-            {filteredItems.map((item) => (
-              <div 
-                key={item.id} 
-                onClick={() => setDetailItem(item)}
-                className="group cursor-pointer"
-              >
-                <div className="relative aspect-[4/5] rounded-[32px] overflow-hidden mb-4 shadow-md group-hover:shadow-2xl transition-all duration-500">
-                  <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className={`absolute top-4 right-4 px-4 py-1.5 rounded-xl text-[10px] font-black uppercase backdrop-blur-md shadow-sm ${item.status === 'Available' ? 'bg-green-500 text-white' : 'bg-orange-500 text-white'}`}>
-                    {item.status}
-                  </div>
-                </div>
-                <h3 className="font-bold text-lg text-gray-800 px-2">{item.name}</h3>
-                <p className="text-primary font-black px-2">₱{item.baseRate}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-
-      {/* ==========================================
-          MOBILE DESIGN (Visible on screen < md)
-      ========================================== */}
-      <div className="md:hidden flex flex-col h-full">
-        <div className="grow overflow-y-auto px-4 pt-8 pb-28">
           
-          <div className="flex flex-col mb-8 gap-6">
-            <div className="animate-slide-up">
-              <h1 className="text-[32px] font-extrabold text-text-main tracking-tight leading-tight">Catalog</h1>
-              <p className="text-sm font-medium text-text-muted mt-1">Browse and manage rental inventory</p>
+          <div className="flex flex-col md:items-end gap-4 shrink-0">
+            <div className="flex gap-3 w-full">
+               <SummaryChip label="Total Assets" value={CATALOG_ITEMS.length} />
+               <SummaryChip label="Ready to Wear" value={availableCount} color="text-[#34c759]" />
             </div>
             
-            <div className="flex gap-3 animate-fade-in-down">
-               <SummaryChip label="Total" value={CATALOG_ITEMS.length} />
-               <SummaryChip label="Available" value={availableCount} color="text-primary" />
-               <SummaryChip label="Rented" value={CATALOG_ITEMS.length - availableCount} />
-            </div>
+            {/* NEW: Admin Only - Add New Item Button */}
+            {globalRole === 'admin' && (
+              <button 
+                onClick={() => navigate('/admin-add-item')}
+                className="bg-[#111010] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-[#bf4a53] hover:shadow-lg hover:shadow-[#bf4a53]/20 transition-all active:scale-95 flex items-center justify-center gap-2 w-full md:w-auto"
+              >
+                <svg className="w-5 h-5 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Item
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ==========================================
+            SEARCH & FILTERS
+        ========================================== */}
+        <div className="flex flex-col md:flex-row gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.05s' }}>
+          {/* Search Bar */}
+          <div className="relative w-full md:w-80 shrink-0">
+            <input 
+              type="text" 
+              placeholder="Search by name or category..." 
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full py-3.5 pr-4 pl-12 border border-gray-200 rounded-2xl bg-white shadow-sm outline-none focus:border-[#bf4a53] focus:ring-4 focus:ring-[#bf4a53]/10 transition-all font-medium text-sm text-gray-900"
+            />
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           </div>
 
-          <div className="flex flex-col gap-4 mb-8">
-            <div className="relative w-full">
-              <input 
-                type="text" 
-                placeholder="Search items..." 
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full py-4 pr-4 pl-12 border-none rounded-2xl bg-white shadow-sm outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-              />
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {['all', 'available', 'gowns', 'suits', 'barong'].map(f => (
+          {/* Filter Pills */}
+          <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex gap-2 w-max pr-4 md:pr-0">
+              {categories.map(cat => (
                 <button 
-                  key={f} onClick={() => setFilter(f)}
-                  className={`px-6 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${filter === f ? 'bg-primary text-white shadow-md shadow-primary/20' : 'bg-white text-gray-500 border border-gray-100 hover:bg-gray-50'}`}
+                  key={cat.id} 
+                  onClick={() => setFilter(cat.id)}
+                  className={`shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                    filter === cat.id 
+                      ? 'bg-[#111010] text-white shadow-lg shadow-black/10' 
+                      : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-900'
+                  }`}
                 >
-                  {f.toUpperCase()}
+                  {cat.label}
                 </button>
               ))}
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4">
+        {/* ==========================================
+            FASHION GRID
+        ========================================== */}
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-32 bg-white rounded-[40px] border border-gray-100 shadow-sm animate-slide-up">
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+              <svg className="w-10 h-10 stroke-[2px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+            <h3 className="text-xl font-black text-gray-900 mb-1">No items found</h3>
+            <p className="text-gray-400 font-medium">Try adjusting your search or filters.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 pb-10">
             {filteredItems.map((item, i) => (
               <div 
                 key={item.id} 
                 onClick={() => setDetailItem(item)}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer group animate-slide-up"
+                className="group cursor-pointer animate-slide-up flex flex-col"
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
-                <div className="relative aspect-3/4 bg-gray-100 overflow-hidden">
+                {/* Image Container (3:4 Aspect Ratio for Fashion) */}
+                <div className="relative aspect-[3/4] rounded-[24px] md:rounded-[32px] overflow-hidden mb-4 shadow-sm group-hover:shadow-2xl transition-all duration-500 bg-white">
                   <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={item.name} />
-                  <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase backdrop-blur-md ${item.status === 'Available' ? 'bg-green-500/10 text-green-600' : 'bg-orange-500/10 text-orange-600'}`}>
-                    {item.status}
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center backdrop-blur-[2px]">
+                    <span className="bg-white/90 text-[#111010] px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">
+                      Quick View
+                    </span>
+                  </div>
+
+                  {/* Status Badge */}
+                  <div className={`absolute top-3 right-3 md:top-4 md:right-4 px-3 py-1.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-sm border border-white/20 ${
+                    item.status === 'Available' ? 'bg-[#34c759]/90 text-white' : 'bg-[#111010]/80 text-white'
+                  }`}>
+                    {item.status === 'Available' ? 'Ready' : 'Rented'}
                   </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-gray-800 truncate text-sm">{item.name}</h3>
-                  <p className="text-primary font-black text-sm mt-1">₱{item.baseRate}</p>
+                
+                {/* Details */}
+                <div className="px-2 grow flex flex-col">
+                  <h3 className="font-black text-sm md:text-lg text-[#111010] leading-tight mb-1">{item.name}</h3>
+                  <p className="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">{item.category}</p>
+                  <p className="text-[#bf4a53] font-black text-sm md:text-base mt-auto">₱{item.baseRate}</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Shared Detail Modal (Works for both desktop and mobile) */}
+      {/* ==========================================
+          SHARED DETAIL MODAL (Boutique Style)
+      ========================================== */}
       {detailItem && (
         <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-0 md:p-6">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDetailItem(null)} />
+          <div className="absolute inset-0 bg-[#111010]/60 backdrop-blur-md transition-opacity" onClick={() => setDetailItem(null)} />
           
-          <div className="relative bg-white w-full md:max-w-4xl md:rounded-[48px] rounded-t-[40px] overflow-hidden max-h-[95vh] md:max-h-[85vh] flex flex-col animate-slide-up">
+          <div className="relative bg-white w-full md:max-w-5xl md:rounded-[40px] rounded-t-[40px] overflow-hidden max-h-[95vh] md:max-h-[85vh] flex flex-col shadow-2xl animate-slide-up">
             
-            {/* CLOSE BUTTON MOVED HERE */}
+            {/* Elegant Close Button */}
             <button 
               onClick={() => setDetailItem(null)}
-              className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/50 backdrop-blur-md p-2 rounded-full text-gray-800 hover:bg-white hover:shadow-md transition-all z-10"
+              className="absolute top-4 right-4 md:top-6 md:right-6 bg-white/80 backdrop-blur-md p-3 rounded-full text-gray-900 hover:bg-[#111010] hover:text-white transition-all z-20 shadow-sm"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 stroke-[3px]">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[3px]">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
             </button>
 
-            <div className="flex flex-col md:flex-row h-full">
-               <div className="w-full md:w-1/2 h-80 md:h-auto relative">
+            <div className="flex flex-col md:flex-row h-full overflow-y-auto custom-scrollbar">
+               {/* Left: Huge Image */}
+               <div className="w-full md:w-1/2 h-[45vh] md:h-auto relative bg-gray-50 shrink-0">
                   <img src={detailItem.imageUrl} className="w-full h-full object-cover" alt={detailItem.name} />
                </div>
-               <div className="p-8 md:p-12 grow flex flex-col">
-                  <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight pr-8">{detailItem.name}</h2>
-                  <p className="text-gray-500 text-base leading-relaxed grow mt-6">
-                    {detailItem.description || "Premium selection for your special events."}
+               
+               {/* Right: Details */}
+               <div className="p-8 md:p-14 md:w-1/2 flex flex-col bg-white">
+                  <div className="mb-2">
+                    <span className="text-[10px] font-black text-[#bf4a53] uppercase tracking-[0.2em]">{detailItem.category}</span>
+                  </div>
+                  <h2 className="text-3xl md:text-5xl font-black text-[#111010] leading-tight pr-8 mb-6">{detailItem.name}</h2>
+                  
+                  <p className="text-gray-500 text-sm md:text-base leading-relaxed mb-10">
+                    {detailItem.description || "An exquisite piece from our premium collection, perfect for making a statement at your next special event. Carefully maintained and professionally cleaned after every use."}
                   </p>
-                  <div className="grid grid-cols-2 gap-6 my-10">
-                    <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                       <p className="text-xs uppercase font-bold text-gray-400 tracking-widest">Rate</p>
-                       <p className="text-2xl font-black text-gray-900">₱{detailItem.baseRate}</p>
+                  
+                  {/* Pricing Cards */}
+                  <div className="grid grid-cols-2 gap-4 mb-10 mt-auto">
+                    <div className="bg-[#faf6f6] p-5 rounded-[24px] border border-gray-100">
+                       <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Rental Rate</p>
+                       <p className="text-2xl font-black text-[#111010]">₱{detailItem.baseRate}</p>
                     </div>
-                    <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                       <p className="text-xs uppercase font-bold text-gray-400 tracking-widest">Deposit</p>
-                       <p className="text-2xl font-black text-gray-900">₱{detailItem.deposit}</p>
+                    <div className="bg-[#faf6f6] p-5 rounded-[24px] border border-gray-100">
+                       <p className="text-[10px] uppercase font-black text-gray-400 tracking-widest mb-1">Security Deposit</p>
+                       <p className="text-2xl font-black text-[#111010]">₱{detailItem.deposit}</p>
                     </div>
                   </div>
                   
-                  {/* ROLE-BASED CONDITIONAL RENDERING */}
+                  {/* Action Button */}
                   {globalRole === 'staff' ? (
                     <button 
                       disabled={detailItem.status !== 'Available'}
                       onClick={() => navigate(`/staff-new-rental?itemId=${detailItem.id}`)}
-                      className={`w-full py-5 rounded-2xl font-black text-lg transition-all ${
+                      className={`w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${
                         detailItem.status === 'Available' 
-                          ? 'bg-[#bf4a53] text-white shadow-xl shadow-[#bf4a53]/20 hover:brightness-110' 
+                          ? 'bg-[#111010] text-white hover:bg-[#bf4a53] hover:shadow-xl hover:shadow-[#bf4a53]/20 active:scale-95' 
                           : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      {detailItem.status === 'Available' ? 'Proceed to Rental' : 'Unavailable'}
+                      {detailItem.status === 'Available' ? 'Proceed to Rental' : 'Currently Rented'}
+                      {detailItem.status === 'Available' && (
+                        <svg className="w-4 h-4 stroke-[3px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                      )}
                     </button>
                   ) : (
-                    <div className={`w-full py-5 rounded-2xl font-black text-lg text-center ${
+                    <div className={`w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest text-center border-2 ${
                       detailItem.status === 'Available'
-                        ? 'bg-green-50 text-green-600 border border-green-200'
-                        : 'bg-gray-100 text-gray-400'
+                        ? 'border-[#34c759]/20 bg-[#34c759]/5 text-[#34c759]'
+                        : 'border-gray-200 bg-gray-50 text-gray-400'
                     }`}>
-                      {detailItem.status === 'Available' ? 'Item is Available' : 'Currently Unavailable'}
+                      {detailItem.status === 'Available' ? 'Available in Store' : 'Currently Rented'}
                     </div>
                   )}
 
@@ -237,12 +250,12 @@ export default function InventoryCatalog({ globalRole }) {
   );
 }
 
-// Retained Helper Component
-function SummaryChip({ label, value, color = "text-text-main" }) {
+// Retained Helper Component with styling update
+function SummaryChip({ label, value, color = "text-[#111010]" }) {
   return (
-    <div className="flex-1 min-w-20 bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-50">
-      <div className={`text-lg font-black ${color}`}>{value}</div>
-      <div className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">{label}</div>
+    <div className="flex-1 md:flex-none md:min-w-[120px] bg-white rounded-2xl p-3 md:p-4 text-center shadow-sm border border-gray-100">
+      <div className={`text-xl md:text-2xl font-black ${color}`}>{value}</div>
+      <div className="text-[9px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{label}</div>
     </div>
   );
 }

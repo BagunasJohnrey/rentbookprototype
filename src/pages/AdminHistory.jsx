@@ -1,7 +1,6 @@
 // src/pages/AdminHistory.jsx
 import { useState } from 'react';
 import { TRANSACTIONS, CATALOG_ITEMS } from '../data/mockData';
-import AdminBottomNav from '../components/AdminBottomNav';
 
 export default function AdminHistory() {
   const [filter, setFilter] = useState('all');
@@ -12,19 +11,26 @@ export default function AdminHistory() {
       return { ...tx, item };
     });
 
-  const sendPing = (name) => alert(`SMS draft created for ${name}`);
+  // Mock Action Handlers
+  const sendPing = (name) => alert(`SMS reminder drafted for ${name}.`);
+  const handleView = (id) => alert(`Opening full transaction details for ${id}...`);
+  const handleReturn = (id) => {
+    const confirm = window.confirm(`Mark transaction ${id} as returned?`);
+    if (confirm) alert(`Transaction ${id} successfully closed!`);
+  };
 
   return (
     <div className="flex flex-col h-full relative bg-[#faf6f6]">
-      <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full">
+      <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full custom-scrollbar">
         
         {/* Header Section */}
         <div className="mb-8 md:mb-12 animate-slide-up">
+          <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">Management Terminal</p>
           <h1 className="text-[32px] md:text-5xl font-black text-[#111010] tracking-tight">Rental History</h1>
           <p className="text-sm md:text-base font-medium text-[#8e8e93] mt-2">Monitor and manage all customer transactions</p>
         </div>
 
-        {/* Filter Tabs - Shared but styled for both */}
+        {/* Filter Tabs */}
         <div className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
           {['all', 'active', 'overdue', 'completed'].map(f => (
             <button 
@@ -80,14 +86,24 @@ export default function AdminHistory() {
                       </span>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      {tx.status !== 'completed' && (
-                        <button 
-                          onClick={() => sendPing(tx.customerName)} 
-                          className="px-4 py-2 bg-[#bf4a53]/5 text-[#bf4a53] rounded-xl text-xs font-black hover:bg-[#bf4a53] hover:text-white transition-all"
-                        >
-                          Send Reminder
+                      <div className="flex justify-end gap-2">
+                        {/* View Details Action */}
+                        <button onClick={() => handleView(tx.txId)} className="p-2 text-gray-400 hover:text-primary transition-colors rounded-xl hover:bg-gray-100" title="View Details">
+                          <svg className="w-5 h-5 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                         </button>
-                      )}
+                        
+                        {/* Conditional Actions for Active/Overdue */}
+                        {tx.status !== 'completed' && (
+                          <>
+                            <button onClick={() => sendPing(tx.customerName)} className="p-2 text-[#ff9f0a] hover:text-white transition-colors rounded-xl hover:bg-[#ff9f0a]" title="Send SMS Reminder">
+                              <svg className="w-5 h-5 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                            </button>
+                            <button onClick={() => handleReturn(tx.txId)} className="p-2 text-[#34c759] hover:text-white transition-colors rounded-xl hover:bg-[#34c759]" title="Mark as Returned">
+                              <svg className="w-5 h-5 stroke-[3px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -109,45 +125,45 @@ export default function AdminHistory() {
             filteredTx.map((tx, i) => (
               <div 
                 key={tx.txId} 
-                className="bg-white rounded-[28px] p-5 flex items-center gap-5 shadow-sm active:scale-95 transition-all animate-slide-up"
+                className="bg-white rounded-[28px] p-5 flex items-center gap-4 shadow-sm transition-all animate-slide-up"
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
-                <div className="relative">
-                  <img src={tx.item?.imageUrl} className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-inner" alt="" />
-                  <div className={`absolute -top-2 -right-2 w-4 h-4 rounded-full border-2 border-white ${
+                <div className="relative shrink-0">
+                  <img src={tx.item?.imageUrl} className="w-16 h-16 rounded-2xl object-cover shadow-inner" alt="" />
+                  <div className={`absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full border-2 border-white ${
                     tx.status === 'active' ? 'bg-[#34c759]' : tx.status === 'overdue' ? 'bg-[#ff9f0a]' : 'bg-gray-300'
                   }`} />
                 </div>
                 
                 <div className="grow min-w-0">
-                  <div className="text-lg font-black text-[#111010] truncate">{tx.customerName}</div>
-                  <div className="text-xs text-[#8e8e93] font-bold truncate mb-1">{tx.item?.name}</div>
-                  <div className="flex items-center gap-1 text-[10px] text-[#bf4a53] font-black uppercase tracking-wider">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {tx.dueDate}
+                  <div className="text-base font-black text-[#111010] truncate">{tx.customerName}</div>
+                  <div className="text-[11px] text-[#8e8e93] font-bold truncate mb-1">{tx.item?.name}</div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-wide ${
+                      tx.status === 'active' ? 'bg-green-50 text-green-600' : 
+                      tx.status === 'overdue' ? 'bg-orange-50 text-orange-600' : 'bg-gray-50 text-gray-400'
+                    }`}>
+                      {tx.status}
+                    </span>
+                    
+                    {/* Mobile Action Buttons row */}
+                    <div className="flex gap-1.5">
+                      <button onClick={() => handleView(tx.txId)} className="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-xl text-gray-400 active:bg-gray-200 transition-colors">
+                        <svg className="w-4 h-4 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      </button>
+                      
+                      {tx.status !== 'completed' && (
+                        <>
+                          <button onClick={() => sendPing(tx.customerName)} className="w-8 h-8 flex items-center justify-center bg-[#ff9f0a]/10 rounded-xl text-[#ff9f0a] active:bg-[#ff9f0a] active:text-white transition-colors">
+                            <svg className="w-4 h-4 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                          </button>
+                          <button onClick={() => handleReturn(tx.txId)} className="w-8 h-8 flex items-center justify-center bg-[#34c759]/10 rounded-xl text-[#34c759] active:bg-[#34c759] active:text-white transition-colors">
+                            <svg className="w-4 h-4 stroke-[3px]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex flex-col items-end gap-3">
-                  {tx.status !== 'completed' && (
-                    <button 
-                      onClick={() => sendPing(tx.customerName)} 
-                      className="w-10 h-10 flex items-center justify-center bg-[#bf4a53]/10 rounded-2xl text-[#bf4a53] active:bg-[#bf4a53] active:text-white transition-colors"
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                      </svg>
-                    </button>
-                  )}
-                  <span className={`text-[8px] font-black px-2 py-1 rounded-lg uppercase ${
-                    tx.status === 'active' ? 'bg-green-50 text-green-600' : 
-                    tx.status === 'overdue' ? 'bg-orange-50 text-orange-600' : 'bg-gray-50 text-gray-400'
-                  }`}>
-                    {tx.status}
-                  </span>
                 </div>
               </div>
             ))
@@ -155,7 +171,6 @@ export default function AdminHistory() {
         </div>
 
       </div>
-      <AdminBottomNav />
     </div>
   );
 }

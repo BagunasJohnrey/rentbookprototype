@@ -44,7 +44,6 @@ export default function Sidenav({ role, setRole }) {
           <>
             <Link to="/admin-dashboard" className={`flex items-center px-6 py-3 transition-all ${isActive('/admin-dashboard')}`}>Dashboard</Link>
             <Link to="/catalog" className={`flex items-center px-6 py-3 transition-all ${isActive('/catalog')}`}>Catalog</Link>
-            <Link to="/admin-add-item" className={`flex items-center px-6 py-3 transition-all ${isActive('/admin-add-item')}`}>Add Item</Link>
             <Link to="/admin-history" className={`flex items-center px-6 py-3 transition-all ${isActive('/admin-history')}`}>History</Link>
             <Link to="/admin-reports" className={`flex items-center px-6 py-3 transition-all ${isActive('/admin-reports')}`}>Reports</Link>
             <Link to="/admin-settings" className={`flex items-center px-6 py-3 transition-all ${isActive('/admin-settings')}`}>Settings</Link>
