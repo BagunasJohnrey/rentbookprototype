@@ -1,7 +1,7 @@
 // src/App.jsx
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import Sidenav from './components/Sidenav';
+import Sidenav from './components/SideNav';
 import BottomNav from './components/BottomNav';
 import AdminBottomNav from './components/AdminBottomNav';
 import Landing from './pages/Landing';
