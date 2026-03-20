@@ -292,7 +292,7 @@ export default function StaffNewRental() {
                       </div>
                       <div>
                         <h3 className="text-xl font-black text-text-main tracking-tight">Bulk / Group Rental</h3>
-                        <p className="text-sm font-semibold text-text-muted mt-1">Rent multiple costumes/items under one booking.</p>
+                        <p className="text-sm font-semibold text-text-muted mt-1">Rent multiple outfits/items under one booking.</p>
                       </div>
                     </div>
                   </button>
@@ -600,7 +600,7 @@ export default function StaffNewRental() {
                   </div>
 
                   <div className="flex flex-col gap-2 pt-2">
-                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Release Photo (Optional)</label>
+                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Release Photo</label>
                      <div className="relative h-40 sm:h-48 bg-app-bg rounded-2xl sm:rounded-3xl border-2 border-dashed border-border-soft flex flex-col items-center justify-center overflow-hidden group transition-all hover:border-primary/30">
                        {customer.photoUrl ? (
                          <>
@@ -612,9 +612,11 @@ export default function StaffNewRental() {
                        ) : (
                          <>
                            <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                           <div className="w-10 h-10 sm:w-12 sm:h-12 bg-app-card rounded-2xl shadow-sm flex items-center justify-center mb-2 text-text-muted group-hover:text-primary transition-colors border border-border-soft">
-                             <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                           </div>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-10 h-10 mb-3 stroke-[2px] text-text-muted group-hover:text-primary transition-colors">
+                              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                              <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
                            <p className="text-[10px] sm:text-xs font-black text-text-muted uppercase tracking-wider">Tap to Take Photo</p>
                          </>
                        )}

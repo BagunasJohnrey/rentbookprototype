@@ -72,7 +72,7 @@ export default function AdminAddItem() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-app-bg relative" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif' }}>
+    <div className="flex flex-col min-h-screen bg-[#faf6f6] relative" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif' }}>
       
       {/* Top Nav */}
       <div className="p-5 md:px-12 md:pt-12 flex justify-between items-center z-10 w-full max-w-4xl mx-auto">
