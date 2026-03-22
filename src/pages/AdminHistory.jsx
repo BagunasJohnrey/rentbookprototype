@@ -22,20 +22,21 @@ export default function AdminHistory() {
     }));
   });
 
-  const [expandedTx, setExpandedTx] = useState(null);
-  const [detailsTx, setDetailsTx] = useState(null);
-  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [expandedTx, setExpandedTx] = useState(null); 
+  const [detailsTx, setDetailsTx] = useState(null); 
+  const [isEditingMode, setIsEditingMode] = useState(false); 
   const [returningTx, setReturningTx] = useState(null);
   const [returnNotes, setReturnNotes] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
 
-  // --- CALENDAR STATES ---
+  // --- CALENDAR & DAY SELECTION STATES ---
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDayBookings, setSelectedDayBookings] = useState(null);
 
   useEffect(() => {
     if (location.state?.newTransaction) {
-      window.history.replaceState({}, document.title);
+      window.history.replaceState({}, document.title); 
     }
   }, [location.state]);
 
@@ -61,7 +62,7 @@ export default function AdminHistory() {
   const getItemImage = (id) => CATALOG_ITEMS.find(i => i.id === id)?.imageUrl || 'https://via.placeholder.com/150?text=No+Image';
 
   const sendPing = (name) => alert(`SMS reminder drafted for ${name}.`);
-  
+
   // --- CONFLICT CHECKER LOGIC ---
   const checkRentalConflict = (itemId, requestedDate, currentTxId) => {
     return transactions.find(tx => 
@@ -71,7 +72,7 @@ export default function AdminHistory() {
       tx.dueDate === requestedDate
     );
   };
-
+  
   const handleMarkPaid = (tx, subItemIndex = undefined) => {
     setTransactions(prev => prev.map(t => {
       if (t.txId === tx.txId) {
@@ -151,7 +152,6 @@ export default function AdminHistory() {
   };
 
   const saveDetails = () => {
-    // Conflict Check before saving
     if (detailsTx.itemId && detailsTx.dueDate) {
       const conflict = checkRentalConflict(detailsTx.itemId, detailsTx.dueDate, detailsTx.txId);
       if (conflict) {
@@ -159,7 +159,6 @@ export default function AdminHistory() {
         return;
       }
     }
-
     setTransactions(prev => prev.map(tx => 
       tx.txId === detailsTx.txId ? detailsTx : tx
     ));
@@ -193,13 +192,12 @@ export default function AdminHistory() {
       <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-7xl md:mx-auto md:w-full scrollbar-hide">
         
         <div className="flex justify-between items-start mb-8 md:mb-12 animate-slide-up">
-          <div>
+          <div className="mb-8 md:mb-12 animate-slide-up">
             <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">Management Terminal</p>
             <h1 className="text-[32px] md:text-5xl font-black text-text-main tracking-tight">Rental History</h1>
             <p className="text-sm md:text-base font-medium text-text-muted mt-2">Monitor and manage all customer transactions</p>
           </div>
-          
-          {/* CALENDAR TRIGGER */}
+
           <button 
             onClick={() => setShowCalendar(true)}
             className="p-4 bg-app-card border border-border-soft rounded-2xl text-text-muted hover:text-primary transition-all shadow-sm hover:shadow-md"
@@ -502,7 +500,6 @@ export default function AdminHistory() {
       {showCalendar && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={() => setShowCalendar(false)}>
           <div className="bg-app-card w-full max-w-lg rounded-[40px] shadow-2xl animate-scale-in flex flex-col border border-border-soft overflow-hidden" onClick={e => e.stopPropagation()}>
-            {/* Calendar Header */}
             <div className="p-6 border-b border-border-soft flex justify-between items-center bg-white">
               <button onClick={prevMonth} className="p-2 hover:bg-app-bg rounded-xl transition-all"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M15 19l-7-7 7-7" /></svg></button>
               <h2 className="text-xl font-black text-text-main tracking-tight uppercase">
@@ -511,7 +508,6 @@ export default function AdminHistory() {
               <button onClick={nextMonth} className="p-2 hover:bg-app-bg rounded-xl transition-all"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M9 5l7 7-7 7" /></svg></button>
             </div>
 
-            {/* Calendar Grid */}
             <div className="p-4 bg-app-bg">
               <div className="grid grid-cols-7 mb-2">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
@@ -519,11 +515,9 @@ export default function AdminHistory() {
                 ))}
               </div>
               <div className="grid grid-cols-7 gap-1">
-                {/* Empty blocks for padding */}
                 {[...Array(firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()))].map((_, i) => (
                   <div key={`empty-${i}`} className="h-12" />
                 ))}
-                {/* Day blocks */}
                 {[...Array(daysInMonth(currentDate.getFullYear(), currentDate.getMonth()))].map((_, i) => {
                   const day = i + 1;
                   const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -532,8 +526,9 @@ export default function AdminHistory() {
                   return (
                     <div 
                       key={day} 
-                      className={`h-14 rounded-xl border border-border-soft flex flex-col items-center justify-center transition-all cursor-default relative
-                        ${bookingsOnDay.length > 0 ? 'bg-white shadow-sm' : 'bg-transparent'}
+                      onClick={() => bookingsOnDay.length > 0 && setSelectedDayBookings({ date: dateString, items: bookingsOnDay })}
+                      className={`h-14 rounded-xl border border-border-soft flex flex-col items-center justify-center transition-all relative group
+                        ${bookingsOnDay.length > 0 ? 'bg-white shadow-sm cursor-pointer hover:border-primary active:scale-95' : 'bg-transparent opacity-40 cursor-default'}
                       `}
                     >
                       <span className={`text-[11px] font-black ${bookingsOnDay.length > 0 ? 'text-primary' : 'text-text-muted'}`}>{day}</span>
@@ -557,17 +552,54 @@ export default function AdminHistory() {
         </div>
       )}
 
+      {/* DAY BOOKINGS QUICK-VIEW MODAL */}
+      {selectedDayBookings && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedDayBookings(null)}>
+          <div className="bg-app-card w-full max-w-sm rounded-[32px] shadow-2xl animate-scale-in border border-border-soft overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="p-6 border-b border-border-soft flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-black text-text-main tracking-tight">Rents for this Day</h3>
+                <p className="text-[10px] font-bold text-text-muted uppercase tracking-widest">{selectedDayBookings.date}</p>
+              </div>
+              <button onClick={() => setSelectedDayBookings(null)} className="p-2 text-text-muted hover:text-primary transition-colors"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <div className="p-4 max-h-[60vh] overflow-y-auto space-y-3 bg-app-bg">
+              {selectedDayBookings.items.map((tx) => {
+                const item = CATALOG_ITEMS.find(i => i.id === tx.itemId);
+                return (
+                  <div key={tx.txId} className="flex items-center gap-3 p-3 bg-app-card border border-border-soft rounded-2xl shadow-sm">
+                    <img src={item?.imageUrl || 'https://via.placeholder.com/150'} className="w-10 h-10 rounded-lg object-cover border border-border-soft" alt="" />
+                    <div className="grow min-w-0">
+                      <p className="text-xs font-black text-text-main truncate">{tx.customerName}</p>
+                      <p className="text-[9px] font-bold text-text-muted truncate">{item?.name || 'Bulk/Wedding Package'}</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setSelectedDayBookings(null);
+                        openDetailsModal(tx);
+                      }}
+                      className="text-[9px] font-black text-primary uppercase tracking-widest bg-primary/5 px-2 py-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+                    >
+                      View
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* COMPREHENSIVE TRANSACTION DETAILS & EDIT MODAL */}
       {detailsTx && (
         <div 
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-md transition-all"
+          className="fixed inset-0 z-500 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-md transition-all"
           onClick={() => { setDetailsTx(null); setIsEditingMode(false); }}
         >
           <div 
             className="bg-app-card w-full max-w-2xl rounded-t-[32px] sm:rounded-[40px] shadow-2xl animate-slide-up sm:animate-scale-in flex flex-col max-h-[90vh] border border-border-soft"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="p-6 border-b border-border-soft shrink-0 flex justify-between items-center w-full">
                 <div>
                   <h2 className="text-xl font-black text-text-main tracking-tight">Transaction Details</h2>
@@ -580,263 +612,95 @@ export default function AdminHistory() {
                      </p>
                   </div>
                 </div>
-                
                 {!isEditingMode && detailsTx.status !== 'completed' && (
                   <button 
                     onClick={() => setIsEditingMode(true)} 
                     className="flex items-center gap-1.5 px-4 py-2 bg-app-bg hover:bg-primary/10 text-text-muted hover:text-primary rounded-xl transition-colors font-bold text-xs border border-border-soft shadow-sm"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                     Edit
                   </button>
                 )}
             </div>
 
-            {/* Form Body - Scrollable */}
             <div className="overflow-y-auto p-4 sm:p-6 space-y-5 bg-app-bg grow scrollbar-hide">
-              
-              {/* Core Information Block */}
               <div className="bg-app-card p-5 rounded-3xl border border-border-soft shadow-sm space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Customer Name</label>
-                      <input 
-                        type="text" 
-                        value={detailsTx.customerName} 
-                        onChange={(e) => setDetailsTx({...detailsTx, customerName: e.target.value})}
-                        disabled={!isEditingMode}
-                        className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                      />
+                      <input type="text" value={detailsTx.customerName} onChange={(e) => setDetailsTx({...detailsTx, customerName: e.target.value})} disabled={!isEditingMode} className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed" />
                     </div>
                     <div>
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Due Date</label>
-                      <input 
-                        type="date" 
-                        value={detailsTx.dueDate} 
-                        onChange={(e) => setDetailsTx({...detailsTx, dueDate: e.target.value})}
-                        disabled={!isEditingMode}
-                        className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                      />
+                      <input type="date" value={detailsTx.dueDate} onChange={(e) => setDetailsTx({...detailsTx, dueDate: e.target.value})} disabled={!isEditingMode} className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed" />
                     </div>
                   </div>
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Status</label>
-                      <select 
-                        value={detailsTx.status} 
-                        onChange={(e) => setDetailsTx({...detailsTx, status: e.target.value})}
-                        disabled={!isEditingMode}
-                        className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        <option value="active">Active</option>
-                        <option value="overdue">Overdue</option>
-                        <option value="completed">Completed</option>
+                      <select value={detailsTx.status} onChange={(e) => setDetailsTx({...detailsTx, status: e.target.value})} disabled={!isEditingMode} className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                        <option value="active">Active</option><option value="overdue">Overdue</option><option value="completed">Completed</option>
                       </select>
                     </div>
-                    
                     {!isMultiItem(detailsTx) && (
                       <div>
                         <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Payment Status</label>
-                        <select 
-                          value={detailsTx.isPaid ? 'paid' : 'unpaid'} 
-                          onChange={(e) => setDetailsTx({...detailsTx, isPaid: e.target.value === 'paid'})}
-                          disabled={!isEditingMode}
-                          className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
-                          <option value="unpaid">Unpaid</option>
-                          <option value="paid">Fully Paid</option>
+                        <select value={detailsTx.isPaid ? 'paid' : 'unpaid'} onChange={(e) => setDetailsTx({...detailsTx, isPaid: e.target.value === 'paid'})} disabled={!isEditingMode} className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed">
+                          <option value="unpaid">Unpaid</option><option value="paid">Fully Paid</option>
                         </select>
                       </div>
                     )}
                   </div>
-
                   <div>
-                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 flex items-center gap-1">
-                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                       Remarks / Notes
-                     </label>
-                     <textarea 
-                       value={detailsTx.notes}
-                       onChange={(e) => setDetailsTx({...detailsTx, notes: e.target.value})}
-                       disabled={!isEditingMode}
-                       placeholder={isEditingMode ? "Add transaction notes here..." : "No notes attached."}
-                       className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none min-h-20 text-text-main transition-all placeholder:text-text-muted/50 disabled:opacity-60 disabled:cursor-not-allowed"
-                     />
+                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 flex items-center gap-1"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>Remarks / Notes</label>
+                     <textarea value={detailsTx.notes} onChange={(e) => setDetailsTx({...detailsTx, notes: e.target.value})} disabled={!isEditingMode} placeholder={isEditingMode ? "Add transaction notes here..." : "No notes attached."} className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none min-h-20 text-text-main transition-all placeholder:text-text-muted/50 disabled:opacity-60 disabled:cursor-not-allowed" />
                   </div>
-
                   {detailsTx.rentalPhotoUrl && (
                     <div className="mt-4 pt-4 border-t border-border-soft">
-                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-2 flex items-center gap-1">
-                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                        Release Condition Photo
-                      </label>
-                      <div className="w-full h-40 sm:h-48 rounded-2xl overflow-hidden border border-border-soft shadow-sm bg-app-bg">
-                        <img src={detailsTx.rentalPhotoUrl} className="w-full h-full object-cover" alt="Release Condition" />
-                      </div>
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-2 flex items-center gap-1"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>Release Condition Photo</label>
+                      <div className="w-full h-40 sm:h-48 rounded-2xl overflow-hidden border border-border-soft shadow-sm bg-app-bg"><img src={detailsTx.rentalPhotoUrl} className="w-full h-full object-cover" alt="Release Condition" /></div>
                     </div>
                   )}
               </div>
 
-              {/* Item Assignment Block */}
               {isMultiItem(detailsTx) ? (
                 <>
-                  <div className="flex justify-between items-end mb-2 mt-4 px-1">
-                     <h3 className="text-xs font-black text-text-muted uppercase tracking-widest">Item Roster</h3>
-                  </div>
-                  
+                  <div className="flex justify-between items-end mb-2 mt-4 px-1"><h3 className="text-xs font-black text-text-muted uppercase tracking-widest">Item Roster</h3></div>
                   {detailsTx.items?.map((item, idx) => (
                     <div key={idx} className="bg-app-card p-4 sm:p-5 rounded-3xl border border-border-soft shadow-sm relative">
-                      
                       {isEditingMode && !item.returned && (
-                        <button 
-                          onClick={() => removeParticipant(idx)} 
-                          className="absolute top-4 right-4 text-text-muted hover:text-primary transition-colors p-1 bg-app-bg rounded-lg border border-border-soft"
-                          title="Remove Item"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
+                        <button onClick={() => removeParticipant(idx)} className="absolute top-4 right-4 text-text-muted hover:text-primary transition-colors p-1 bg-app-bg rounded-lg border border-border-soft" title="Remove Item"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                       )}
-                      
                       <div className="pr-10 space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Role / Title</label>
-                            <input 
-                              type="text" 
-                              value={item.role || ''} 
-                              onChange={(e) => handleEditItemChange(idx, 'role', e.target.value)}
-                              placeholder="e.g. Groomsman"
-                              disabled={!isEditingMode || item.returned}
-                              className="w-full p-3 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-60 disabled:cursor-not-allowed text-text-main transition-all placeholder:text-text-muted/50"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Assignee Name</label>
-                            <input 
-                              type="text" 
-                              value={item.name} 
-                              onChange={(e) => handleEditItemChange(idx, 'name', e.target.value)}
-                              placeholder="e.g. John Doe"
-                              disabled={!isEditingMode || item.returned}
-                              className="w-full p-3 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-60 disabled:cursor-not-allowed text-text-main transition-all placeholder:text-text-muted/50"
-                            />
-                          </div>
+                          <div><label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Role / Title</label><input type="text" value={item.role || ''} onChange={(e) => handleEditItemChange(idx, 'role', e.target.value)} placeholder="e.g. Groomsman" disabled={!isEditingMode || item.returned} className="w-full p-3 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-60 disabled:cursor-not-allowed text-text-main transition-all placeholder:text-text-muted/50" /></div>
+                          <div><label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Assignee Name</label><input type="text" value={item.name} onChange={(e) => handleEditItemChange(idx, 'name', e.target.value)} placeholder="e.g. John Doe" disabled={!isEditingMode || item.returned} className="w-full p-3 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none disabled:opacity-60 disabled:cursor-not-allowed text-text-main transition-all placeholder:text-text-muted/50" /></div>
                         </div>
-
                         <div>
                           <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Assigned Item</label>
-                          <div className="flex gap-3 items-center">
-                            <img src={getItemImage(item.itemId)} className="w-12 h-12 rounded-lg object-cover shadow-sm bg-app-bg border border-border-soft shrink-0" alt="Catalog preview"/>
-                            <select 
-                              value={item.itemId || ''} 
-                              onChange={(e) => handleEditItemChange(idx, 'itemId', e.target.value)}
-                              disabled={!isEditingMode || item.returned}
-                              className="w-full p-3 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none appearance-none disabled:opacity-60 disabled:cursor-not-allowed text-text-main transition-all"
-                            >
-                              <option value="">-- Select Catalog Item --</option>
-                              {CATALOG_ITEMS.map(ci => (
-                                <option key={ci.id} value={ci.id}>{ci.name} ({ci.id})</option>
-                              ))}
-                            </select>
-                          </div>
+                          <div className="flex gap-3 items-center"><img src={getItemImage(item.itemId)} className="w-12 h-12 rounded-lg object-cover shadow-sm bg-app-bg border border-border-soft shrink-0" alt="Catalog preview"/><select value={item.itemId || ''} onChange={(e) => handleEditItemChange(idx, 'itemId', e.target.value)} disabled={!isEditingMode || item.returned} className="w-full p-3 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none appearance-none disabled:opacity-60 disabled:cursor-not-allowed text-text-main transition-all"><option value="">-- Select Catalog Item --</option>{CATALOG_ITEMS.map(ci => (<option key={ci.id} value={ci.id}>{ci.name} ({ci.id})</option>))}</select></div>
                         </div>
-                        
-                        <div className="flex justify-between items-center pt-2 border-t border-border-soft">
-                           <label className={`flex items-center gap-2 ${isEditingMode ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
-                              <input 
-                                type="checkbox" 
-                                checked={item.isPaid || false} 
-                                onChange={(e) => handleEditItemChange(idx, 'isPaid', e.target.checked)}
-                                disabled={!isEditingMode}
-                                className="w-4 h-4 rounded text-primary bg-app-bg border-border-soft focus:ring-primary disabled:opacity-60"
-                              />
-                              <span className="text-xs font-bold text-text-main">Participant Paid</span>
-                           </label>
-                           {item.returned && (
-                             <span className="text-[10px] font-black text-text-muted uppercase tracking-widest flex items-center gap-1 bg-app-bg px-2 py-1 rounded-md border border-border-soft">
-                               <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                               Returned
-                             </span>
-                           )}
-                        </div>
-
+                        <div className="flex justify-between items-center pt-2 border-t border-border-soft"><label className={`flex items-center gap-2 ${isEditingMode ? 'cursor-pointer' : 'cursor-not-allowed'}`}><input type="checkbox" checked={item.isPaid || false} onChange={(e) => handleEditItemChange(idx, 'isPaid', e.target.checked)} disabled={!isEditingMode} className="w-4 h-4 rounded text-primary bg-app-bg border-border-soft focus:ring-primary disabled:opacity-60"/><span className="text-xs font-bold text-text-main">Participant Paid</span></label>{item.returned && (<span className="text-[10px] font-black text-text-muted uppercase tracking-widest flex items-center gap-1 bg-app-bg px-2 py-1 rounded-md border border-border-soft"><svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>Returned</span>)}</div>
                       </div>
                     </div>
                   ))}
-
-                  {isEditingMode && (
-                    <button 
-                      onClick={addParticipant}
-                      className="w-full py-4 border-2 border-dashed border-border-soft text-text-muted font-black text-xs uppercase tracking-widest rounded-3xl hover:border-primary hover:text-primary transition-all flex justify-center items-center gap-2 bg-app-card"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                      Add Participant / Item
-                    </button>
-                  )}
+                  {isEditingMode && (<button onClick={addParticipant} className="w-full py-4 border-2 border-dashed border-border-soft text-text-muted font-black text-xs uppercase tracking-widest rounded-3xl hover:border-primary hover:text-primary transition-all flex justify-center items-center gap-2 bg-app-card"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>Add Participant / Item</button>)}
                 </>
               ) : (
                 <div className="bg-app-card p-5 rounded-3xl border border-border-soft shadow-sm">
                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-2 block">Assigned Item (Catalog)</label>
-                   <div className="flex gap-4 items-center">
-                      <img src={getItemImage(detailsTx.itemId)} className="w-16 h-16 rounded-xl object-cover shadow-sm bg-app-bg border border-border-soft shrink-0" alt="Catalog preview"/>
-                      <div className="relative grow">
-                        <select 
-                          value={detailsTx.itemId || ''} 
-                          onChange={(e) => setDetailsTx({...detailsTx, itemId: e.target.value})}
-                          disabled={!isEditingMode}
-                          className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none appearance-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                        >
-                          <option value="">-- Select Catalog Item --</option>
-                          {CATALOG_ITEMS.map(ci => (
-                            <option key={ci.id} value={ci.id}>{ci.name} - ₱{ci.baseRate}</option>
-                          ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-text-muted">
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                      </div>
-                   </div>
+                   <div className="flex gap-4 items-center"><img src={getItemImage(detailsTx.itemId)} className="w-16 h-16 rounded-xl object-cover shadow-sm bg-app-bg border border-border-soft shrink-0" alt="Catalog preview"/><div className="relative grow"><select value={detailsTx.itemId || ''} onChange={(e) => setDetailsTx({...detailsTx, itemId: e.target.value})} disabled={!isEditingMode} className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none appearance-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"><option value="">-- Select Catalog Item --</option>{CATALOG_ITEMS.map(ci => (<option key={ci.id} value={ci.id}>{ci.name} - ₱{ci.baseRate}</option>))}</select><div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-text-muted"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg></div></div></div>
                 </div>
               )}
 
               {detailsTx.status === 'completed' && detailsTx.returnPhotoUrl && (
-                  <div className="pt-4 animate-slide-up">
-                    <div className="flex items-center gap-2 mb-3 text-text-main">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      <h4 className="font-black text-[10px] sm:text-xs uppercase tracking-widest">Return Proof</h4>
-                    </div>
-                    <div className="rounded-[24px] overflow-hidden shadow-sm border border-border-soft">
-                      <img 
-                        src={detailsTx.returnPhotoUrl} 
-                        className="w-full h-32 object-cover grayscale-20" 
-                        alt="Proof of return" 
-                      />
-                    </div>
-                  </div>
+                  <div className="pt-4 animate-slide-up"><div className="flex items-center gap-2 mb-3 text-text-main"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><h4 className="font-black text-[10px] sm:text-xs uppercase tracking-widest">Return Proof</h4></div><div className="rounded-[24px] overflow-hidden shadow-sm border border-border-soft"><img src={detailsTx.returnPhotoUrl} className="w-full h-32 object-cover grayscale-20" alt="Proof of return" /></div></div>
               )}
-
             </div>
 
-            {/* Footer */}
             <div className="p-4 sm:p-6 border-t border-border-soft flex gap-3 shrink-0 bg-app-card rounded-b-[32px] sm:rounded-b-[40px]">
-              <button 
-                onClick={() => { setDetailsTx(null); setIsEditingMode(false); }} 
-                className="flex-1 py-3.5 sm:py-4 text-sm text-text-muted font-bold hover:bg-app-bg border border-transparent hover:border-border-soft rounded-2xl transition-colors"
-              >
-                {isEditingMode ? 'Cancel' : 'Close'}
-              </button>
-              
-              {isEditingMode && (
-                <button 
-                  onClick={saveDetails} 
-                  className="flex-[2] py-3.5 sm:py-4 text-sm bg-primary hover:bg-primary-dark text-white rounded-2xl font-black shadow-lg shadow-primary/20 active:scale-95 transition-all animate-in fade-in"
-                >
-                  Save Changes
-                </button>
-              )}
+              <button onClick={() => { setDetailsTx(null); setIsEditingMode(false); }} className="flex-1 py-3.5 sm:py-4 text-sm text-text-muted font-bold hover:bg-app-bg border border-transparent hover:border-border-soft rounded-2xl transition-colors">{isEditingMode ? 'Cancel' : 'Close'}</button>
+              {isEditingMode && (<button onClick={saveDetails} className="flex-[2] py-3.5 sm:py-4 text-sm bg-primary hover:bg-primary-dark text-white rounded-2xl font-black shadow-lg shadow-primary/20 active:scale-95 transition-all animate-in fade-in">Save Changes</button>)}
             </div>
           </div>
         </div>
@@ -844,61 +708,9 @@ export default function AdminHistory() {
 
       {/* RETURN CAPTURE MODAL */}
       {returningTx && (
-        <div 
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-md transition-all"
-          onClick={() => setReturningTx(null)}
-        >
-          <form 
-            onSubmit={submitReturn} 
-            className="bg-app-card w-full max-w-md rounded-t-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl animate-slide-up sm:animate-scale-in max-h-[90vh] overflow-y-auto scrollbar-hide pb-safe border border-border-soft"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-black text-text-main mb-1 tracking-tight">
-                {isMultiItem(returningTx) && returningTx.subItemIndex === undefined ? 'Return All Items' : 'Return Item'}
-              </h2>
-              <p className="text-sm sm:text-base text-text-muted font-medium mb-6 tracking-tight">
-                Capture proof for <span className="text-text-main font-bold">{returningTx.item?.name}</span>
-              </p>
-              
-              <div className="space-y-4">
-                <div className="relative h-40 sm:h-48 bg-app-bg rounded-[24px] sm:rounded-3xl border-2 border-dashed border-border-soft flex flex-col items-center justify-center overflow-hidden group hover:border-primary/30 transition-colors">
-                  {imagePreview ? (
-                    <>
-                      <img src={imagePreview} className="w-full h-full object-cover" alt="Proof" />
-                      <button type="button" onClick={() => setImagePreview(null)} className="absolute top-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-10 h-10 mb-3 stroke-[2px] text-text-muted group-hover:text-primary transition-colors">
-                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
-                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                        <polyline points="21 15 16 10 5 21"></polyline>
-                      </svg>
-                      <p className="text-[10px] sm:text-xs font-black text-text-muted uppercase tracking-wider">Tap to Take Photo</p>
-                    </>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Condition Notes</label>
-                  <textarea 
-                    value={returnNotes}
-                    onChange={(e) => setReturnNotes(e.target.value)}
-                    placeholder="e.g. Returned in perfect condition..."
-                    className="w-full mt-1 p-3.5 sm:p-4 bg-app-bg border border-border-soft rounded-2xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none min-h-[80px] sm:min-h-[100px] text-text-main transition-all placeholder:text-text-muted/50"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-2 sm:gap-3 mt-6 sm:mt-8">
-                <button type="button" onClick={() => setReturningTx(null)} className="flex-1 py-3.5 sm:py-4 text-xs sm:text-sm text-text-muted font-bold hover:bg-app-bg border border-transparent hover:border-border-soft rounded-[20px] sm:rounded-2xl transition-colors">Cancel</button>
-                <button type="submit" className="flex-[2] py-3.5 sm:py-4 text-xs sm:text-sm bg-primary hover:bg-primary-dark text-white rounded-[20px] sm:rounded-2xl font-black shadow-lg shadow-primary/20 active:scale-95 transition-all">Confirm Return</button>
-              </div>
-            </div>
+        <div className="fixed inset-0 z-200 flex items-end sm:items-center justify-center sm:p-4 bg-black/60 backdrop-blur-md transition-all" onClick={() => setReturningTx(null)}>
+          <form onSubmit={submitReturn} className="bg-app-card w-full max-w-md rounded-t-[32px] sm:rounded-[40px] overflow-hidden shadow-2xl animate-slide-up sm:animate-scale-in max-h-[90vh] overflow-y-auto scrollbar-hide pb-safe border border-border-soft" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 sm:p-8"><h2 className="text-xl sm:text-2xl font-black text-text-main mb-1 tracking-tight">{isMultiItem(returningTx) && returningTx.subItemIndex === undefined ? 'Return All Items' : 'Return Item'}</h2><p className="text-sm sm:text-base text-text-muted font-medium mb-6 tracking-tight">Capture proof for <span className="text-text-main font-bold">{returningTx.item?.name}</span></p><div className="space-y-4"><div className="relative h-40 sm:h-48 bg-app-bg rounded-[24px] sm:rounded-3xl border-2 border-dashed border-border-soft flex flex-col items-center justify-center overflow-hidden group hover:border-primary/30 transition-colors">{imagePreview ? (<><img src={imagePreview} className="w-full h-full object-cover" alt="Proof" /><button type="button" onClick={() => setImagePreview(null)} className="absolute top-2 right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg></button></>) : (<><input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer z-10" /><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-10 h-10 mb-3 stroke-[2px] text-text-muted group-hover:text-primary transition-colors"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg><p className="text-[10px] sm:text-xs font-black text-text-muted uppercase tracking-wider">Tap to Take Photo</p></>)}</div><div><label className="text-[9px] sm:text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Condition Notes</label><textarea value={returnNotes} onChange={(e) => setReturnNotes(e.target.value)} placeholder="e.g. Returned in perfect condition..." className="w-full mt-1 p-3.5 sm:p-4 bg-app-bg border border-border-soft rounded-2xl text-xs sm:text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none min-h-[80px] sm:min-h-[100px] text-text-main transition-all placeholder:text-text-muted/50" /></div></div><div className="flex gap-2 sm:gap-3 mt-6 sm:mt-8"><button type="button" onClick={() => setReturningTx(null)} className="flex-1 py-3.5 sm:py-4 text-xs sm:text-sm text-text-muted font-bold hover:bg-app-bg border border-transparent hover:border-border-soft rounded-[20px] sm:rounded-2xl transition-colors">Cancel</button><button type="submit" className="flex-[2] py-3.5 sm:py-4 text-xs sm:text-sm bg-primary hover:bg-primary-dark text-white rounded-[20px] sm:rounded-2xl font-black shadow-lg shadow-primary/20 active:scale-95 transition-all">Confirm Return</button></div></div>
           </form>
         </div>
       )}
