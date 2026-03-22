@@ -18,7 +18,6 @@ export default function AdminSettings({ setGlobalRole }) {
   const navigate = useNavigate();
 
   // Automation State
-  const [autoSmsEnabled, setAutoSmsEnabled] = useState(true);
   const [smsTemplate, setSmsTemplate] = useState("Hi {Name}, your rental is due on {Date}. Please return it to avoid late fees.");
   
   // Configuration State
@@ -133,42 +132,22 @@ export default function AdminSettings({ setGlobalRole }) {
             Automation
           </h3>
           
-          <div className="bg-app-card rounded-[26px] p-5 shadow-sm border border-border-soft flex flex-col gap-4 transition-all">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-success/10 text-success rounded-2xl">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-black text-text-main tracking-tight">Auto SMS Reminders</p>
-                  <p className="text-[13px] text-text-muted font-bold tracking-tight">Send due date texts automatically</p>
-                </div>
+          <div 
+            onClick={() => openModal('sms', smsTemplate)}
+            className="bg-app-card rounded-[26px] p-5 shadow-sm border border-border-soft hover:border-primary/30 flex justify-between items-center cursor-pointer transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-success/10 text-success rounded-2xl shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
               </div>
-              
-              {/* Toggle Switch */}
-              <button 
-                onClick={() => setAutoSmsEnabled(!autoSmsEnabled)}
-                className={`w-14 h-8 rounded-full transition-colors duration-300 relative focus:outline-none ${autoSmsEnabled ? 'bg-primary' : 'bg-border-soft'}`}
-              >
-                <div className={`w-7 h-7 bg-white rounded-full absolute top-0.5 shadow-md transition-transform duration-300 ${autoSmsEnabled ? 'translate-x-[26px]' : 'translate-x-0.5'}`}></div>
-              </button>
-            </div>
-
-            {/* Edit Message Template Button */}
-            <div 
-              onClick={() => openModal('sms', smsTemplate)}
-              className="pt-4 border-t border-border-soft flex justify-between items-center cursor-pointer group"
-            >
               <div className="pr-4">
-                <p className="text-[11px] font-black text-text-muted uppercase tracking-widest mb-1">Message Template</p>
-                <p className="text-[13px] text-text-main font-bold tracking-tight line-clamp-1">"{smsTemplate}"</p>
-              </div>
-              <div className="p-2 bg-app-bg border border-border-soft rounded-xl group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/30 transition-colors text-text-muted">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 stroke-[2.5px]"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <p className="font-black text-text-main tracking-tight">SMS Template</p>
+                <p className="text-[13px] text-text-muted font-bold tracking-tight line-clamp-1">"{smsTemplate}"</p>
               </div>
             </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-text-muted/50 stroke-[3px] group-hover:text-primary transition-colors shrink-0"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </div>
         </div>
 
@@ -290,9 +269,9 @@ export default function AdminSettings({ setGlobalRole }) {
       {/* POPUP MODAL OVERLAY */}
       {activeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          {/* Backdrop */}
+          {/* Backdrop (Solid Black with 60% opacity, No Blur) */}
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-md animate-in fade-in duration-300 transition-all"
+            className="absolute inset-0 bg-black/60 animate-in fade-in duration-300 transition-all"
             onClick={closeModal}
           ></div>
           
