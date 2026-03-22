@@ -5,6 +5,11 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat'; 
 
+/**
+ * RENTECH: AN AI-ENHANCED RENTAL MANAGEMENT SYSTEM [cite: 1]
+ * Implementation for Mylene's Boutique [cite: 30]
+ */
+
 // ==========================================
 // REAL LEAFLET HEATMAP COMPONENT
 // ==========================================
@@ -77,8 +82,6 @@ function BatangasHeatmap() {
       }).bindPopup(`<b style="font-family: sans-serif; font-size: 14px;">${mun.name}</b>`).addTo(map);
     });
 
-    // FIX: ResizeObserver automatically invalidates map size continuously 
-    // as the modal animates/expands, perfectly fixing the black box cut-off bug.
     const resizeObserver = new ResizeObserver(() => {
       if (mapInstance.current) {
         mapInstance.current.invalidateSize();
@@ -96,7 +99,7 @@ function BatangasHeatmap() {
   return (
      <div 
        ref={mapRef} 
-       style={{ background: 'transparent' }} // FIX: Forces leaflet's grey background to be transparent
+       style={{ background: 'transparent' }} 
        className="absolute inset-0 z-0 rounded-inherit border-none filter contrast-125 saturate-50 bg-transparent" 
      />
   );
@@ -160,10 +163,10 @@ const POPULAR_CATEGORIES = [
 ];
 
 const TOP_OCCASIONS = [
-  { source: 'Weddings', percentage: 45, colorClass: 'bg-primary' },
-  { source: 'Debuts & Proms', percentage: 35, colorClass: 'bg-text-main' },
-  { source: 'Corporate/Formal Events', percentage: 15, colorClass: 'bg-text-muted' },
-  { source: 'Photo Shoots', percentage: 5, colorClass: 'bg-border-soft' },
+  { source: 'Weddings', percentage: 40, colorClass: 'bg-primary' },
+  { source: 'Graduations', percentage: 25, colorClass: 'bg-text-main' },
+  { source: 'Debuts & Proms', percentage: 20, colorClass: 'bg-[#ff9f0a]' },
+  { source: 'Pageants', percentage: 15, colorClass: 'bg-border-soft' },
 ];
 
 const CUSTOMER_LOCATIONS = [
@@ -499,8 +502,9 @@ export default function AdminReports() {
           </div>
         </div>
 
-        {/* Dynamic Top KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 animate-slide-up cursor-pointer group" onClick={() => setActiveModal('revenue')}>
+        {/* 1. FINANCIAL & GROWTH KPIs */}
+        <h3 className="text-xs font-black text-text-muted uppercase tracking-widest mb-3 animate-slide-up">Financial & Growth</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8 animate-slide-up cursor-pointer group" onClick={() => setActiveModal('revenue')}>
           <div className="bg-app-card p-4 md:p-6 rounded-[20px] md:rounded-3xl shadow-sm border border-border-soft group-hover:border-primary/50 transition-colors">
             <p className="text-text-muted font-bold uppercase text-[8px] md:text-[10px] tracking-wider mb-1 md:mb-2 truncate">Revenue</p>
             <h2 className="text-xl md:text-3xl font-black text-text-main truncate">₱{currentData.stats.totalRevenue.toLocaleString()}</h2>
@@ -523,17 +527,50 @@ export default function AdminReports() {
           </div>
         </div>
 
+        {/* 2. OPERATIONAL & COMPLIANCE KPIs */}
+        <h3 className="text-xs font-black text-text-muted uppercase tracking-widest mb-3 animate-slide-up">Operations & Compliance</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-8 animate-slide-up">
+          {/* Maintenance & Condition KPI */}
+          <div className="bg-app-card p-4 md:p-6 rounded-[20px] md:rounded-3xl shadow-sm border border-red-100 hover:border-red-300 transition-colors cursor-pointer">
+            <p className="text-red-500 font-bold uppercase text-[8px] md:text-[10px] tracking-wider mb-1 md:mb-2 truncate flex items-center gap-1.5">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Items Needing Repair
+            </p>
+            <h2 className="text-xl md:text-3xl font-black text-text-main truncate">12 Items</h2>
+            <p className="text-[9px] md:text-xs text-text-muted font-bold mt-1 md:mt-2 truncate">2.5% Catalog Damage Rate</p>
+          </div>
+          
+          {/* Photo Verification Compliance KPI */}
+          <div className="bg-app-card p-4 md:p-6 rounded-[20px] md:rounded-3xl shadow-sm border border-success/20 hover:border-success/50 transition-colors cursor-pointer">
+            <p className="text-success font-bold uppercase text-[8px] md:text-[10px] tracking-wider mb-1 md:mb-2 truncate flex items-center gap-1.5">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Return Verification
+            </p>
+            <h2 className="text-xl md:text-3xl font-black text-text-main truncate">95%</h2>
+            <p className="text-[9px] md:text-xs text-text-muted font-bold mt-1 md:mt-2 truncate">106/112 returns have photos</p>
+          </div>
+          
+          {/* SMS Reminders / Overdue Tracking KPI */}
+          <div className="bg-app-card p-4 md:p-6 rounded-[20px] md:rounded-3xl shadow-sm border border-[#ff9f0a]/20 hover:border-[#ff9f0a]/50 transition-colors col-span-2 md:col-span-1 cursor-pointer">
+            <p className="text-[#ff9f0a] font-bold uppercase text-[8px] md:text-[10px] tracking-wider mb-1 md:mb-2 truncate flex items-center gap-1.5">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              Delayed Returns
+            </p>
+            <h2 className="text-xl md:text-3xl font-black text-text-main truncate">3 Items</h2>
+            <p className="text-[9px] md:text-xs text-success font-bold mt-1 md:mt-2 truncate">↓ 18% Since SMS Reminders</p>
+          </div>
+        </div>
+
         {/* CHARTS GRID */}
         <div className="flex flex-col gap-4 md:gap-6 animate-slide-up">
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             
-            {/* Chart 1: Revenue Line Chart */}
+            {/* Chart 1: Revenue Line Chart WITH PEAK SEASON MARKERS */}
             <div 
               onClick={() => setActiveModal('revenue')}
-              className="col-span-1 md:col-span-2 bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft flex flex-col justify-between cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
+              className="col-span-1 md:col-span-2 bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft flex flex-col justify-between cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group relative overflow-hidden"
             >
-              <div className="flex justify-between items-start mb-6 md:mb-10">
+              <div className="flex justify-between items-start mb-6 md:mb-10 relative z-10">
                 <h3 className="font-bold text-text-main group-hover:text-primary transition-colors flex items-center gap-2 text-sm md:text-base">
                   Revenue Overview
                   <svg className="w-3 h-3 md:w-4 md:h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -545,7 +582,28 @@ export default function AdminReports() {
               </div>
               
               <div className="relative h-40 md:h-48 w-full mb-4 text-primary">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible">
+                
+                {/* HTML Overlays for Peak Labels (Prevents text stretching) */}
+                {timeRange === 'This Year' && (
+                   <>
+                      <div className="absolute top-0 md:top-2 left-[50%] -translate-x-1/2 text-[8px] md:text-[9px] font-black tracking-[0.2em] text-primary/50 pointer-events-none whitespace-nowrap z-0">GRADUATION PEAK</div>
+                      <div className="absolute top-0 md:top-2 left-[91.66%] -translate-x-1/2 text-[8px] md:text-[9px] font-black tracking-[0.2em] text-primary/50 pointer-events-none whitespace-nowrap z-0">WEDDING PEAK</div>
+                   </>
+                )}
+
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible z-0">
+                  
+                  {/* Peak Season Highlights Backgrounds ONLY */}
+                  {timeRange === 'This Year' && (
+                     <>
+                        {/* Graduation Peak: March (33.33%) to May (66.66%) */}
+                        <rect x="33.33%" y="0" width="33.33%" height="100%" fill="currentColor" fillOpacity="0.04" />
+                        
+                        {/* Wedding Peak: June (83.33%) to July (100%) */}
+                        <rect x="83.33%" y="0" width="16.67%" height="100%" fill="currentColor" fillOpacity="0.04" />
+                     </>
+                  )}
+
                   <defs>
                     <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="currentColor" stopOpacity="0.25"/>
@@ -589,7 +647,7 @@ export default function AdminReports() {
               onClick={() => setActiveModal('categories')}
               className="bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft flex flex-col cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
             >
-              <h3 className="font-bold text-text-main mb-4 md:mb-6 group-hover:text-primary transition-colors flex items-center gap-2 text-sm md:text-base">
+               <h3 className="font-bold text-text-main mb-4 md:mb-6 group-hover:text-primary transition-colors flex items-center gap-2 text-sm md:text-base">
                 Top Categories
                 <svg className="w-3 h-3 md:w-4 md:h-4 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
               </h3>
@@ -612,11 +670,10 @@ export default function AdminReports() {
                 ))}
               </div>
             </div>
-
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            {/* Chart 3: Top Occasions */}
+            {/* Chart 3: Top Occasions (UPDATED with Pageants/Graduations) */}
             <div 
               onClick={() => setActiveModal('occasions')}
               className="bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
@@ -640,7 +697,7 @@ export default function AdminReports() {
               </div>
             </div>
 
-            {/* Chart 4: Customer Demographics (Real Leaflet Map) */}
+            {/* Chart 4: Customer Demographics (Leaflet Map) */}
             <div 
               onClick={() => setActiveModal('heatmap')}
               className="bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-4 relative overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
@@ -667,10 +724,9 @@ export default function AdminReports() {
                  <div className="absolute inset-0 bg-transparent z-10"></div>
               </div>
             </div>
-
           </div>
-
-          {/* Predictive Item Insights */}
+          
+          {/* Predictive Item Insights Section */}
           <div 
             onClick={() => setActiveModal('insights')}
             className="bg-app-card rounded-3xl md:rounded-4xl shadow-sm border border-border-soft overflow-hidden animate-slide-up mt-2 cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
@@ -692,13 +748,11 @@ export default function AdminReports() {
               onAdjustClick={setManualAdjustItem} 
               onActionClick={handleActionClick} 
             />
-
           </div>
 
         </div>
-
       </div>
-
+      
       {/* ==========================================
           SHARED FULL-SCREEN MODALS
       ========================================== */}
