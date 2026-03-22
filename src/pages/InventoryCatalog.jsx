@@ -1,5 +1,5 @@
 // src/pages/InventoryCatalog.jsx
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CATALOG_ITEMS } from '../data/mockData';
 
@@ -18,6 +18,10 @@ export default function InventoryCatalog({ globalRole }) {
 
   // State for Maintenance Input Modal (Repair issue / Laundry status)
   const [maintenanceForm, setMaintenanceForm] = useState(null);
+
+  // Long press refs
+  const timerRef = useRef(null);
+  const isLongPressRef = useRef(false);
 
   // AI Semantic Search Logic
   const filteredItems = useMemo(() => {
@@ -158,28 +162,29 @@ export default function InventoryCatalog({ globalRole }) {
               </div>
               
               {globalRole === 'admin' && filter !== 'maintenance' && (
-                <div className="flex gap-2 w-full">
-                  <button 
-                    onClick={() => {
-                      if (selectionMode && selectedItems.length > 0) {
-                        setShowCancelPrompt(true);
-                      } else {
-                        setSelectionMode(!selectionMode);
-                        setSelectedItems([]);
-                      }
-                    }}
-                    className={`flex-1 md:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 border-2 ${
-                      selectionMode ? 'bg-primary text-white border-primary' : 'bg-white text-text-main border-border-soft hover:border-primary/50'
-                    }`}
-                  >
-                    {selectionMode ? 'Cancel Selection' : 'Select for Service'}
-                  </button>
-                  {!selectionMode && (
+                <div className="flex gap-2 w-full md:w-auto">
+                  {selectionMode ? (
+                    <button 
+                      onClick={() => {
+                        if (selectedItems.length > 0) {
+                          setShowCancelPrompt(true);
+                        } else {
+                          setSelectionMode(false);
+                        }
+                      }}
+                      className="w-full md:w-auto px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 bg-red-50 text-red-500 border-2 border-red-200 hover:bg-red-500 hover:text-white hover:border-red-500 shadow-sm"
+                    >
+                      Cancel Selection
+                    </button>
+                  ) : (
                     <button 
                       onClick={() => navigate('/admin-add-item')}
-                      className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-primary-dark hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                      className="group w-full md:w-auto flex items-center justify-center gap-2 bg-text-main text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 transform hover:-translate-y-0.5"
                     >
-                      Add New
+                      <svg className="w-4 h-4 transition-transform duration-300 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add New Item
                     </button>
                   )}
                 </div>
@@ -292,12 +297,56 @@ export default function InventoryCatalog({ globalRole }) {
             {filteredItems.map((item, i) => (
               <div 
                 key={item.id} 
+                onPointerDown={(e) => {
+                  if (globalRole !== 'admin' || filter === 'maintenance') return;
+                  // Handle left clicks or touch
+                  if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  
+                  isLongPressRef.current = false;
+                  timerRef.current = setTimeout(() => {
+                    isLongPressRef.current = true;
+                    if (!selectionMode) {
+                      setSelectionMode(true);
+                      setSelectedItems([item.id]);
+                      // Add tactile feedback for mobile devices
+                      if (window.navigator && window.navigator.vibrate) {
+                        window.navigator.vibrate(50);
+                      }
+                    }
+                  }, 600); // 600ms long press threshold
+                }}
+                onPointerUp={() => {
+                  if (timerRef.current) clearTimeout(timerRef.current);
+                }}
+                onPointerLeave={() => {
+                  if (timerRef.current) clearTimeout(timerRef.current);
+                }}
+                onPointerCancel={() => {
+                  if (timerRef.current) clearTimeout(timerRef.current);
+                }}
+                onContextMenu={(e) => {
+                  // Prevent the default mobile context menu from appearing during a long press
+                  if (globalRole === 'admin') e.preventDefault();
+                }}
                 onClick={(e) => {
-                  e.stopPropagation(); // VERY IMPORTANT: Clicking the card won't trigger BG cancel
+                  e.stopPropagation(); 
+                  if (timerRef.current) clearTimeout(timerRef.current);
+                  
+                  // Ignore click if it was just a long press
+                  if (isLongPressRef.current) {
+                    isLongPressRef.current = false;
+                    return;
+                  }
+                  
                   selectionMode ? toggleSelection(item.id) : setDetailItem(item);
                 }}
                 className={`group cursor-pointer animate-slide-up flex flex-col relative ${selectionMode && selectedItems.includes(item.id) ? 'scale-95' : ''} transition-transform`}
-                style={{ animationDelay: `${i * 0.05}s` }}
+                style={{ 
+                  animationDelay: `${i * 0.05}s`, 
+                  WebkitUserSelect: 'none', 
+                  userSelect: 'none',
+                  WebkitTouchCallout: 'none' // Prevent iOS popup
+                }}
               >
                 {selectionMode && (
                   <div className={`absolute top-4 left-4 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
@@ -478,7 +527,6 @@ function MaintenanceActionModal({ form, onClose, onConfirm }) {
   );
 }
 
-// Updated MaintenanceTable - Fully Responsive (Flex/Grid)
 function MaintenanceTable({ title, count, headers, data }) {
   return (
     <div className="bg-app-card rounded-[24px] md:rounded-[32px] border border-border-soft shadow-sm overflow-hidden">
@@ -495,25 +543,21 @@ function MaintenanceTable({ title, count, headers, data }) {
         </div>
       </div>
 
-      {/* Desktop Header */}
       <div className="hidden md:grid grid-cols-[2fr_1.5fr_1fr_1fr] gap-4 bg-app-bg/50 px-6 py-4 border-b border-border-soft">
         {headers.map(h => (
           <div key={h} className="text-[10px] font-black uppercase text-text-muted tracking-widest">{h}</div>
         ))}
       </div>
 
-      {/* Body: Card view on Mobile, Grid row on Desktop */}
       <div className="flex flex-col">
         {data.map((row, i) => (
           <div key={i} className="flex flex-col md:grid md:grid-cols-[2fr_1.5fr_1fr_1fr] gap-4 md:gap-4 md:items-center border-b last:border-0 border-border-soft hover:bg-app-bg/30 transition-colors p-5 md:px-6 md:py-5">
             
-            {/* Outfit Asset & Mobile Priority */}
             <div className="flex justify-between items-start md:items-center">
               <div>
                 <p className="font-black text-sm text-text-main">{row.name}</p>
                 <p className="text-[10px] font-bold text-text-muted mt-0.5">{row.id}</p>
               </div>
-              {/* Priority Badge (Mobile Only) */}
               <div className="md:hidden">
                 <span className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${
                   row.priority === 'Urgent' ? 'bg-primary text-white' : 
@@ -524,7 +568,6 @@ function MaintenanceTable({ title, count, headers, data }) {
               </div>
             </div>
 
-            {/* Status / Update */}
             <div className="flex justify-between items-center md:block bg-app-bg md:bg-transparent p-3 md:p-0 rounded-xl md:rounded-none border border-border-soft md:border-0">
               <span className="text-[10px] font-black uppercase text-text-muted md:hidden">Status</span>
               <div className="text-right md:text-left">
@@ -533,7 +576,6 @@ function MaintenanceTable({ title, count, headers, data }) {
               </div>
             </div>
 
-            {/* Priority Badge (Desktop Only) */}
             <div className="hidden md:block">
               <span className={`inline-block px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
                 row.priority === 'Urgent' ? 'bg-primary text-white' : 
@@ -543,7 +585,6 @@ function MaintenanceTable({ title, count, headers, data }) {
               </span>
             </div>
 
-            {/* Action */}
             <div className="mt-1 md:mt-0">
               <button 
                 onClick={() => alert(`${row.id} set to Available`)} 
