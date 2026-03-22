@@ -1,8 +1,25 @@
 // src/pages/AdminSettings.jsx
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminSettings({ setGlobalRole }) {
   const navigate = useNavigate();
+
+  // Automation State
+  const [autoSmsEnabled, setAutoSmsEnabled] = useState(true);
+  const [smsTemplate, setSmsTemplate] = useState("Hi {Name}, your rental is due on {Date}. Please return it to avoid late fees.");
+  
+  // Configuration State
+  const [storeHours, setStoreHours] = useState("9:00 AM - 6:00 PM");
+  const [rentalDuration, setRentalDuration] = useState("7 Days");
+  
+  // Policy State
+  const [securityDeposit, setSecurityDeposit] = useState("₱500.00 / item");
+  const [gracePeriod, setGracePeriod] = useState("24 Hours");
+
+  // Modal State
+  const [activeModal, setActiveModal] = useState(null); // 'hours', 'sms', 'duration', 'deposit', 'grace'
+  const [tempValue, setTempValue] = useState("");
 
   const handleLogout = () => {
     const confirmLogout = window.confirm("Are you sure you want to log out of the Management Terminal?");
@@ -10,6 +27,26 @@ export default function AdminSettings({ setGlobalRole }) {
       if (setGlobalRole) setGlobalRole(null);
       navigate('/login');
     }
+  };
+
+  // Modal Handlers
+  const openModal = (type, currentValue) => {
+    setActiveModal(type);
+    setTempValue(currentValue);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setTempValue("");
+  };
+
+  const handleSave = () => {
+    if (activeModal === 'hours') setStoreHours(tempValue);
+    if (activeModal === 'sms') setSmsTemplate(tempValue);
+    if (activeModal === 'duration') setRentalDuration(tempValue);
+    if (activeModal === 'deposit') setSecurityDeposit(tempValue);
+    if (activeModal === 'grace') setGracePeriod(tempValue);
+    closeModal();
   };
 
   return (
@@ -31,7 +68,7 @@ export default function AdminSettings({ setGlobalRole }) {
           </p>
         </div>
 
-        {/* Profile Card - iOS Glassmorphism Style */}
+        {/* Profile Card */}
         <div className="bg-white rounded-[32px] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-gray-100 flex items-center gap-5 mb-10 transition-transform active:scale-[0.99]">
           <div className="w-20 h-20 rounded-[22px] bg-[#111010] flex items-center justify-center text-white text-2xl font-black shadow-xl shadow-black/20 shrink-0">
             AD
@@ -45,36 +82,126 @@ export default function AdminSettings({ setGlobalRole }) {
           </div>
         </div>
 
-        {/* Preferences Section */}
-        <div className="mb-10 space-y-3">
+        {/* Notifications & Automation Section */}
+        <div className="mb-8 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h3 className="text-[11px] font-black text-[#8e8e93] uppercase tracking-[0.15em] ml-5 mb-4">
+            Automation
+          </h3>
+          
+          <div className="bg-white rounded-[26px] p-5 shadow-sm border border-transparent flex flex-col gap-4 transition-all">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-[#e8f5e9] text-[#4caf50] rounded-2xl">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-black text-[#111010] tracking-tight">Auto SMS Reminders</p>
+                  <p className="text-[13px] text-[#8e8e93] font-bold tracking-tight">Send due date texts automatically</p>
+                </div>
+              </div>
+              
+              {/* Toggle Switch */}
+              <button 
+                onClick={() => setAutoSmsEnabled(!autoSmsEnabled)}
+                className={`w-14 h-8 rounded-full transition-colors duration-300 relative focus:outline-none ${autoSmsEnabled ? 'bg-[#34c759]' : 'bg-[#e5e5ea]'}`}
+              >
+                <div className={`w-7 h-7 bg-white rounded-full absolute top-0.5 shadow-md transition-transform duration-300 ${autoSmsEnabled ? 'translate-x-[26px]' : 'translate-x-0.5'}`}></div>
+              </button>
+            </div>
+
+            {/* Edit Message Template Button */}
+            <div 
+              onClick={() => openModal('sms', smsTemplate)}
+              className="pt-4 border-t border-gray-100 flex justify-between items-center cursor-pointer group"
+            >
+              <div className="pr-4">
+                <p className="text-[11px] font-black text-[#8e8e93] uppercase tracking-widest mb-1">Message Template</p>
+                <p className="text-[13px] text-[#111010] font-bold tracking-tight line-clamp-1">"{smsTemplate}"</p>
+              </div>
+              <div className="p-2 bg-gray-50 rounded-xl group-hover:bg-primary/10 group-hover:text-primary transition-colors text-gray-400">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 stroke-[2.5px]"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Store Configuration Section */}
+        <div className="mb-8 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-75">
           <h3 className="text-[11px] font-black text-[#8e8e93] uppercase tracking-[0.15em] ml-5 mb-4">
             Store Configuration
           </h3>
           
-          <div className="bg-white rounded-[26px] p-5 shadow-sm border border-transparent active:bg-gray-50 flex justify-between items-center cursor-pointer transition-all group">
+          <div 
+            onClick={() => openModal('hours', storeHours)}
+            className="bg-white rounded-[26px] p-5 shadow-sm border border-transparent active:bg-gray-50 flex justify-between items-center cursor-pointer transition-all group mb-3"
+          >
             <div className="flex items-center gap-4">
               <div className="p-3 bg-[#faf6f6] rounded-2xl text-[#111010]">
                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               </div>
               <div>
                 <p className="font-black text-[#111010] tracking-tight">Store Hours</p>
-                <p className="text-[13px] text-[#8e8e93] font-bold tracking-tight">Configure operating times</p>
+                <p className="text-[13px] text-primary font-bold tracking-tight">{storeHours}</p>
               </div>
             </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-300 stroke-[3px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-300 stroke-[3px] group-hover:text-primary transition-colors"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </div>
 
-          <div className="bg-white rounded-[26px] p-5 shadow-sm border border-transparent active:bg-gray-50 flex justify-between items-center cursor-pointer transition-all group">
+          <div 
+            onClick={() => openModal('duration', rentalDuration)}
+            className="bg-white rounded-[26px] p-5 shadow-sm border border-transparent active:bg-gray-50 flex justify-between items-center cursor-pointer transition-all group"
+          >
             <div className="flex items-center gap-4">
               <div className="p-3 bg-[#faf6f6] rounded-2xl text-[#111010]">
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               </div>
               <div>
-                <p className="font-black text-[#111010] tracking-tight">Tax & Fees</p>
-                <p className="text-[13px] text-[#8e8e93] font-bold tracking-tight">Manage platform handling rates</p>
+                <p className="font-black text-[#111010] tracking-tight">Standard Rental Duration</p>
+                <p className="text-[13px] text-primary font-bold tracking-tight">{rentalDuration}</p>
               </div>
             </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-300 stroke-[3px]"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-300 stroke-[3px] group-hover:text-primary transition-colors"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+        </div>
+
+        {/* Rental Policies Section (NEW) */}
+        <div className="mb-10 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
+          <h3 className="text-[11px] font-black text-[#8e8e93] uppercase tracking-[0.15em] ml-5 mb-4">
+            Rental Policies
+          </h3>
+          
+          <div 
+            onClick={() => openModal('deposit', securityDeposit)}
+            className="bg-white rounded-[26px] p-5 shadow-sm border border-transparent active:bg-gray-50 flex justify-between items-center cursor-pointer transition-all group mb-3"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#faf6f6] rounded-2xl text-[#111010]">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              </div>
+              <div>
+                <p className="font-black text-[#111010] tracking-tight">Security Downpayment</p>
+                <p className="text-[13px] text-primary font-bold tracking-tight">{securityDeposit}</p>
+              </div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-300 stroke-[3px] group-hover:text-primary transition-colors"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+
+          <div 
+            onClick={() => openModal('grace', gracePeriod)}
+            className="bg-white rounded-[26px] p-5 shadow-sm border border-transparent active:bg-gray-50 flex justify-between items-center cursor-pointer transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-[#faf6f6] rounded-2xl text-[#111010]">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <div>
+                <p className="font-black text-[#111010] tracking-tight">Return Period</p>
+                <p className="text-[13px] text-primary font-bold tracking-tight">{gracePeriod}</p>
+              </div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-gray-300 stroke-[3px] group-hover:text-primary transition-colors"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </div>
         </div>
 
@@ -91,6 +218,66 @@ export default function AdminSettings({ setGlobalRole }) {
         </div>
 
       </div>
+
+      {/* POPUP MODAL OVERLAY */}
+      {activeModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-[#111010]/30 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={closeModal}
+          ></div>
+          
+          {/* Modal Content Card */}
+          <div className="relative w-full max-w-sm bg-white rounded-[32px] p-6 shadow-2xl animate-in zoom-in-95 duration-300 slide-in-from-bottom-4">
+            
+            <h2 className="text-2xl font-black text-[#111010] tracking-tight mb-1">
+              {activeModal === 'hours' && "Edit Store Hours"}
+              {activeModal === 'duration' && "Rental Duration"}
+              {activeModal === 'deposit' && "Security Deposit"}
+              {activeModal === 'grace' && "Grace Period"}
+              {activeModal === 'sms' && "Edit SMS Template"}
+            </h2>
+            
+            <p className="text-[13px] font-bold text-[#8e8e93] mb-5">
+              {activeModal === 'sms' ? "Use {Name} and {Date} as placeholders." : "Update the system-wide value below."}
+            </p>
+
+            {activeModal === 'sms' ? (
+              <textarea
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                className="w-full p-4 bg-[#faf6f6] border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl text-sm font-bold text-[#111010] outline-none transition-all resize-none h-32"
+                placeholder="Enter message template..."
+              />
+            ) : (
+              <input
+                type="text"
+                value={tempValue}
+                onChange={(e) => setTempValue(e.target.value)}
+                className="w-full p-4 bg-[#faf6f6] border border-transparent focus:border-primary/20 focus:bg-white rounded-2xl text-sm font-bold text-[#111010] outline-none transition-all"
+                placeholder="Enter value..."
+              />
+            )}
+
+            <div className="flex gap-3 mt-6">
+              <button 
+                onClick={closeModal}
+                className="flex-1 py-4 bg-[#faf6f6] text-[#8e8e93] rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSave}
+                className="flex-1 py-4 bg-[#111010] text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-black/10 hover:bg-black transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
