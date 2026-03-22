@@ -109,54 +109,82 @@ export default function InventoryCatalog({ globalRole }) {
         
         {/* SHARED HEADER */}
         <div 
-          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-10 animate-slide-up"
+          className="flex flex-col gap-4 md:gap-6 mb-8 md:mb-10 animate-slide-up"
           onClick={(e) => e.stopPropagation()} // Prevent BG click
         >
-          <div>
-            <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">
+          {/* TOP ROW: Subtitle & Maintenance Toggle (Upper Right) */}
+          <div className="flex justify-between items-start w-full">
+            <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mt-2">
               {filter === 'maintenance' ? 'Service Tracking' : 'The Collection'}
             </p>
-            <h1 className="text-[32px] md:text-5xl font-black text-text-main tracking-tight leading-none">
-              {filter === 'maintenance' ? 'Maintenance' : 'Lookbook'}
-            </h1>
-            <p className="text-sm md:text-base font-medium text-text-muted mt-3">
-              {filter === 'maintenance' ? 'Restoration and cleaning cycle management.' : 'Browse our exclusive wardrobe of premium attire.'}
-            </p>
+            {globalRole === 'admin' && (
+              <button 
+                onClick={() => {
+                  setFilter(filter === 'maintenance' ? 'all' : 'maintenance');
+                  setSelectionMode(false);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 md:px-4 md:py-2.5 text-[10px] md:text-xs font-black uppercase tracking-widest rounded-xl transition-all bg-app-card text-text-main border border-border-soft hover:border-primary/50 hover:text-primary shadow-sm shrink-0"
+              >
+                {filter === 'maintenance' ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                    Catalog
+                  </>
+                ) : (
+                  <>
+                    Maintenance
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                  </>
+                )}
+              </button>
+            )}
           </div>
-          
-          <div className="flex flex-col md:items-end gap-4 shrink-0">
-            <div className="flex gap-3 w-full">
-               <SummaryChip label="Total Assets" value={CATALOG_ITEMS.length} />
-               <SummaryChip label="Ready to Wear" value={availableCount} color="text-success" />
+
+          {/* MAIN TITLE & ACTIONS */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div>
+              <h1 className="text-[32px] md:text-5xl font-black text-text-main tracking-tight leading-none">
+                {filter === 'maintenance' ? 'Maintenance' : 'Lookbook'}
+              </h1>
+              <p className="text-sm md:text-base font-medium text-text-muted mt-3">
+                {filter === 'maintenance' ? 'Restoration and cleaning cycle management.' : 'Browse our exclusive wardrobe of premium attire.'}
+              </p>
             </div>
             
-            {globalRole === 'admin' && filter !== 'maintenance' && (
-              <div className="flex gap-2 w-full">
-                <button 
-                  onClick={() => {
-                    if (selectionMode && selectedItems.length > 0) {
-                      setShowCancelPrompt(true);
-                    } else {
-                      setSelectionMode(!selectionMode);
-                      setSelectedItems([]);
-                    }
-                  }}
-                  className={`flex-1 md:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 border-2 ${
-                    selectionMode ? 'bg-primary text-white border-primary' : 'bg-white text-text-main border-border-soft hover:border-primary/50'
-                  }`}
-                >
-                  {selectionMode ? 'Cancel Selection' : 'Select for Service'}
-                </button>
-                {!selectionMode && (
-                  <button 
-                    onClick={() => navigate('/admin-add-item')}
-                    className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-primary-dark hover:shadow-lg transition-all flex items-center justify-center gap-2"
-                  >
-                    Add New
-                  </button>
-                )}
+            <div className="flex flex-col md:items-end gap-4 shrink-0">
+              <div className="flex gap-3 w-full">
+                 <SummaryChip label="Total Assets" value={CATALOG_ITEMS.length} />
+                 <SummaryChip label="Ready to Wear" value={availableCount} color="text-success" />
               </div>
-            )}
+              
+              {globalRole === 'admin' && filter !== 'maintenance' && (
+                <div className="flex gap-2 w-full">
+                  <button 
+                    onClick={() => {
+                      if (selectionMode && selectedItems.length > 0) {
+                        setShowCancelPrompt(true);
+                      } else {
+                        setSelectionMode(!selectionMode);
+                        setSelectedItems([]);
+                      }
+                    }}
+                    className={`flex-1 md:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 border-2 ${
+                      selectionMode ? 'bg-primary text-white border-primary' : 'bg-white text-text-main border-border-soft hover:border-primary/50'
+                    }`}
+                  >
+                    {selectionMode ? 'Cancel Selection' : 'Select for Service'}
+                  </button>
+                  {!selectionMode && (
+                    <button 
+                      onClick={() => navigate('/admin-add-item')}
+                      className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-primary-dark hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      Add New
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -177,27 +205,6 @@ export default function InventoryCatalog({ globalRole }) {
               className="bg-primary/80 text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all shadow-lg shadow-primary/10"
             >
               Repair
-            </button>
-          </div>
-        )}
-
-        {/* --- VIEW TOGGLE (ADMIN ONLY) --- */}
-        {globalRole === 'admin' && (
-          <div 
-            className="flex p-1 bg-app-card border border-border-soft rounded-2xl w-full md:w-max mb-6 shadow-sm animate-slide-up"
-            onClick={(e) => e.stopPropagation()} // Prevent BG click
-          >
-            <button 
-              onClick={() => { setFilter('all'); setSelectionMode(false); }}
-              className={`flex-1 md:w-48 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${filter !== 'maintenance' ? 'bg-primary text-white shadow-md' : 'text-text-muted hover:text-text-main'}`}
-            >
-              Catalog View
-            </button>
-            <button 
-              onClick={() => { setFilter('maintenance'); setSelectionMode(false); }}
-              className={`flex-1 md:w-48 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${filter === 'maintenance' ? 'bg-primary text-white shadow-md' : 'text-text-muted hover:text-text-main'}`}
-            >
-              Maintenance Center
             </button>
           </div>
         )}
@@ -249,7 +256,7 @@ export default function InventoryCatalog({ globalRole }) {
         {/* FASHION GRID OR MAINTENANCE CENTER */}
         {filter === 'maintenance' && globalRole === 'admin' ? (
           <div 
-            className="flex flex-col gap-10 pb-20 animate-slide-up"
+            className="flex flex-col gap-6 md:gap-10 pb-20 animate-slide-up"
             onClick={(e) => e.stopPropagation()} // Prevent BG click
           >
             <MaintenanceTable 
@@ -471,12 +478,13 @@ function MaintenanceActionModal({ form, onClose, onConfirm }) {
   );
 }
 
+// Updated MaintenanceTable - Fully Responsive (Flex/Grid)
 function MaintenanceTable({ title, count, headers, data }) {
   return (
-    <div className="bg-app-card rounded-[32px] border border-border-soft shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-border-soft flex items-center justify-between">
+    <div className="bg-app-card rounded-[24px] md:rounded-[32px] border border-border-soft shadow-sm overflow-hidden">
+      <div className="p-5 md:p-6 border-b border-border-soft flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0">
             {title === 'Repair' ? (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
             ) : (
@@ -486,41 +494,66 @@ function MaintenanceTable({ title, count, headers, data }) {
           <h3 className="text-lg font-black text-text-main">{title} <span className="text-text-muted ml-1">({count})</span></h3>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-app-bg/50">
-              {headers.map(h => <th key={h} className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest whitespace-nowrap">{h}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((row, i) => (
-              <tr key={i} className="border-t border-border-soft hover:bg-app-bg/30 transition-colors">
-                <td className="px-6 py-5">
-                  <p className="font-black text-sm text-text-main whitespace-nowrap">{row.name}</p>
-                  <p className="text-[10px] font-bold text-text-muted">{row.id}</p>
-                </td>
-                <td className="px-6 py-5">
-                  <p className="text-sm font-bold text-text-main whitespace-nowrap">{row.status}</p>
-                  <p className="text-[10px] font-medium text-text-muted">{row.sub}</p>
-                </td>
-                <td className="px-6 py-5">
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
-                    row.priority === 'Urgent' ? 'bg-primary text-white' : 
-                    row.priority === 'High' ? 'bg-primary/20 text-primary' : 'bg-app-bg text-text-muted border border-border-soft'
-                  }`}>
-                    {row.priority}
-                  </span>
-                </td>
-                <td className="px-6 py-5">
-                  <button onClick={() => alert(`${row.id} set to Available`)} className="bg-success text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-success-dark transition-all whitespace-nowrap">
-                    Set Available
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      {/* Desktop Header */}
+      <div className="hidden md:grid grid-cols-[2fr_1.5fr_1fr_1fr] gap-4 bg-app-bg/50 px-6 py-4 border-b border-border-soft">
+        {headers.map(h => (
+          <div key={h} className="text-[10px] font-black uppercase text-text-muted tracking-widest">{h}</div>
+        ))}
+      </div>
+
+      {/* Body: Card view on Mobile, Grid row on Desktop */}
+      <div className="flex flex-col">
+        {data.map((row, i) => (
+          <div key={i} className="flex flex-col md:grid md:grid-cols-[2fr_1.5fr_1fr_1fr] gap-4 md:gap-4 md:items-center border-b last:border-0 border-border-soft hover:bg-app-bg/30 transition-colors p-5 md:px-6 md:py-5">
+            
+            {/* Outfit Asset & Mobile Priority */}
+            <div className="flex justify-between items-start md:items-center">
+              <div>
+                <p className="font-black text-sm text-text-main">{row.name}</p>
+                <p className="text-[10px] font-bold text-text-muted mt-0.5">{row.id}</p>
+              </div>
+              {/* Priority Badge (Mobile Only) */}
+              <div className="md:hidden">
+                <span className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${
+                  row.priority === 'Urgent' ? 'bg-primary text-white' : 
+                  row.priority === 'High' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-app-bg text-text-muted border border-border-soft'
+                }`}>
+                  {row.priority}
+                </span>
+              </div>
+            </div>
+
+            {/* Status / Update */}
+            <div className="flex justify-between items-center md:block bg-app-bg md:bg-transparent p-3 md:p-0 rounded-xl md:rounded-none border border-border-soft md:border-0">
+              <span className="text-[10px] font-black uppercase text-text-muted md:hidden">Status</span>
+              <div className="text-right md:text-left">
+                <p className="text-sm font-bold text-text-main">{row.status}</p>
+                <p className="text-[10px] font-medium text-text-muted mt-0.5">{row.sub}</p>
+              </div>
+            </div>
+
+            {/* Priority Badge (Desktop Only) */}
+            <div className="hidden md:block">
+              <span className={`inline-block px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                row.priority === 'Urgent' ? 'bg-primary text-white' : 
+                row.priority === 'High' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-app-bg text-text-muted border border-border-soft'
+              }`}>
+                {row.priority}
+              </span>
+            </div>
+
+            {/* Action */}
+            <div className="mt-1 md:mt-0">
+              <button 
+                onClick={() => alert(`${row.id} set to Available`)} 
+                className="w-full md:w-auto bg-success text-white px-4 py-3 md:py-2.5 rounded-xl text-[11px] md:text-[10px] font-black uppercase tracking-widest hover:bg-success-dark transition-all shadow-sm shadow-success/20"
+              >
+                Set Available
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

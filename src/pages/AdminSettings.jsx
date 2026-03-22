@@ -1,5 +1,5 @@
 // src/pages/AdminSettings.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminSettings({ setGlobalRole }) {
@@ -20,6 +20,36 @@ export default function AdminSettings({ setGlobalRole }) {
   // Modal State
   const [activeModal, setActiveModal] = useState(null); // 'hours', 'sms', 'duration', 'deposit', 'grace'
   const [tempValue, setTempValue] = useState("");
+
+  // PWA Install Prompt State
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  useEffect(() => {
+    // Listen for the beforeinstallprompt event for PWA installation
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+      }
+    } else {
+      // Fallback message for devices that don't support the prompt (e.g., iOS Safari) or already installed
+      alert("App installation may already be complete, or it's not supported by this browser. \n\nOn iOS, tap the 'Share' icon and select 'Add to Home Screen'.");
+    }
+  };
 
   const handleLogout = () => {
     const confirmLogout = window.confirm("Are you sure you want to log out of the Management Terminal?");
@@ -205,8 +235,31 @@ export default function AdminSettings({ setGlobalRole }) {
           </div>
         </div>
 
+        {/* App Configuration Section (New) */}
+        <div className="mb-10 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[200ms]">
+          <h3 className="text-[11px] font-black text-text-muted uppercase tracking-[0.15em] ml-5 mb-4">
+            App Configuration
+          </h3>
+          
+          <div 
+            onClick={handleInstallApp}
+            className="bg-app-card rounded-[26px] p-5 shadow-sm border border-border-soft hover:border-primary/30 flex justify-between items-center cursor-pointer transition-all group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-app-bg border border-border-soft rounded-2xl text-text-main">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 stroke-[2.5px]"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              </div>
+              <div>
+                <p className="font-black text-text-main tracking-tight">Install to Home Screen</p>
+                <p className="text-[13px] text-text-muted font-bold tracking-tight">Get quick access from your device</p>
+              </div>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-5 h-5 text-text-muted/50 stroke-[3px] group-hover:text-primary transition-colors"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+        </div>
+
         {/* Danger Zone */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-[250ms]">
           <h3 className="text-[11px] font-black text-text-muted uppercase tracking-[0.15em] ml-5 mb-4">Security</h3>
           <button 
             onClick={handleLogout}
