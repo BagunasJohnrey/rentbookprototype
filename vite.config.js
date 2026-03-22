@@ -11,8 +11,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon-192x192.png', 'icon-512x512.png'], // Pre-cache icons
       manifest: {
-        name: 'RentBook',
-        short_name: 'RentBook',
+        name: 'RenTech',
+        short_name: 'RenTech',
         description: 'Smart Rental Management for Gowns & Suits',
         theme_color: '#991b1b', // Changed to match your primary red
         background_color: '#991b1b', // Native OS splash screen background
