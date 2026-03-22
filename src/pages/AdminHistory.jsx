@@ -6,6 +6,7 @@ import { TRANSACTIONS, CATALOG_ITEMS } from '../data/mockData';
 export default function AdminHistory() {
   const location = useLocation();
   const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState(''); // New state for search
   
   const [transactions, setTransactions] = useState(() => {
     if (location.state?.newTransaction) {
@@ -40,7 +41,10 @@ export default function AdminHistory() {
     }
   }, [location.state]);
 
-  const filteredTx = (filter === 'all' ? transactions : transactions.filter(t => t.status === filter))
+  // Updated filtering logic to include both status and customer search
+  const filteredTx = transactions
+    .filter(t => (filter === 'all' ? true : t.status === filter))
+    .filter(t => t.customerName.toLowerCase().includes(searchQuery.toLowerCase()))
     .map(tx => {
       if (tx.type === 'wedding') {
         return { 
@@ -192,7 +196,7 @@ export default function AdminHistory() {
       <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-7xl md:mx-auto md:w-full scrollbar-hide">
         
         <div className="flex justify-between items-start mb-8 md:mb-12 animate-slide-up">
-          <div className="mb-8 md:mb-12 animate-slide-up">
+          <div>
             <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">Management Terminal</p>
             <h1 className="text-[32px] md:text-5xl font-black text-text-main tracking-tight">Rental History</h1>
             <p className="text-sm md:text-base font-medium text-text-muted mt-2">Monitor and manage all customer transactions</p>
@@ -206,6 +210,22 @@ export default function AdminHistory() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </button>
+        </div>
+
+        {/* SEARCH BAR SECTION */}
+        <div className="relative mb-6 group animate-slide-up" style={{ animationDelay: '0.1s' }}>
+          <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-text-muted group-focus-within:text-primary transition-colors">
+            <svg className="w-5 h-5 stroke-[2.5]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input 
+            type="text"
+            placeholder="Search customer name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-14 pr-6 py-5 bg-app-card border border-border-soft rounded-[24px] text-sm font-bold text-text-main placeholder:text-text-muted/50 focus:ring-4 focus:ring-primary/10 focus:border-primary/30 outline-none transition-all shadow-sm"
+          />
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
@@ -426,7 +446,7 @@ export default function AdminHistory() {
 
                         {!tx.isPaid && tx.status !== 'completed' && !isMultiItem(tx) && (
                           <button onClick={() => handleMarkPaid(tx)} className="w-8 h-8 flex items-center justify-center bg-app-bg rounded-xl text-text-muted hover:text-success transition-colors font-black text-sm border border-transparent hover:border-success/20">
-                               ₱
+                                ₱
                           </button>
                         )}
                         
@@ -448,21 +468,21 @@ export default function AdminHistory() {
 
                 {isMultiItem(tx) && expandedTx === tx.txId && (
                   <div className="px-5 pb-5 pt-2 border-t border-border-soft bg-app-bg/50">
-                     <div className="flex justify-between items-center mb-3">
-                       <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Item Checklist</p>
-                       {tx.status !== 'completed' && (
-                          <button 
-                            onClick={() => openDetailsModal(tx, true)}
-                            className="text-[9px] font-black bg-app-card border border-border-soft text-text-main px-2 py-1 rounded-md uppercase flex items-center gap-1 shadow-sm hover:border-primary hover:text-primary transition-colors"
-                          >
-                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                            Edit
-                          </button>
-                       )}
-                     </div>
-                     <div className="space-y-2">
-                       {tx.items?.map((subItem, idx) => (
-                         <div key={idx} className="flex flex-col bg-app-card p-3 rounded-xl border border-border-soft shadow-sm gap-2">
+                      <div className="flex justify-between items-center mb-3">
+                        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Item Checklist</p>
+                        {tx.status !== 'completed' && (
+                           <button 
+                             onClick={() => openDetailsModal(tx, true)}
+                             className="text-[9px] font-black bg-app-card border border-border-soft text-text-main px-2 py-1 rounded-md uppercase flex items-center gap-1 shadow-sm hover:border-primary hover:text-primary transition-colors"
+                           >
+                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                             Edit
+                           </button>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        {tx.items?.map((subItem, idx) => (
+                          <div key={idx} className="flex flex-col bg-app-card p-3 rounded-xl border border-border-soft shadow-sm gap-2">
                             <div className="truncate">
                               <p className="font-black text-xs text-text-main tracking-tight truncate">{subItem.role || subItem.name} {subItem.name && subItem.role ? `(${subItem.name})` : ''}</p>
                               <p className="text-[9px] font-bold text-text-muted mt-0.5 truncate">{getItemName(subItem.itemId) || 'No item'}</p>
@@ -485,9 +505,9 @@ export default function AdminHistory() {
                                  </button>
                                )}
                             </div>
-                         </div>
-                       ))}
-                     </div>
+                          </div>
+                        ))}
+                      </div>
                   </div>
                 )}
               </div>
