@@ -262,7 +262,7 @@ export default function StaffNewRental() {
         </div>
 
         {/* Content Area */}
-        <main className="grow px-6 pt-4 pb-64 md:pb-12 md:px-12">
+        <main className="grow px-6 pt-4 pb-64 md:pb-36 md:px-12">
           <div className="max-w-4xl mx-auto">
             
             {/* STEP 1: Select Rental Type */}
@@ -481,7 +481,7 @@ export default function StaffNewRental() {
                         value={customer.address} 
                         onChange={e => setCustomer({...customer, address: e.target.value})} 
                         className="w-full p-4 rounded-2xl bg-app-bg text-text-main border border-transparent focus:border-primary/30 outline-none focus:ring-2 focus:ring-primary/10 text-sm font-bold tracking-tight transition-all placeholder:text-text-muted/50"
-                        placeholder="e.g. 123 Rizal St" 
+                        placeholder="e.g. 123 Rizal St, Brgy. San Jose" 
                       />
                     </div>
                   </div>
@@ -729,63 +729,57 @@ export default function StaffNewRental() {
           </div>
           
           {/* DESKTOP ACTION BAR */}
-          <div className="hidden md:flex max-w-2xl mx-auto mt-12 gap-4 pb-12">
-            {step > 1 && (
+          {step > 1 && (
+            <div className="hidden md:flex sticky bottom-8 mx-auto w-full max-w-2xl z-[100] gap-4 px-6 md:px-0">
               <button 
                 onClick={handleBack} 
-                className="flex-1 py-5 rounded-3xl font-black text-sm uppercase tracking-widest transition-all bg-app-card border border-border-soft text-text-muted hover:text-primary hover:border-primary/30"
+                className="flex-1 py-5 rounded-3xl font-black text-sm uppercase tracking-widest transition-all bg-app-card border border-border-soft text-text-muted hover:text-primary hover:border-primary/30 shadow-2xl"
               >
                 Go Back
               </button>
-            )}
-            <button 
-              onClick={handleNext} 
-              className="flex-2 py-5 rounded-3xl font-black text-sm uppercase tracking-widest shadow-xl transition-all bg-primary text-white shadow-primary/20 hover:bg-primary-dark active:scale-[0.98]"
-            >
-              {step === 4 ? 'Confirm & Process' : 'Continue to Next Step'}
-            </button>
-          </div>
+              <button 
+                onClick={handleNext} 
+                className="flex-[2] py-5 rounded-3xl font-black text-sm uppercase tracking-widest shadow-2xl transition-all bg-primary text-white shadow-primary/20 hover:bg-primary-dark active:scale-[0.98]"
+              >
+                {step === 4 ? 'Confirm & Process' : 'Continue to Next Step'}
+              </button>
+            </div>
+          )}
 
         </main>
 
-        {/* COLLAPSIBLE MOBILE FLOATING ACTION BAR */}
-        <div className="md:hidden fixed bottom-17.5 sm:bottom-0 left-0 right-0 z-40">
-          <div className="bg-app-card/95 backdrop-blur-xl rounded-t-4xl shadow-[0_-15px_40px_rgba(0,0,0,0.08)] border-t border-border-soft px-5 transition-all duration-300 overflow-hidden">
-            
-            {/* Drawer Drag Handle */}
-            <div 
-              className="w-full flex flex-col items-center justify-center py-4 cursor-pointer"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              <div className="w-10 h-1.5 bg-border-soft rounded-full mb-2"></div>
-              <div className="flex items-center gap-1.5">
-                <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isMobileMenuOpen ? 'text-text-muted' : 'text-primary'}`}>
-                  {isMobileMenuOpen ? 'Minimize' : 'Show Actions'}
-                </span>
-                <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180 text-text-muted' : 'text-primary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
-              </div>
-            </div>
-
-            {/* Action Buttons (Collapses when minimized) */}
-            <div className={`flex flex-col-reverse gap-3 transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-50 pb-6 opacity-100' : 'max-h-0 pb-0 opacity-0 pointer-events-none'}`}>
-              {step > 1 && (
-                <button 
-                  onClick={handleBack} 
-                  className="w-full py-3.5 font-black text-sm text-text-muted hover:text-primary bg-app-bg rounded-2xl transition-colors border border-border-soft uppercase tracking-widest"
-                >
-                  Go Back
-                </button>
-              )}
-              <button 
-                onClick={handleNext} 
-                className="w-full py-4 rounded-[20px] font-black text-sm shadow-xl transition-all bg-primary text-white shadow-primary/20 active:scale-[0.98] uppercase tracking-widest hover:bg-primary-dark"
+{/* COLLAPSIBLE MOBILE FLOATING ACTION BAR */}
+        {step > 1 && (
+          <div className="md:hidden fixed bottom-17.5 sm:bottom-0 left-0 right-0 z-40">
+            <div className="bg-app-card/95 backdrop-blur-xl rounded-t-4xl shadow-[0_-15px_40px_rgba(0,0,0,0.08)] border-t border-border-soft px-5 transition-all duration-300 overflow-hidden">
+              
+              {/* Drawer Drag Handle */}
+              <div 
+                className="w-full flex flex-col items-center justify-center py-4 cursor-pointer"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
-                {step === 4 ? 'Confirm & Process' : 'Continue'}
-              </button>
-            </div>
+                <div className="w-10 h-1.5 bg-border-soft rounded-full mb-2"></div>
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-[9px] font-black uppercase tracking-widest transition-colors ${isMobileMenuOpen ? 'text-text-muted' : 'text-primary'}`}>
+                    {isMobileMenuOpen ? 'Minimize' : 'Show Actions'}
+                  </span>
+                  <svg className={`w-3.5 h-3.5 transition-transform duration-300 ${isMobileMenuOpen ? 'rotate-180 text-text-muted' : 'text-primary'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </div>
+              </div>
 
+              {/* Action Buttons (Collapses when minimized) */}
+              <div className={`flex flex-col-reverse gap-3 transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-50 pb-6 opacity-100' : 'max-h-0 pb-0 opacity-0 pointer-events-none'}`}>
+                <button 
+                  onClick={handleNext} 
+                  className="w-full py-4 rounded-[20px] font-black text-sm shadow-xl transition-all bg-primary text-white shadow-primary/20 active:scale-[0.98] uppercase tracking-widest hover:bg-primary-dark"
+                >
+                  {step === 4 ? 'Confirm & Process' : 'Continue'}
+                </button>
+              </div>
+
+            </div>
           </div>
-        </div>
+        )}
 
       </div>
     </div>
