@@ -188,15 +188,15 @@ export default function AdminHistory() {
         </div>
 
         {/* DESKTOP TABLE */}
-        <div className="hidden md:block bg-app-card rounded-[32px] shadow-sm border border-border-soft overflow-hidden animate-slide-up">
-          <table className="w-full text-left border-collapse">
+        <div className="hidden md:block bg-app-card rounded-[32px] shadow-sm border border-border-soft overflow-x-auto animate-slide-up scrollbar-hide">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-app-bg border-b border-border-soft">
-                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest">Item / Package</th>
-                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest">Customer</th>
-                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest">Due Date</th>
-                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest">Status</th>
-                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest text-right">Actions</th>
+                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest whitespace-nowrap">Item / Package</th>
+                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest whitespace-nowrap">Customer</th>
+                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest whitespace-nowrap">Due Date</th>
+                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest whitespace-nowrap">Status</th>
+                <th className="px-8 py-6 text-[11px] font-black uppercase text-text-muted tracking-widest text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-soft">
@@ -232,9 +232,9 @@ export default function AdminHistory() {
                         </div>
                       </td>
                       <td className="px-8 py-5 font-black text-text-main tracking-tight">{tx.customerName}</td>
-                      <td className="px-8 py-5 font-bold text-text-muted">{tx.dueDate}</td>
+                      <td className="px-8 py-5 text-xs font-bold text-text-muted whitespace-nowrap">{tx.dueDate}</td>
                       <td className="px-8 py-5">
-                        <span className={`inline-flex px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusBadge(tx.status)}`}>
+                        <span className={`inline-flex px-4 py-1.5 rounded-full font-black uppercase tracking-widest ${tx.status === 'overdue' ? 'text-[9px]' : 'text-[10px]'} ${getStatusBadge(tx.status)}`}>
                           {tx.status}
                         </span>
                       </td>
@@ -293,7 +293,7 @@ export default function AdminHistory() {
                                 </button>
                               )}
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                               {tx.items?.map((subItem, idx) => (
                                 <div key={idx} className="flex justify-between items-center p-3 rounded-xl border border-border-soft bg-app-bg hover:border-primary/30 transition-colors group">
                                   <div>
@@ -371,7 +371,7 @@ export default function AdminHistory() {
                     </div>
                     
                     <div className="flex items-center justify-between mt-2">
-                      <span className={`text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-wide ${getStatusBadge(tx.status)}`}>
+                      <span className={`font-black px-2 py-1 rounded-lg uppercase tracking-wide ${tx.status === 'overdue' ? 'text-[8px]' : 'text-[9px]'} ${getStatusBadge(tx.status)}`}>
                         {tx.status}
                       </span>
                       
@@ -478,7 +478,7 @@ export default function AdminHistory() {
                <div>
                  <h2 className="text-xl font-black text-text-main tracking-tight">Transaction Details</h2>
                  <div className="flex gap-2 items-center mt-1">
-                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest ${getStatusBadge(detailsTx.status)}`}>
+                    <span className={`px-2 py-0.5 rounded-md font-black uppercase tracking-widest ${detailsTx.status === 'overdue' ? 'text-[8px]' : 'text-[10px]'} ${getStatusBadge(detailsTx.status)}`}>
                       {detailsTx.status}
                     </span>
                     <p className="text-xs text-text-muted font-bold uppercase tracking-widest">
@@ -506,7 +506,7 @@ export default function AdminHistory() {
               
               {/* Core Information Block */}
               <div className="bg-app-card p-5 rounded-3xl border border-border-soft shadow-sm space-y-4">
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <div>
                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Customer Name</label>
                      <input 
@@ -529,7 +529,7 @@ export default function AdminHistory() {
                    </div>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <div>
                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Status</label>
                      <select 
@@ -611,7 +611,7 @@ export default function AdminHistory() {
                       )}
                       
                       <div className="pr-10 space-y-4">
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Role / Title</label>
                             <input 
@@ -745,7 +745,7 @@ export default function AdminHistory() {
               {isEditingMode && (
                 <button 
                   onClick={saveDetails} 
-                  className="flex-2 py-3.5 sm:py-4 text-sm bg-primary hover:bg-primary-dark text-white rounded-2xl font-black shadow-lg shadow-primary/20 active:scale-95 transition-all animate-in fade-in"
+                  className="flex-[2] py-3.5 sm:py-4 text-sm bg-primary hover:bg-primary-dark text-white rounded-2xl font-black shadow-lg shadow-primary/20 active:scale-95 transition-all animate-in fade-in"
                 >
                   Save Changes
                 </button>
