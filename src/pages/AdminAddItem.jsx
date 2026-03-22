@@ -10,7 +10,8 @@ export default function AdminAddItem() {
     name: '',
     baseRate: '',
     downpayment: '',
-    category: 'gowns'
+    category: 'gowns',
+    description: '' // Added description state
   });
   
   // AI Tagging State
@@ -76,7 +77,6 @@ export default function AdminAddItem() {
       
       {/* Top Nav */}
       <div className="p-5 md:px-12 md:pt-12 flex justify-between items-center z-10 w-full max-w-4xl mx-auto">
-        {/* FIX: Changed navigate(-1) to navigate('/catalog') to ensure it always returns to the inventory */}
         <button onClick={() => navigate('/catalog')} className="text-text-main hover:text-primary hover:-translate-x-1 transition-all">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 stroke-[3px]"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
@@ -156,6 +156,18 @@ export default function AdminAddItem() {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
                 </div>
               </div>
+            </div>
+
+            {/* Added Description Tab/Field */}
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Description</label>
+              <textarea 
+                rows={4}
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Describe the item's style, fabric, and fit..."
+                className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted/50 resize-none" 
+              />
             </div>
           </div>
 
