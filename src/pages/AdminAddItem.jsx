@@ -76,7 +76,8 @@ export default function AdminAddItem() {
       
       {/* Top Nav */}
       <div className="p-5 md:px-12 md:pt-12 flex justify-between items-center z-10 w-full max-w-4xl mx-auto">
-        <button onClick={() => navigate(-1)} className="text-text-main hover:text-primary hover:-translate-x-1 transition-all">
+        {/* FIX: Changed navigate(-1) to navigate('/catalog') to ensure it always returns to the inventory */}
+        <button onClick={() => navigate('/catalog')} className="text-text-main hover:text-primary hover:-translate-x-1 transition-all">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 stroke-[3px]"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
         <div className="text-lg md:text-xl font-black text-text-main tracking-tight">Add New Item</div>

@@ -8,6 +8,10 @@ export default function InventoryCatalog({ globalRole }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [detailItem, setDetailItem] = useState(null);
+  
+  // State for bulk selection
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
 
   // AI Semantic Search Logic
   const filteredItems = useMemo(() => {
@@ -53,6 +57,20 @@ export default function InventoryCatalog({ globalRole }) {
     { id: 'costumes', label: 'Costumes' },
   ];
 
+  const toggleSelection = (id) => {
+    setSelectedItems(prev => 
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleBulkAction = (status) => {
+    alert(`Moving ${selectedItems.length} items to ${status}`);
+    setSelectedItems([]);
+    setSelectionMode(false);
+  };
+
+  const isItemAvailable = detailItem?.status?.toLowerCase() === 'available';
+
   return (
     <div className="flex flex-col h-full relative bg-[#faf6f6]" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif' }}>
       <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full scrollbar-hide">
@@ -76,19 +94,48 @@ export default function InventoryCatalog({ globalRole }) {
             </div>
             
             {globalRole === 'admin' && (
-              <button 
-                onClick={() => navigate('/admin-add-item')}
-                className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 flex items-center justify-center gap-2 w-full md:w-auto"
-              >
-                <svg className="w-5 h-5 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <line x1="12" y1="5" x2="12" y2="19"></line>
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                </svg>
-                Add New Item
-              </button>
+              <div className="flex gap-2 w-full">
+                <button 
+                  onClick={() => {
+                    setSelectionMode(!selectionMode);
+                    setSelectedItems([]);
+                  }}
+                  className={`flex-1 md:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 border-2 ${
+                    selectionMode ? 'bg-primary text-white border-primary' : 'bg-white text-text-main border-border-soft hover:border-primary/50'
+                  }`}
+                >
+                  {selectionMode ? 'Cancel Selection' : 'Select for Service'}
+                </button>
+                {!selectionMode && (
+                  <button 
+                    onClick={() => navigate('/admin-add-item')}
+                    className="bg-primary text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-primary-dark hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    Add New
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
+
+        {/* BULK ACTION BAR - Simplified to Buttons Only */}
+        {selectionMode && selectedItems.length > 0 && (
+          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-app-card border-2 border-primary rounded-3xl p-4 shadow-2xl flex items-center justify-center gap-3 animate-slide-up w-auto px-8">
+            <button 
+              onClick={() => handleBulkAction('Laundry')}
+              className="bg-primary text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
+            >
+              Laundry
+            </button>
+            <button 
+              onClick={() => handleBulkAction('Repair')}
+              className="bg-primary/80 text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary transition-all shadow-lg shadow-primary/10"
+            >
+              Repair
+            </button>
+          </div>
+        )}
 
         {/* SEARCH & FILTERS */}
         <div className="flex flex-col md:flex-row gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.05s' }}>
@@ -141,23 +188,38 @@ export default function InventoryCatalog({ globalRole }) {
             {filteredItems.map((item, i) => (
               <div 
                 key={item.id} 
-                onClick={() => setDetailItem(item)}
-                className="group cursor-pointer animate-slide-up flex flex-col"
+                onClick={() => selectionMode ? toggleSelection(item.id) : setDetailItem(item)}
+                className={`group cursor-pointer animate-slide-up flex flex-col relative ${selectionMode && selectedItems.includes(item.id) ? 'scale-95' : ''} transition-transform`}
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
-                <div className="relative aspect-[3/4] rounded-[24px] md:rounded-[32px] overflow-hidden mb-4 shadow-sm group-hover:shadow-2xl transition-all duration-500 bg-app-card border border-border-soft">
+                {/* Selection Marker */}
+                {selectionMode && (
+                  <div className={`absolute top-4 left-4 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                    selectedItems.includes(item.id) ? 'bg-primary border-primary' : 'bg-white/80 border-text-muted'
+                  }`}>
+                    {selectedItems.includes(item.id) && (
+                      <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    )}
+                  </div>
+                )}
+
+                <div className={`relative aspect-[3/4] rounded-[24px] md:rounded-[32px] overflow-hidden mb-4 shadow-sm group-hover:shadow-2xl transition-all duration-500 bg-app-card border-2 ${
+                  selectionMode && selectedItems.includes(item.id) ? 'border-primary' : 'border-border-soft'
+                }`}>
                   <img src={item.imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 bg-app-bg" alt={item.name} />
                   
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center backdrop-blur-[2px]">
-                    <span className="bg-app-card/90 text-text-main px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">
-                      Quick View
-                    </span>
-                  </div>
+                  {!selectionMode && (
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hidden md:flex items-center justify-center backdrop-blur-[2px]">
+                      <span className="bg-app-card/90 text-text-main px-6 py-3 rounded-full font-black text-xs uppercase tracking-widest shadow-lg">
+                        Quick View
+                      </span>
+                    </div>
+                  )}
 
                   <div className={`absolute top-3 right-3 md:top-4 md:right-4 px-3 py-1.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-wider backdrop-blur-md shadow-sm border border-white/20 ${
                     item.status?.toLowerCase() === 'available' ? 'bg-success/90 text-white' : 'bg-app-card/90 text-text-muted border-border-soft'
                   }`}>
-                    {item.status?.toLowerCase() === 'available' ? 'Ready' : 'Rented'}
+                    {item.status}
                   </div>
                 </div>
                 
@@ -177,7 +239,6 @@ export default function InventoryCatalog({ globalRole }) {
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 transition-all">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onClick={() => setDetailItem(null)} />
           
-          {/* Removed 'border border-border-soft' from here */}
           <div className="relative bg-app-card w-full sm:max-w-5xl rounded-t-[32px] sm:rounded-[40px] overflow-hidden max-h-[90vh] flex flex-col shadow-2xl animate-slide-up sm:animate-scale-in z-10 pb-safe">
             
             <button 
@@ -220,35 +281,63 @@ export default function InventoryCatalog({ globalRole }) {
                   </p>
                   
                   <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-8 sm:mb-10 mt-auto">
-                    <div className="bg-app-bg p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-border-soft">
+                    <div className="bg-[#faf6f6] p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-border-soft">
                        <p className="text-[9px] sm:text-[10px] uppercase font-black text-text-muted tracking-widest mb-1">Rental Rate</p>
                        <p className="text-xl sm:text-2xl font-black text-text-main">₱{detailItem.baseRate}</p>
                     </div>
-                    <div className="bg-app-bg p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-border-soft">
+                    <div className="bg-[#faf6f6] p-4 sm:p-5 rounded-[20px] sm:rounded-[24px] border border-border-soft">
                        <p className="text-[9px] sm:text-[10px] uppercase font-black text-text-muted tracking-widest mb-1">Downpayment</p>
                        <p className="text-xl sm:text-2xl font-black text-text-main">₱{detailItem.deposit}</p>
                     </div>
                   </div>
                   
+                  {/* Action Buttons styled with Theme Colors */}
                   {globalRole === 'staff' ? (
                     <button 
-                      disabled={detailItem.status?.toLowerCase() !== 'available'}
+                      disabled={!isItemAvailable}
                       onClick={() => navigate(`/staff-new-rental?itemId=${detailItem.id}`)}
                       className={`w-full py-4 sm:py-5 rounded-[20px] sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 ${
-                        detailItem.status?.toLowerCase() === 'available' 
+                        isItemAvailable 
                           ? 'bg-primary text-white hover:bg-primary-dark hover:shadow-xl hover:shadow-primary/20 active:scale-95' 
                           : 'bg-app-bg text-text-muted opacity-70 border border-border-soft cursor-not-allowed'
                       }`}
                     >
-                      {detailItem.status?.toLowerCase() === 'available' ? 'Proceed to Rental' : 'Currently Rented'}
+                      {isItemAvailable ? 'Proceed to Rental' : 'Currently Rented'}
                     </button>
                   ) : (
-                    <div className={`w-full py-4 sm:py-5 rounded-[20px] sm:rounded-2xl font-black text-xs sm:text-sm uppercase tracking-widest text-center border-2 ${
-                      detailItem.status?.toLowerCase() === 'available'
-                        ? 'border-success/20 bg-success/10 text-success'
-                        : 'border-border-soft bg-app-bg text-text-muted'
-                    }`}>
-                      {detailItem.status?.toLowerCase() === 'available' ? 'Available in Store' : 'Currently Rented'}
+                    <div className="flex flex-col gap-2">
+                      {/* Option to restore availability if currently unavailable */}
+                      {!isItemAvailable && (
+                        <button 
+                          onClick={() => { alert('Status updated to Available'); setDetailItem(null); }}
+                          className="w-full bg-success text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-success/90 active:scale-95 transition-all shadow-lg shadow-success/20 mb-1"
+                        >
+                          Mark as Available
+                        </button>
+                      )}
+                      
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => { alert('Marked for Laundry'); setDetailItem(null); }}
+                          className="flex-1 bg-primary text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-dark active:scale-95 transition-all shadow-md"
+                        >
+                          Laundry
+                        </button>
+                        <button 
+                          onClick={() => { alert('Marked for Repair'); setDetailItem(null); }}
+                          className="flex-1 bg-primary/80 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary active:scale-95 transition-all shadow-md"
+                        >
+                          Repair
+                        </button>
+                      </div>
+
+                      <div className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-center border-2 mt-2 ${
+                        isItemAvailable 
+                          ? 'border-success/20 bg-success/10 text-success' 
+                          : 'border-border-soft bg-[#faf6f6] text-text-muted'
+                      }`}>
+                        Current Status: {detailItem.status}
+                      </div>
                     </div>
                   )}
                </div>
