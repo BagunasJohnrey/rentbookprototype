@@ -2,6 +2,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// Capture the prompt event globally as early as possible.
+// This ensures we don't miss it if the user navigates to this page after the initial app load.
+let globalDeferredPrompt = null;
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    globalDeferredPrompt = e;
+  });
+}
+
 export default function AdminSettings({ setGlobalRole }) {
   const navigate = useNavigate();
 
@@ -21,33 +33,36 @@ export default function AdminSettings({ setGlobalRole }) {
   const [activeModal, setActiveModal] = useState(null); // 'hours', 'sms', 'duration', 'deposit', 'grace'
   const [tempValue, setTempValue] = useState("");
 
-  // PWA Install Prompt State
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-
   useEffect(() => {
-    // Listen for the beforeinstallprompt event for PWA installation
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+    // Listen for the app being successfully installed to clear the prompt
+    const handleAppInstalled = () => {
+      globalDeferredPrompt = null;
+      console.log('PWA was installed');
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const handleInstallApp = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+    if (globalDeferredPrompt) {
+      // Show the install prompt
+      globalDeferredPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      const { outcome } = await globalDeferredPrompt.userChoice;
       if (outcome === 'accepted') {
-        setDeferredPrompt(null);
+        console.log('User accepted the install prompt');
+        // We can't use the prompt again, discard it
+        globalDeferredPrompt = null;
+      } else {
+        console.log('User dismissed the install prompt');
       }
     } else {
       // Fallback message for devices that don't support the prompt (e.g., iOS Safari) or already installed
-      alert("App installation may already be complete, or it's not supported by this browser. \n\nOn iOS, tap the 'Share' icon and select 'Add to Home Screen'.");
+      alert("App installation may already be complete, or it's not supported by this browser. \n\n• On Chrome/Edge (Desktop): Look for the install icon in the URL address bar.\n• On Chrome (Android): Tap the 3-dot menu and select 'Install app'.\n• On Safari (iOS): Tap the 'Share' icon and select 'Add to Home Screen'.");
     }
   };
 
