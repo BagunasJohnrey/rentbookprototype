@@ -22,16 +22,20 @@ export default function AdminHistory() {
     }));
   });
 
-  const [expandedTx, setExpandedTx] = useState(null); 
-  const [detailsTx, setDetailsTx] = useState(null); 
-  const [isEditingMode, setIsEditingMode] = useState(false); // Controls Read-Only vs Edit in Modal
+  const [expandedTx, setExpandedTx] = useState(null);
+  const [detailsTx, setDetailsTx] = useState(null);
+  const [isEditingMode, setIsEditingMode] = useState(false);
   const [returningTx, setReturningTx] = useState(null);
   const [returnNotes, setReturnNotes] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
 
+  // --- CALENDAR STATES ---
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   useEffect(() => {
     if (location.state?.newTransaction) {
-      window.history.replaceState({}, document.title); 
+      window.history.replaceState({}, document.title);
     }
   }, [location.state]);
 
@@ -58,7 +62,16 @@ export default function AdminHistory() {
 
   const sendPing = (name) => alert(`SMS reminder drafted for ${name}.`);
   
-  // --- INLINE PAYMENT HANDLER ---
+  // --- CONFLICT CHECKER LOGIC ---
+  const checkRentalConflict = (itemId, requestedDate, currentTxId) => {
+    return transactions.find(tx => 
+      tx.itemId === itemId && 
+      tx.txId !== currentTxId &&
+      tx.status !== 'completed' && 
+      tx.dueDate === requestedDate
+    );
+  };
+
   const handleMarkPaid = (tx, subItemIndex = undefined) => {
     setTransactions(prev => prev.map(t => {
       if (t.txId === tx.txId) {
@@ -74,7 +87,6 @@ export default function AdminHistory() {
     }));
   };
 
-  // --- RETURNS HANDLER ---
   const openReturnModal = (tx) => {
     setReturningTx(tx);
     setReturnNotes('');
@@ -115,7 +127,6 @@ export default function AdminHistory() {
     if (file) setImagePreview(URL.createObjectURL(file));
   };
 
-  // --- DETAILS/EDIT HANDLER ---
   const openDetailsModal = (tx, startInEditMode = false) => {
     setDetailsTx(JSON.parse(JSON.stringify(tx)));
     setIsEditingMode(startInEditMode);
@@ -140,6 +151,15 @@ export default function AdminHistory() {
   };
 
   const saveDetails = () => {
+    // Conflict Check before saving
+    if (detailsTx.itemId && detailsTx.dueDate) {
+      const conflict = checkRentalConflict(detailsTx.itemId, detailsTx.dueDate, detailsTx.txId);
+      if (conflict) {
+        alert(`CONFLICT: Item ${detailsTx.itemId} is already booked for ${detailsTx.dueDate} by ${conflict.customerName}.`);
+        return;
+      }
+    }
+
     setTransactions(prev => prev.map(tx => 
       tx.txId === detailsTx.txId ? detailsTx : tx
     ));
@@ -147,7 +167,13 @@ export default function AdminHistory() {
     setIsEditingMode(false);
   };
 
-  // --- THEME UTILS ---
+  // --- CALENDAR UTILS ---
+  const daysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
+
+  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1));
+  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1));
+
   const getStatusBadge = (status) => {
     if (status === 'active') return 'bg-app-bg text-text-main border border-border-soft';
     if (status === 'overdue') return 'bg-primary/10 text-primary border border-primary/20';
@@ -166,10 +192,22 @@ export default function AdminHistory() {
     <div className="flex flex-col h-full relative bg-[#faf6f6]" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif' }}>
       <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-7xl md:mx-auto md:w-full scrollbar-hide">
         
-        <div className="mb-8 md:mb-12 animate-slide-up">
-          <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">Management Terminal</p>
-          <h1 className="text-[32px] md:text-5xl font-black text-text-main tracking-tight">Rental History</h1>
-          <p className="text-sm md:text-base font-medium text-text-muted mt-2">Monitor and manage all customer transactions</p>
+        <div className="flex justify-between items-start mb-8 md:mb-12 animate-slide-up">
+          <div>
+            <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">Management Terminal</p>
+            <h1 className="text-[32px] md:text-5xl font-black text-text-main tracking-tight">Rental History</h1>
+            <p className="text-sm md:text-base font-medium text-text-muted mt-2">Monitor and manage all customer transactions</p>
+          </div>
+          
+          {/* CALENDAR TRIGGER */}
+          <button 
+            onClick={() => setShowCalendar(true)}
+            className="p-4 bg-app-card border border-border-soft rounded-2xl text-text-muted hover:text-primary transition-all shadow-sm hover:shadow-md"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </button>
         </div>
 
         <div className="flex gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
@@ -247,7 +285,6 @@ export default function AdminHistory() {
                             </button>
                           )}
                           
-                          {/* EYE ICON: View Details */}
                           <button onClick={() => openDetailsModal(tx, false)} className="p-2 text-text-muted hover:text-primary transition-colors rounded-xl hover:bg-primary/10" title="View Details">
                             <svg className="w-5 h-5 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -335,7 +372,7 @@ export default function AdminHistory() {
         <div className="md:hidden space-y-4">
           {filteredTx.length === 0 ? (
             <div className="text-center py-20 bg-app-card rounded-[32px] border border-border-soft text-text-muted font-bold">
-               No transactions found
+                No transactions found
             </div>
           ) : (
             filteredTx.map((tx, i) => (
@@ -376,7 +413,6 @@ export default function AdminHistory() {
                       </span>
                       
                       <div className="flex gap-1.5">
-                        {/* EYE ICON: View Details (Mobile) */}
                         <button onClick={() => openDetailsModal(tx, false)} className="w-8 h-8 flex items-center justify-center bg-app-bg rounded-xl text-text-muted hover:text-primary transition-colors border border-transparent hover:border-primary/20">
                           <svg className="w-4 h-4 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -392,7 +428,7 @@ export default function AdminHistory() {
 
                         {!tx.isPaid && tx.status !== 'completed' && !isMultiItem(tx) && (
                           <button onClick={() => handleMarkPaid(tx)} className="w-8 h-8 flex items-center justify-center bg-app-bg rounded-xl text-text-muted hover:text-success transition-colors font-black text-sm border border-transparent hover:border-success/20">
-                             ₱
+                               ₱
                           </button>
                         )}
                         
@@ -412,7 +448,6 @@ export default function AdminHistory() {
                   </div>
                 </div>
 
-                {/* Mobile Accordion */}
                 {isMultiItem(tx) && expandedTx === tx.txId && (
                   <div className="px-5 pb-5 pt-2 border-t border-border-soft bg-app-bg/50">
                      <div className="flex justify-between items-center mb-3">
@@ -463,6 +498,65 @@ export default function AdminHistory() {
         </div>
       </div>
 
+      {/* CALENDAR MODAL */}
+      {showCalendar && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md" onClick={() => setShowCalendar(false)}>
+          <div className="bg-app-card w-full max-w-lg rounded-[40px] shadow-2xl animate-scale-in flex flex-col border border-border-soft overflow-hidden" onClick={e => e.stopPropagation()}>
+            {/* Calendar Header */}
+            <div className="p-6 border-b border-border-soft flex justify-between items-center bg-white">
+              <button onClick={prevMonth} className="p-2 hover:bg-app-bg rounded-xl transition-all"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M15 19l-7-7 7-7" /></svg></button>
+              <h2 className="text-xl font-black text-text-main tracking-tight uppercase">
+                {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+              </h2>
+              <button onClick={nextMonth} className="p-2 hover:bg-app-bg rounded-xl transition-all"><svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M9 5l7 7-7 7" /></svg></button>
+            </div>
+
+            {/* Calendar Grid */}
+            <div className="p-4 bg-app-bg">
+              <div className="grid grid-cols-7 mb-2">
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => (
+                  <div key={d} className="text-center text-[10px] font-black text-text-muted uppercase py-2">{d}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {/* Empty blocks for padding */}
+                {[...Array(firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()))].map((_, i) => (
+                  <div key={`empty-${i}`} className="h-12" />
+                ))}
+                {/* Day blocks */}
+                {[...Array(daysInMonth(currentDate.getFullYear(), currentDate.getMonth()))].map((_, i) => {
+                  const day = i + 1;
+                  const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                  const bookingsOnDay = transactions.filter(t => t.dueDate === dateString);
+
+                  return (
+                    <div 
+                      key={day} 
+                      className={`h-14 rounded-xl border border-border-soft flex flex-col items-center justify-center transition-all cursor-default relative
+                        ${bookingsOnDay.length > 0 ? 'bg-white shadow-sm' : 'bg-transparent'}
+                      `}
+                    >
+                      <span className={`text-[11px] font-black ${bookingsOnDay.length > 0 ? 'text-primary' : 'text-text-muted'}`}>{day}</span>
+                      {bookingsOnDay.length > 0 && (
+                        <div className="flex gap-0.5 mt-1">
+                          {bookingsOnDay.slice(0, 3).map((_, idx) => (
+                            <div key={idx} className="w-1 h-1 rounded-full bg-primary" />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="p-6 bg-white border-t border-border-soft flex gap-2">
+              <button onClick={() => setShowCalendar(false)} className="w-full py-4 text-sm font-black text-text-muted hover:bg-app-bg rounded-2xl transition-all">Close Calendar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* COMPREHENSIVE TRANSACTION DETAILS & EDIT MODAL */}
       {detailsTx && (
         <div 
@@ -475,30 +569,29 @@ export default function AdminHistory() {
           >
             {/* Header */}
             <div className="p-6 border-b border-border-soft shrink-0 flex justify-between items-center w-full">
-               <div>
-                 <h2 className="text-xl font-black text-text-main tracking-tight">Transaction Details</h2>
-                 <div className="flex gap-2 items-center mt-1">
-                    <span className={`px-2 py-0.5 rounded-md font-black uppercase tracking-widest ${detailsTx.status === 'overdue' ? 'text-[8px]' : 'text-[10px]'} ${getStatusBadge(detailsTx.status)}`}>
-                      {detailsTx.status}
-                    </span>
-                    <p className="text-xs text-text-muted font-bold uppercase tracking-widest">
-                      ID: {detailsTx.txId}
-                    </p>
-                 </div>
-               </div>
-               
-               {/* Explicit Edit Button in Header */}
-               {!isEditingMode && detailsTx.status !== 'completed' && (
-                 <button 
-                   onClick={() => setIsEditingMode(true)} 
-                   className="flex items-center gap-1.5 px-4 py-2 bg-app-bg hover:bg-primary/10 text-text-muted hover:text-primary rounded-xl transition-colors font-bold text-xs border border-border-soft shadow-sm"
-                 >
-                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                   </svg>
-                   Edit
-                 </button>
-               )}
+                <div>
+                  <h2 className="text-xl font-black text-text-main tracking-tight">Transaction Details</h2>
+                  <div className="flex gap-2 items-center mt-1">
+                     <span className={`px-2 py-0.5 rounded-md font-black uppercase tracking-widest ${detailsTx.status === 'overdue' ? 'text-[8px]' : 'text-[10px]'} ${getStatusBadge(detailsTx.status)}`}>
+                       {detailsTx.status}
+                     </span>
+                     <p className="text-xs text-text-muted font-bold uppercase tracking-widest">
+                       ID: {detailsTx.txId}
+                     </p>
+                  </div>
+                </div>
+                
+                {!isEditingMode && detailsTx.status !== 'completed' && (
+                  <button 
+                    onClick={() => setIsEditingMode(true)} 
+                    className="flex items-center gap-1.5 px-4 py-2 bg-app-bg hover:bg-primary/10 text-text-muted hover:text-primary rounded-xl transition-colors font-bold text-xs border border-border-soft shadow-sm"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                    Edit
+                  </button>
+                )}
             </div>
 
             {/* Form Body - Scrollable */}
@@ -506,88 +599,85 @@ export default function AdminHistory() {
               
               {/* Core Information Block */}
               <div className="bg-app-card p-5 rounded-3xl border border-border-soft shadow-sm space-y-4">
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <div>
-                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Customer Name</label>
-                     <input 
-                       type="text" 
-                       value={detailsTx.customerName} 
-                       onChange={(e) => setDetailsTx({...detailsTx, customerName: e.target.value})}
-                       disabled={!isEditingMode}
-                       className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                     />
-                   </div>
-                   <div>
-                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Due Date</label>
-                     <input 
-                       type="date" 
-                       value={detailsTx.dueDate} 
-                       onChange={(e) => setDetailsTx({...detailsTx, dueDate: e.target.value})}
-                       disabled={!isEditingMode}
-                       className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                     />
-                   </div>
-                 </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Customer Name</label>
+                      <input 
+                        type="text" 
+                        value={detailsTx.customerName} 
+                        onChange={(e) => setDetailsTx({...detailsTx, customerName: e.target.value})}
+                        disabled={!isEditingMode}
+                        className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Due Date</label>
+                      <input 
+                        type="date" 
+                        value={detailsTx.dueDate} 
+                        onChange={(e) => setDetailsTx({...detailsTx, dueDate: e.target.value})}
+                        disabled={!isEditingMode}
+                        className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
 
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <div>
-                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Status</label>
-                     <select 
-                       value={detailsTx.status} 
-                       onChange={(e) => setDetailsTx({...detailsTx, status: e.target.value})}
-                       disabled={!isEditingMode}
-                       className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                     >
-                       <option value="active">Active</option>
-                       <option value="overdue">Overdue</option>
-                       <option value="completed">Completed</option>
-                     </select>
-                   </div>
-                   
-                   {/* Overall Payment Status for standard */}
-                   {!isMultiItem(detailsTx) && (
-                     <div>
-                       <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Payment Status</label>
-                       <select 
-                         value={detailsTx.isPaid ? 'paid' : 'unpaid'} 
-                         onChange={(e) => setDetailsTx({...detailsTx, isPaid: e.target.value === 'paid'})}
-                         disabled={!isEditingMode}
-                         className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
-                       >
-                         <option value="unpaid">Unpaid</option>
-                         <option value="paid">Fully Paid</option>
-                       </select>
-                     </div>
-                   )}
-                 </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Status</label>
+                      <select 
+                        value={detailsTx.status} 
+                        onChange={(e) => setDetailsTx({...detailsTx, status: e.target.value})}
+                        disabled={!isEditingMode}
+                        className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        <option value="active">Active</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="completed">Completed</option>
+                      </select>
+                    </div>
+                    
+                    {!isMultiItem(detailsTx) && (
+                      <div>
+                        <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 block">Payment Status</label>
+                        <select 
+                          value={detailsTx.isPaid ? 'paid' : 'unpaid'} 
+                          onChange={(e) => setDetailsTx({...detailsTx, isPaid: e.target.value === 'paid'})}
+                          disabled={!isEditingMode}
+                          className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-bold focus:ring-2 focus:ring-primary/20 outline-none text-text-main appearance-none transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          <option value="unpaid">Unpaid</option>
+                          <option value="paid">Fully Paid</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
 
-                 {/* General Remarks / Notes */}
-                 <div>
-                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      Remarks / Notes
-                    </label>
-                    <textarea 
-                      value={detailsTx.notes}
-                      onChange={(e) => setDetailsTx({...detailsTx, notes: e.target.value})}
-                      disabled={!isEditingMode}
-                      placeholder={isEditingMode ? "Add transaction notes here..." : "No notes attached."}
-                      className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none min-h-20 text-text-main transition-all placeholder:text-text-muted/50 disabled:opacity-60 disabled:cursor-not-allowed"
-                    />
-                 </div>
-
-                 {/* Release Photo */}
-                 {detailsTx.rentalPhotoUrl && (
-                   <div className="mt-4 pt-4 border-t border-border-soft">
-                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-2 flex items-center gap-1">
-                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                       Release Condition Photo
+                  <div>
+                     <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-1 flex items-center gap-1">
+                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                       Remarks / Notes
                      </label>
-                     <div className="w-full h-40 sm:h-48 rounded-2xl overflow-hidden border border-border-soft shadow-sm bg-app-bg">
-                       <img src={detailsTx.rentalPhotoUrl} className="w-full h-full object-cover" alt="Release Condition" />
-                     </div>
-                   </div>
-                 )}
+                     <textarea 
+                       value={detailsTx.notes}
+                       onChange={(e) => setDetailsTx({...detailsTx, notes: e.target.value})}
+                       disabled={!isEditingMode}
+                       placeholder={isEditingMode ? "Add transaction notes here..." : "No notes attached."}
+                       className="w-full p-3.5 bg-app-bg border border-border-soft rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20 outline-none min-h-20 text-text-main transition-all placeholder:text-text-muted/50 disabled:opacity-60 disabled:cursor-not-allowed"
+                     />
+                  </div>
+
+                  {detailsTx.rentalPhotoUrl && (
+                    <div className="mt-4 pt-4 border-t border-border-soft">
+                      <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-2 flex items-center gap-1">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        Release Condition Photo
+                      </label>
+                      <div className="w-full h-40 sm:h-48 rounded-2xl overflow-hidden border border-border-soft shadow-sm bg-app-bg">
+                        <img src={detailsTx.rentalPhotoUrl} className="w-full h-full object-cover" alt="Release Condition" />
+                      </div>
+                    </div>
+                  )}
               </div>
 
               {/* Item Assignment Block */}
@@ -654,7 +744,6 @@ export default function AdminHistory() {
                           </div>
                         </div>
                         
-                        {/* Sub Item Payment */}
                         <div className="flex justify-between items-center pt-2 border-t border-border-soft">
                            <label className={`flex items-center gap-2 ${isEditingMode ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                               <input 
@@ -689,7 +778,6 @@ export default function AdminHistory() {
                   )}
                 </>
               ) : (
-                // STANDARD SINGLE ITEM ASSIGNMENT
                 <div className="bg-app-card p-5 rounded-3xl border border-border-soft shadow-sm">
                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 mb-2 block">Assigned Item (Catalog)</label>
                    <div className="flex gap-4 items-center">
@@ -714,7 +802,6 @@ export default function AdminHistory() {
                 </div>
               )}
 
-              {/* View Proof of Return if completed */}
               {detailsTx.status === 'completed' && detailsTx.returnPhotoUrl && (
                   <div className="pt-4 animate-slide-up">
                     <div className="flex items-center gap-2 mb-3 text-text-main">

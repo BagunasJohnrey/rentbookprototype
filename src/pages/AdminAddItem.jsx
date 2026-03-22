@@ -1,4 +1,3 @@
-// src/pages/AdminAddItem.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,12 +10,33 @@ export default function AdminAddItem() {
     baseRate: '',
     downpayment: '',
     category: 'gowns',
-    description: '' // Added description state
+    description: ''
   });
   
-  // AI Tagging State
+  // Tagging State
   const [tags, setTags] = useState([]);
+  const [manualTag, setManualTag] = useState(''); // New state for input box
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  // Add Manual Tag
+  const handleAddManualTag = (e) => {
+    if (e.key === 'Enter' || e.type === 'blur') {
+      const tagValue = manualTag.trim();
+      if (tagValue) {
+        // Ensure it starts with # and avoid duplicates
+        const formattedTag = tagValue.startsWith('#') ? tagValue : `#${tagValue}`;
+        if (!tags.includes(formattedTag)) {
+          setTags([...tags, formattedTag]);
+        }
+        setManualTag(''); // Clear input
+      }
+    }
+  };
+
+  // Remove Tag
+  const removeTag = (tagToRemove) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
 
   // Simulated AI Auto-Tagging Engine
   const handleAutoTag = () => {
@@ -26,9 +46,8 @@ export default function AdminAddItem() {
     }
 
     setIsAnalyzing(true);
-    setTags([]); // Clear old tags
-
-    // Simulate API network delay
+    // Note: We don't clear old tags anymore so manual tags stay
+    
     setTimeout(() => {
       const desc = formData.name.toLowerCase();
       const generatedTags = [];
@@ -48,13 +67,12 @@ export default function AdminAddItem() {
       if (desc.includes("lace")) generatedTags.push("#Vintage", "#Lace");
       if (desc.includes("costume")) generatedTags.push("#Costume", "#Thematic");
 
-      // Random fabric fallback if none specified
       if (generatedTags.length < 3) {
         const fabrics = ["#Satin", "#Silk", "#Velvet", "#Chiffon", "#Tulle"];
         generatedTags.push(fabrics[Math.floor(Math.random() * fabrics.length)]);
       }
 
-      setTags([...new Set(generatedTags)]);
+      setTags([...new Set([...tags, ...generatedTags])]);
       setIsAnalyzing(false);
     }, 1500);
   };
@@ -69,7 +87,7 @@ export default function AdminAddItem() {
       return;
     }
     alert('Item successfully saved to Catalog with AI tags!');
-    navigate('/catalog'); // Redirect back to inventory
+    navigate('/catalog'); 
   };
 
   return (
@@ -84,9 +102,7 @@ export default function AdminAddItem() {
         <div className="w-6"></div>
       </div>
 
-      {/* Content Area */}
       <div className="grow overflow-y-auto px-6 pb-24 animate-slide-up w-full max-w-2xl mx-auto">
-        
         <div className="md:bg-app-card md:p-8 md:rounded-[40px] md:shadow-sm md:border md:border-border-soft md:mt-4">
           
           {/* Upload Area */}
@@ -102,7 +118,6 @@ export default function AdminAddItem() {
             <span className="font-bold text-sm group-hover:text-primary transition-colors">Tap to upload photo</span>
           </div>
 
-          {/* Form Inputs */}
           <div className="flex flex-col gap-5 mb-8">
             <div className="flex flex-col gap-2">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Item Name</label>
@@ -111,7 +126,7 @@ export default function AdminAddItem() {
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 placeholder="e.g. Red Satin Evening Gown"
-                className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted/50" 
+                className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
               />
             </div>
 
@@ -123,7 +138,7 @@ export default function AdminAddItem() {
                   value={formData.baseRate}
                   onChange={(e) => setFormData({...formData, baseRate: e.target.value})}
                   placeholder="3500"
-                  className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted/50" 
+                  className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -133,7 +148,7 @@ export default function AdminAddItem() {
                   value={formData.downpayment}
                   onChange={(e) => setFormData({...formData, downpayment: e.target.value})}
                   placeholder="1500"
-                  className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted/50" 
+                  className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
                 />
               </div>
             </div>
@@ -144,7 +159,7 @@ export default function AdminAddItem() {
                 <select 
                   value={formData.category}
                   onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none"
+                  className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none appearance-none"
                 >
                   <option value="gowns">Gowns</option>
                   <option value="suits">Suits</option>
@@ -153,25 +168,24 @@ export default function AdminAddItem() {
                   <option value="accessories">Accessories</option>
                 </select>
                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-text-muted">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M19 9l-7 7-7-7" /></svg>
                 </div>
               </div>
             </div>
 
-            {/* Added Description Tab/Field */}
             <div className="flex flex-col gap-2">
               <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Description</label>
               <textarea 
-                rows={4}
+                rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Describe the item's style, fabric, and fit..."
-                className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted/50 resize-none" 
+                className="w-full p-4 rounded-2xl bg-app-card md:bg-app-bg text-sm font-bold text-text-main border border-border-soft outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none" 
               />
             </div>
           </div>
 
-          {/* AI Auto-Tagging Section */}
+          {/* AI & Manual Tagging Section */}
           <div className="bg-primary/5 border border-primary/10 rounded-3xl p-5 mb-8 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <div className="text-[11px] font-black text-primary flex items-center gap-2 uppercase tracking-widest">
@@ -188,23 +202,38 @@ export default function AdminAddItem() {
                 {isAnalyzing ? 'Analyzing...' : 'Auto-Generate'}
               </button>
             </div>
+
+            {/* Manual Tag Input Box */}
+            <input 
+              type="text"
+              value={manualTag}
+              onChange={(e) => setManualTag(e.target.value)}
+              onKeyDown={handleAddManualTag}
+              onBlur={handleAddManualTag}
+              placeholder="Add your own tags (e.g. #Vintage, #Fitted)"
+              className="w-full p-3 mb-4 rounded-xl bg-white border border-border-soft text-xs font-bold text-text-main outline-none focus:ring-2 focus:ring-primary/20 placeholder:font-medium transition-all"
+            />
             
             <div className="flex flex-wrap gap-2 min-h-8 items-center">
               {isAnalyzing ? (
                 <span className="text-primary text-xs font-bold animate-pulse">AI analyzing item attributes...</span>
               ) : tags.length > 0 ? (
                 tags.map(tag => (
-                  <span key={tag} className="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg animate-in zoom-in duration-300">
+                  <button 
+                    key={tag} 
+                    onClick={() => removeTag(tag)}
+                    className="bg-primary text-white text-[10px] font-black px-3 py-1.5 rounded-lg animate-in zoom-in duration-300 hover:bg-red-500 hover:scale-95 transition-all group flex items-center gap-1.5"
+                  >
                     {tag}
-                  </span>
+                    <span className="opacity-50 group-hover:opacity-100">×</span>
+                  </button>
                 ))
               ) : (
-                <span className="text-text-muted text-xs font-medium">Enter item name then tap Auto-Generate...</span>
+                <span className="text-text-muted text-xs font-medium italic">No tags added yet. Use AI or type above...</span>
               )}
             </div>
           </div>
 
-          {/* Save Button */}
           <button 
             onClick={handleSave}
             className="w-full bg-primary hover:bg-primary-dark text-white rounded-2xl p-4 md:p-5 text-sm md:text-base font-black uppercase tracking-widest shadow-xl shadow-primary/20 active:scale-[0.98] transition-all"
@@ -213,7 +242,6 @@ export default function AdminAddItem() {
           </button>
           
         </div>
-
       </div>
     </div>
   );

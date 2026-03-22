@@ -641,7 +641,7 @@ function DetailModal({ detailItem, setDetailItem, globalRole, isItemAvailable, n
               {detailItem.tags && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   <span className="text-[10px] font-black text-primary uppercase tracking-widest flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-lg">
-                    AI Tags:
+                    Tags:
                   </span>
                   {detailItem.tags.map(tag => (
                     <span key={tag} className="px-2.5 py-1 bg-app-bg text-text-muted border border-border-soft rounded-lg text-[10px] font-bold tracking-wider">
