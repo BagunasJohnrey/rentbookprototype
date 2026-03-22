@@ -9,21 +9,24 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['icon-192x192.png', 'icon-512x512.png'], // Pre-cache icons
       manifest: {
         name: 'RentBook',
         short_name: 'RentBook',
         description: 'Smart Rental Management for Gowns & Suits',
-        theme_color: '#bf4a53',
-        background_color: '#faf6f6',
+        theme_color: '#991b1b', // Changed to match your primary red
+        background_color: '#991b1b', // Native OS splash screen background
         display: 'standalone',
+        orientation: 'portrait',
         icons: [
           {
-            src: 'https://cdn-icons-png.flaticon.com/512/3233/3233483.png', // You can replace this URL with your actual app icon later
+            src: '/icon-192x192.png', // Use local assets
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
-            src: 'https://cdn-icons-png.flaticon.com/512/3233/3233483.png', // You can replace this URL with your actual app icon later
+            src: '/icon-512x512.png', // Use local assets
             sizes: '512x512',
             type: 'image/png'
           }
