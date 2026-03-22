@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import AdminBottomNav from '../components/AdminBottomNav';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet.heat'; 
+import 'leaflet.heat';
 
 /**
  * RENTECH: AN AI-ENHANCED RENTAL MANAGEMENT SYSTEM [cite: 1]
@@ -19,12 +19,12 @@ function BatangasHeatmap() {
 
   useEffect(() => {
     if (!mapRef.current) return;
-    if (mapInstance.current) return; 
+    if (mapInstance.current) return;
 
     const map = L.map(mapRef.current, {
-       zoomControl: false 
+       zoomControl: false
     }).setView([13.9500, 120.7500], 10);
-    
+
     mapInstance.current = map;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -33,9 +33,9 @@ function BatangasHeatmap() {
     }).addTo(map);
 
     const baseData = [
-      [13.9388, 120.7323, 1.0], // Balayan 
-      [13.8306, 120.6331, 0.8], // Calatagan 
-      [13.9317, 120.8146, 0.6], // Calaca 
+      [13.9388, 120.7323, 1.0], // Balayan
+      [13.8306, 120.6331, 0.8], // Calatagan
+      [13.9317, 120.8146, 0.6], // Calaca
       [13.8820, 120.9142, 0.3], // Lemery
       [14.0658, 120.6277, 0.2], // Nasugbu
       [13.8812, 120.9255, 0.1], // Taal
@@ -97,10 +97,10 @@ function BatangasHeatmap() {
   }, []);
 
   return (
-     <div 
-       ref={mapRef} 
-       style={{ background: 'transparent' }} 
-       className="absolute inset-0 z-0 rounded-inherit border-none filter contrast-125 saturate-50 bg-transparent" 
+     <div
+       ref={mapRef}
+       style={{ background: 'transparent' }}
+       className="absolute inset-0 z-0 rounded-inherit border-none filter contrast-125 saturate-50 bg-transparent"
      />
   );
 }
@@ -214,6 +214,21 @@ const ITEM_INSIGHTS = [
 ];
 
 // ==========================================
+// LAUNDRY & REPAIR DATA (from first code)
+// ==========================================
+const CARE_DATA = {
+  Laundry: [
+    { id: "ITEM-1011", name: "Ivory Lace Bridal Gown", status: "In Wash", since: "2 hours ago", priority: "High", imageUrl: "https://images.unsplash.com/photo-1594434212624-4054ad902401?w=150" },
+    { id: "ITEM-1004", name: "Midnight Blue Peak Tuxedo", status: "Drying", since: "5 hours ago", priority: "Normal", imageUrl: "https://images.unsplash.com/photo-1594932224491-ef7012971337?w=150" },
+    { id: "ITEM-1021", name: "Satin Bridesmaid Midi", status: "Pressing", since: "1 hour ago", priority: "Urgent", imageUrl: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=150" }
+  ],
+  Repair: [
+    { id: "ITEM-1007", name: "Emerald Evening Gown", issue: "Loose Hemline", assigned: "Manang Nene", priority: "Urgent", imageUrl: "https://images.unsplash.com/photo-1568252542512-9fe8fe9c87bb?w=150" },
+    { id: "ITEM-1014", name: "Modern Piña Barong", issue: "Fabric Snag", assigned: "Internal", priority: "High", imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" }
+  ]
+};
+
+// ==========================================
 // REUSABLE COMPONENT
 // ==========================================
 const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionClick }) => (
@@ -227,7 +242,7 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
             <th className="px-6 py-5 text-[10px] font-black uppercase text-text-muted tracking-widest">Metrics & Trend</th>
             <th className="px-6 py-5 text-[10px] font-black uppercase text-text-muted tracking-widest">System Recommendation</th>
             <th className="px-6 py-5 text-[10px] font-black uppercase text-text-muted tracking-widest text-right">Direct Action</th>
-          </tr>
+           </tr>
         </thead>
         <tbody className="divide-y divide-border-soft">
           {items.map((item) => (
@@ -246,7 +261,7 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
                   <div className="flex justify-between items-end mb-1.5">
                     <span className="text-xs font-bold text-text-main">Util: {item.utilization}%</span>
                     <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded flex items-center gap-1 border ${
-                      item.trend === 'up' ? 'text-success bg-success/10 border-success/20' : 
+                      item.trend === 'up' ? 'text-success bg-success/10 border-success/20' :
                       item.trend === 'down' ? 'text-red-600 bg-red-50 border-red-100' : 'text-text-muted bg-app-bg border-border-soft'
                     }`}>
                       {item.trend === 'up' ? '↑ ' : item.trend === 'down' ? '↓ ' : '− '}{item.demand}
@@ -264,14 +279,14 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
               </td>
               <td className="px-6 py-5 text-right">
                 <div className="flex justify-end gap-2">
-                  <button 
+                  <button
                     onClick={(e) => { e.stopPropagation(); onAdjustClick(item); }}
                     className="px-3 py-3 bg-app-card border border-border-soft text-text-main text-[10px] font-black uppercase tracking-wider rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm active:scale-95 whitespace-nowrap"
                     title="Manually Adjust Pricing"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                   </button>
-                  <button 
+                  <button
                     onClick={(e) => onActionClick(item.actionText, e)}
                     className="px-5 py-3 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary-dark transition-all shadow-md active:scale-95 whitespace-nowrap"
                   >
@@ -281,13 +296,6 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
               </td>
             </tr>
           ))}
-          {!isModal && (
-            <tr className="bg-app-bg/50 pointer-events-none">
-              <td colSpan="4" className="text-center py-3 text-xs font-bold text-primary uppercase tracking-widest">
-                Click Card to View Full List
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </div>
@@ -303,7 +311,7 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
               <div className="flex items-center justify-between mt-1.5">
                 <span className="text-[9px] text-text-muted font-black bg-app-card border border-border-soft px-1.5 py-0.5 rounded uppercase tracking-wider">{item.id}</span>
                 <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded flex items-center gap-1 border ${
-                    item.trend === 'up' ? 'text-success bg-success/10 border-success/20' : 
+                    item.trend === 'up' ? 'text-success bg-success/10 border-success/20' :
                     item.trend === 'down' ? 'text-red-600 bg-red-50 border-red-100' : 'text-text-muted bg-app-bg border-border-soft'
                 }`}>
                   {item.trend === 'up' ? '↑ ' : item.trend === 'down' ? '↓ ' : '− '}{item.demand}
@@ -311,7 +319,7 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
               </div>
             </div>
           </div>
-          
+
           <div className="w-full pointer-events-none">
             <div className="flex justify-between items-end mb-1">
               <span className="text-[10px] font-bold text-text-muted">Utilization</span>
@@ -321,19 +329,19 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
               <div className={`h-full rounded-full ${item.utilization > 80 ? 'bg-success' : item.utilization > 40 ? 'bg-[#ff9f0a]' : 'bg-red-500'}`} style={{ width: `${item.utilization}%` }} />
             </div>
           </div>
-          
+
           <p className="text-xs text-text-muted font-medium leading-relaxed bg-app-card p-3 rounded-xl border border-border-soft pointer-events-none">
             {item.recommendation}
           </p>
-          
+
           <div className="flex gap-2">
-             <button 
+             <button
                onClick={(e) => { e.stopPropagation(); onAdjustClick(item); }}
                className="px-4 py-3 bg-app-card border border-border-soft text-text-main text-[10px] font-black uppercase tracking-wider rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm active:scale-95 flex items-center justify-center"
              >
                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
              </button>
-             <button 
+             <button
                onClick={(e) => onActionClick(item.actionText, e)}
                className="flex-1 py-3 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary-dark transition-all shadow-sm active:scale-95"
              >
@@ -342,11 +350,6 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
           </div>
         </div>
       ))}
-      {!isModal && (
-        <div className="p-4 text-center text-[10px] font-bold text-primary uppercase tracking-widest bg-app-bg/50 pointer-events-none">
-          Click Card to View Full List
-        </div>
-      )}
     </div>
   </div>
 );
@@ -356,9 +359,10 @@ const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionCli
 // ==========================================
 export default function AdminReports() {
   const [timeRange, setTimeRange] = useState('This Year');
-  const [activeModal, setActiveModal] = useState(null); 
-  const [actionSuccess, setActionSuccess] = useState(null); 
+  const [activeModal, setActiveModal] = useState(null);
+  const [actionSuccess, setActionSuccess] = useState(null);
   const [manualAdjustItem, setManualAdjustItem] = useState(null);
+  const [activeCareTab, setActiveCareTab] = useState('Laundry'); // for Maintenance & Care Center
 
   // Dynamic AI State
   const [insightsConfig, setInsightsConfig] = useState({
@@ -369,7 +373,7 @@ export default function AdminReports() {
     discountPercent: 10,
     discountCategory: 'Party Dresses'
   });
-  
+
   const [tempInsights, setTempInsights] = useState(insightsConfig);
 
   const currentData = DATA_SETS[timeRange] || DATA_SETS['This Year'];
@@ -393,7 +397,7 @@ export default function AdminReports() {
   const pathForecast = buildPath(forecastLinePoints);
 
   const handleActionClick = (actionName, e) => {
-    if (e) e.stopPropagation(); 
+    if (e) e.stopPropagation();
     setActionSuccess(`Successfully executed: ${actionName}`);
     setTimeout(() => setActionSuccess(null), 3000);
   };
@@ -411,7 +415,7 @@ export default function AdminReports() {
 
   return (
     <div className="flex flex-col min-h-screen md:h-screen relative bg-app-bg" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif' }}>
-      
+
       {/* Toast Notification */}
       {actionSuccess && (
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-200 bg-success text-white px-4 md:px-6 py-3 rounded-full font-bold shadow-xl flex items-center gap-2 md:gap-3 animate-slide-up text-sm md:text-base w-max max-w-[90vw]">
@@ -421,7 +425,7 @@ export default function AdminReports() {
       )}
 
       <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-12 pb-28 md:pb-12 md:max-w-350 md:mx-auto md:w-full scrollbar-hide">
-        
+
         {/* Header Section */}
         <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 animate-slide-up">
           <div>
@@ -429,8 +433,8 @@ export default function AdminReports() {
             <h1 className="text-3xl md:text-4xl font-black text-text-main tracking-tight">Analytics Overview</h1>
             <p className="text-sm font-medium text-text-muted mt-1 md:mt-2">Track your store's revenue, rentals, and user demographics.</p>
           </div>
-          
-          <select 
+
+          <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
             className="w-full md:w-auto bg-app-card border border-border-soft text-text-main text-sm rounded-xl px-4 py-3 md:py-2 font-bold outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer shadow-sm transition-all"
@@ -444,7 +448,7 @@ export default function AdminReports() {
         {/* Dynamic Executive Insights Card */}
         <div className="mb-8 bg-app-card rounded-3xl md:rounded-4xl p-5 md:p-8 shadow-sm relative overflow-hidden border border-primary/20 animate-slide-up group">
           <div className="absolute top-0 right-0 w-75 md:w-100 h-75 md:h-100 bg-primary/5 rounded-full blur-[60px] md:blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
-          
+
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between mb-5 md:mb-8 gap-3 md:gap-4">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
@@ -458,10 +462,10 @@ export default function AdminReports() {
                 <p className="text-text-muted text-xs md:text-sm font-medium mt-0.5 md:mt-1">Real-time predictive analytics based on current market trends.</p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
                <span className="text-text-muted text-[9px] md:text-[10px] uppercase font-bold tracking-widest hidden md:inline-block">Updated Just Now</span>
-               <button 
+               <button
                  onClick={openConfigModal}
                  className="p-2 md:p-2.5 bg-app-bg border border-border-soft rounded-lg md:rounded-xl text-text-muted hover:text-primary hover:border-primary transition-all shadow-sm active:scale-95"
                  title="Configure Model"
@@ -492,7 +496,7 @@ export default function AdminReports() {
                   Apply a <span className="text-[#ff9f0a] font-bold">{insightsConfig.discountPercent}% discount</span> on underperforming '{insightsConfig.discountCategory}' to boost utilization.
                 </p>
               </div>
-              <button 
+              <button
                 onClick={(e) => handleActionClick('Promo Automation Executed', e)}
                 className="w-full md:w-auto bg-text-main text-white py-3 md:py-3 px-6 rounded-xl font-black text-xs uppercase tracking-wider hover:bg-black transition-colors active:scale-95 shadow-md"
               >
@@ -539,7 +543,7 @@ export default function AdminReports() {
             <h2 className="text-xl md:text-3xl font-black text-text-main truncate">12 Items</h2>
             <p className="text-[9px] md:text-xs text-text-muted font-bold mt-1 md:mt-2 truncate">2.5% Catalog Damage Rate</p>
           </div>
-          
+
           {/* Photo Verification Compliance KPI */}
           <div className="bg-app-card p-4 md:p-6 rounded-[20px] md:rounded-3xl shadow-sm border border-success/20 hover:border-success/50 transition-colors cursor-pointer">
             <p className="text-success font-bold uppercase text-[8px] md:text-[10px] tracking-wider mb-1 md:mb-2 truncate flex items-center gap-1.5">
@@ -549,7 +553,7 @@ export default function AdminReports() {
             <h2 className="text-xl md:text-3xl font-black text-text-main truncate">95%</h2>
             <p className="text-[9px] md:text-xs text-text-muted font-bold mt-1 md:mt-2 truncate">106/112 returns have photos</p>
           </div>
-          
+
           {/* SMS Reminders / Overdue Tracking KPI */}
           <div className="bg-app-card p-4 md:p-6 rounded-[20px] md:rounded-3xl shadow-sm border border-[#ff9f0a]/20 hover:border-[#ff9f0a]/50 transition-colors col-span-2 md:col-span-1 cursor-pointer">
             <p className="text-[#ff9f0a] font-bold uppercase text-[8px] md:text-[10px] tracking-wider mb-1 md:mb-2 truncate flex items-center gap-1.5">
@@ -561,12 +565,89 @@ export default function AdminReports() {
           </div>
         </div>
 
+        {/* MAINTENANCE & CARE CENTER (added from first code) */}
+        <div className="mb-8 bg-app-card rounded-3xl md:rounded-[2rem] shadow-sm border border-border-soft overflow-hidden animate-slide-up">
+          <div className="px-5 md:px-8 py-4 md:py-6 border-b border-border-soft flex flex-col md:flex-row md:items-center justify-between gap-4 bg-app-bg/50">
+            <div>
+              <h3 className="font-bold text-text-main flex items-center gap-2 text-sm md:text-base">
+                Maintenance & Care Center
+                <span className="bg-primary/10 text-primary text-[8px] md:text-[9px] px-2 py-0.5 rounded-md uppercase tracking-widest font-black">Active Flow</span>
+              </h3>
+              <p className="text-[10px] md:text-xs text-text-muted font-medium mt-1">Tracking outfits in cleaning or restoration cycles.</p>
+            </div>
+
+            <div className="flex bg-app-bg border border-border-soft p-1 rounded-xl w-fit">
+              {['Laundry', 'Repair'].map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveCareTab(tab)}
+                  className={`px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-wider transition-all ${
+                    activeCareTab === tab ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'
+                  }`}
+                >
+                  {tab} ({CARE_DATA[tab].length})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="overflow-x-auto scrollbar-hide">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="border-b border-border-soft">
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest">Outfit Asset</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest">Status / Issue</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest">Priority</th>
+                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-soft">
+                {CARE_DATA[activeCareTab].map((item) => (
+                  <tr key={item.id} className="hover:bg-app-bg/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <img src={item.imageUrl} className="w-12 h-12 rounded-xl object-cover border border-border-soft" alt={item.name} />
+                        <div>
+                          <span className="font-bold text-sm text-text-main block">{item.name}</span>
+                          <span className="text-[10px] text-text-muted font-black tracking-widest uppercase">{item.id}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div>
+                        <span className="text-xs font-bold text-text-main block">{activeCareTab === 'Laundry' ? item.status : item.issue}</span>
+                        <span className="text-[10px] text-text-muted">{activeCareTab === 'Laundry' ? item.since : `Assigned: ${item.assigned}`}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-md font-black border tracking-widest uppercase ${
+                        item.priority === 'Urgent' ? 'bg-red-50 text-red-600 border-red-100' :
+                        item.priority === 'High' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-app-bg text-text-muted border-border-soft'
+                      }`}>
+                        {item.priority}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleActionClick(`Flagged ${item.id} as Available`)}
+                        className="px-4 py-2 bg-app-bg border border-border-soft text-[10px] font-black uppercase tracking-widest rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm"
+                      >
+                        Set Available
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* CHARTS GRID */}
         <div className="flex flex-col gap-4 md:gap-6 animate-slide-up">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-            
+
             {/* Chart 1: Revenue Line Chart WITH PEAK SEASON MARKERS */}
-            <div 
+            <div
               onClick={() => setActiveModal('revenue')}
               className="col-span-1 md:col-span-2 bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft flex flex-col justify-between cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group relative overflow-hidden"
             >
@@ -580,9 +661,9 @@ export default function AdminReports() {
                   <span className="flex items-center gap-1 text-primary"><div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border-2 border-primary"></div> Forecast</span>
                 </div>
               </div>
-              
+
               <div className="relative h-40 md:h-48 w-full mb-4 text-primary">
-                
+
                 {/* HTML Overlays for Peak Labels (Prevents text stretching) */}
                 {timeRange === 'This Year' && (
                    <>
@@ -592,13 +673,13 @@ export default function AdminReports() {
                 )}
 
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible z-0">
-                  
+
                   {/* Peak Season Highlights Backgrounds ONLY */}
                   {timeRange === 'This Year' && (
                      <>
                         {/* Graduation Peak: March (33.33%) to May (66.66%) */}
                         <rect x="33.33%" y="0" width="33.33%" height="100%" fill="currentColor" fillOpacity="0.04" />
-                        
+
                         {/* Wedding Peak: June (83.33%) to July (100%) */}
                         <rect x="83.33%" y="0" width="16.67%" height="100%" fill="currentColor" fillOpacity="0.04" />
                      </>
@@ -610,7 +691,7 @@ export default function AdminReports() {
                       <stop offset="100%" stopColor="currentColor" stopOpacity="0.0"/>
                     </linearGradient>
                   </defs>
-                  
+
                   {actualDataPoints.length > 0 && <path d={pathActual} fill="none" stroke="currentColor" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />}
                   {forecastLinePoints.length > 0 && <path d={pathForecast} fill="none" stroke="currentColor" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="5,5" />}
                 </svg>
@@ -643,7 +724,7 @@ export default function AdminReports() {
             </div>
 
             {/* Chart 2: Popular Categories */}
-            <div 
+            <div
               onClick={() => setActiveModal('categories')}
               className="bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft flex flex-col cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
             >
@@ -674,7 +755,7 @@ export default function AdminReports() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Chart 3: Top Occasions (UPDATED with Pageants/Graduations) */}
-            <div 
+            <div
               onClick={() => setActiveModal('occasions')}
               className="bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
             >
@@ -698,7 +779,7 @@ export default function AdminReports() {
             </div>
 
             {/* Chart 4: Customer Demographics (Leaflet Map) */}
-            <div 
+            <div
               onClick={() => setActiveModal('heatmap')}
               className="bg-app-card p-5 md:p-8 rounded-3xl shadow-sm border border-border-soft flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-4 relative overflow-hidden cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
             >
@@ -718,16 +799,16 @@ export default function AdminReports() {
                   ))}
                 </div>
               </div>
-              
+
               <div className="w-full md:w-1/2 h-62.5 md:h-full min-h-62.5 flex items-center justify-center relative pointer-events-none rounded-2xl overflow-hidden border border-border-soft group-hover:border-primary/30 transition-colors shadow-inner">
                  <BatangasHeatmap />
                  <div className="absolute inset-0 bg-transparent z-10"></div>
               </div>
             </div>
           </div>
-          
+
           {/* Predictive Item Insights Section */}
-          <div 
+          <div
             onClick={() => setActiveModal('insights')}
             className="bg-app-card rounded-3xl md:rounded-4xl shadow-sm border border-border-soft overflow-hidden animate-slide-up mt-2 cursor-pointer hover:border-primary/50 hover:shadow-md transition-all group"
           >
@@ -741,28 +822,28 @@ export default function AdminReports() {
                 <p className="text-[10px] md:text-xs text-text-muted font-medium mt-1">Recommendations to maximize revenue.</p>
               </div>
             </div>
-            
-            <ResponsiveInsights 
-              items={ITEM_INSIGHTS.slice(0, 2)} 
-              isModal={false} 
-              onAdjustClick={setManualAdjustItem} 
-              onActionClick={handleActionClick} 
+
+            <ResponsiveInsights
+              items={ITEM_INSIGHTS.slice(0, 2)}
+              isModal={false}
+              onAdjustClick={setManualAdjustItem}
+              onActionClick={handleActionClick}
             />
           </div>
 
         </div>
       </div>
-      
+
       {/* ==========================================
           SHARED FULL-SCREEN MODALS
       ========================================== */}
       {activeModal && (
         <div className="fixed inset-0 z-100 flex items-center justify-center p-2 sm:p-4 md:p-6 transition-all">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onClick={() => setActiveModal(null)} />
-          
+
           <div className={`relative bg-app-card border border-border-soft w-full ${activeModal === 'configureInsights' ? 'max-w-2xl' : 'max-w-5xl'} rounded-3xl sm:rounded-4xl overflow-hidden max-h-[90vh] md:max-h-[85vh] flex flex-col shadow-2xl animate-scale-in z-10`}>
-            
-            <button 
+
+            <button
               onClick={() => setActiveModal(null)}
               className="absolute top-3 right-3 md:top-6 md:right-6 bg-app-bg/90 backdrop-blur-md p-2 md:p-3 rounded-full text-text-muted hover:bg-primary hover:text-white border border-border-soft transition-all z-20 shadow-sm"
             >
@@ -770,7 +851,7 @@ export default function AdminReports() {
             </button>
 
             <div className={`flex flex-col h-full overflow-y-auto scrollbar-hide ${activeModal === 'configureInsights' ? 'p-5 sm:p-8 pt-12 md:pt-8' : 'p-4 sm:p-6 md:p-10 pt-12 md:pt-10'}`}>
-              
+
               {/* MODAL: CONFIGURE INSIGHTS */}
               {activeModal === 'configureInsights' && (
                 <div className="space-y-6 animate-fade-in pb-4">
@@ -778,29 +859,29 @@ export default function AdminReports() {
                     <h2 className="text-2xl md:text-3xl font-black text-text-main tracking-tight pr-8">Configure Model</h2>
                     <p className="text-sm text-text-muted font-medium mt-1">Adjust the parameters for the real-time AI Insights.</p>
                   </div>
-                  
+
                   {/* Forecast Adjustments */}
                   <div className="bg-app-bg p-5 rounded-2xl border border-border-soft">
                      <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-success"></div>
                         Demand Forecast Parameters
                      </h3>
-                     
+
                      <div className="space-y-4">
                         <div>
                            <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Projected Spike (%)</label>
-                           <input 
-                             type="number" 
+                           <input
+                             type="number"
                              value={tempInsights.spikePercent}
                              onChange={e => setTempInsights({...tempInsights, spikePercent: e.target.value})}
-                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" 
+                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                            />
                         </div>
-                        
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                            <div>
                               <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Primary Category</label>
-                              <select 
+                              <select
                                 value={tempInsights.spikeCategory1}
                                 onChange={e => setTempInsights({...tempInsights, spikeCategory1: e.target.value})}
                                 className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
@@ -810,7 +891,7 @@ export default function AdminReports() {
                            </div>
                            <div>
                               <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Secondary Category</label>
-                              <select 
+                              <select
                                 value={tempInsights.spikeCategory2}
                                 onChange={e => setTempInsights({...tempInsights, spikeCategory2: e.target.value})}
                                 className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
@@ -822,12 +903,12 @@ export default function AdminReports() {
 
                         <div>
                            <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Timeline Target</label>
-                           <input 
-                             type="text" 
+                           <input
+                             type="text"
                              value={tempInsights.spikeTimeline}
                              onChange={e => setTempInsights({...tempInsights, spikeTimeline: e.target.value})}
                              placeholder="e.g. June/July"
-                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" 
+                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                            />
                         </div>
                      </div>
@@ -839,21 +920,21 @@ export default function AdminReports() {
                         <div className="w-2 h-2 rounded-full bg-[#ff9f0a]"></div>
                         Suggested Optimization Parameters
                      </h3>
-                     
+
                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                            <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Proposed Discount (%)</label>
-                           <input 
-                             type="number" 
+                           <input
+                             type="number"
                              value={tempInsights.discountPercent}
                              onChange={e => setTempInsights({...tempInsights, discountPercent: e.target.value})}
-                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" 
+                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                            />
                         </div>
-                        
+
                         <div>
                            <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Target Category</label>
-                           <select 
+                           <select
                              value={tempInsights.discountCategory}
                              onChange={e => setTempInsights({...tempInsights, discountCategory: e.target.value})}
                              className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
@@ -879,7 +960,7 @@ export default function AdminReports() {
                     <h2 className="text-xl md:text-3xl font-black text-text-main tracking-tight pr-8">Comprehensive Revenue</h2>
                     <p className="text-xs md:text-sm text-text-muted font-medium mt-1 md:mt-2">Historical financial data for <span className="font-bold">{timeRange}</span>.</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                      <div className="bg-app-bg p-4 md:p-5 rounded-2xl border border-border-soft">
                         <p className="text-[9px] md:text-[10px] text-text-muted font-black uppercase tracking-widest mb-1 truncate">Total Revenue</p>
@@ -935,7 +1016,7 @@ export default function AdminReports() {
                     <h2 className="text-xl md:text-3xl font-black text-text-main tracking-tight pr-8">Catalog Performance</h2>
                     <p className="text-xs md:text-sm text-text-muted font-medium mt-1 md:mt-2">Breakdown of the most popular rental categories.</p>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 grow">
                     {POPULAR_CATEGORIES.map(cat => (
                       <div key={cat.name} className="bg-app-bg p-4 md:p-6 rounded-[20px] md:rounded-3xl border border-border-soft flex flex-col justify-between">
@@ -987,7 +1068,7 @@ export default function AdminReports() {
                     <h2 className="text-xl md:text-3xl font-black text-text-main tracking-tight pr-8">Geographic Distribution</h2>
                     <p className="text-xs md:text-sm text-text-muted font-medium mt-1 md:mt-2">Customer municipalities in 1st District Batangas.</p>
                   </div>
-                  
+
                   <div className="flex flex-col md:flex-row gap-4 md:gap-8 flex-1 min-h-0 pb-6 md:pb-0">
                      <div className="w-full md:w-2/3 h-[300px] md:h-full md:min-h-[500px] bg-app-bg rounded-[20px] md:rounded-4xl border border-border-soft relative overflow-hidden shadow-inner shrink-0 md:shrink md:order-2">
                         <BatangasHeatmap />
@@ -1018,11 +1099,11 @@ export default function AdminReports() {
                   </div>
 
                   <div className="bg-app-bg border border-border-soft rounded-2xl md:rounded-3xl overflow-hidden grow flex flex-col">
-                    <ResponsiveInsights 
-                      items={ITEM_INSIGHTS} 
-                      isModal={true} 
-                      onAdjustClick={setManualAdjustItem} 
-                      onActionClick={handleActionClick} 
+                    <ResponsiveInsights
+                      items={ITEM_INSIGHTS}
+                      isModal={true}
+                      onAdjustClick={setManualAdjustItem}
+                      onActionClick={handleActionClick}
                     />
                   </div>
                 </div>
@@ -1042,24 +1123,24 @@ export default function AdminReports() {
                 <div className="bg-app-bg border border-border-soft text-text-muted text-[9px] md:text-[10px] font-black uppercase px-2 py-1 rounded-md">{manualAdjustItem.id}</div>
               </div>
               <p className="text-xs md:text-sm text-text-muted font-medium mb-5 md:mb-6">Set a new base rate for <span className="font-bold text-text-main">{manualAdjustItem.name}</span>.</p>
-              
+
               <div className="mb-6 relative">
                  <label className="text-[9px] md:text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 md:mb-2 block">New Base Rate</label>
                  <span className="absolute left-4 bottom-3 md:bottom-3.25 text-text-main font-black">₱</span>
-                 <input 
-                   type="number" 
-                   placeholder="e.g. 2500" 
-                   className="w-full bg-app-bg border border-border-soft rounded-xl pl-8 pr-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted/50 text-sm md:text-base" 
+                 <input
+                   type="number"
+                   placeholder="e.g. 2500"
+                   className="w-full bg-app-bg border border-border-soft rounded-xl pl-8 pr-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-text-muted/50 text-sm md:text-base"
                  />
               </div>
-              
+
               <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
                  <button onClick={() => setManualAdjustItem(null)} className="w-full sm:flex-1 py-3.5 bg-app-bg border border-transparent hover:border-border-soft text-text-muted font-bold rounded-xl transition-colors text-sm">Cancel</button>
-                 <button 
-                   onClick={(e) => { 
-                     setManualAdjustItem(null); 
-                     handleActionClick(`Updated Pricing for ${manualAdjustItem.id}`, e); 
-                   }} 
+                 <button
+                   onClick={(e) => {
+                     setManualAdjustItem(null);
+                     handleActionClick(`Updated Pricing for ${manualAdjustItem.id}`, e);
+                   }}
                    className="w-full sm:flex-2 py-3.5 bg-text-main text-white font-black rounded-xl hover:bg-black transition-colors shadow-lg active:scale-95 text-sm"
                  >
                    Confirm Update
