@@ -414,7 +414,7 @@ export default function AdminReports() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen md:h-screen relative bg-app-bg" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif' }}>
+    <div className="flex flex-col min-h-screen md:h-screen relative bg-[#faf6f6]" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif' }}>
 
       {/* Toast Notification */}
       {actionSuccess && (

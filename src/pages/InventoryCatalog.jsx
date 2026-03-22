@@ -12,9 +12,12 @@ export default function InventoryCatalog({ globalRole }) {
   // State for bulk selection
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
+  
+  // New State: Confirmation prompt for cancelling selection
+  const [showCancelPrompt, setShowCancelPrompt] = useState(false);
 
-  // New: State for Maintenance Input Modal (Repair issue / Laundry status)
-  const [maintenanceForm, setMaintenanceForm] = useState(null); // { type: 'laundry' | 'repair', items: [] }
+  // State for Maintenance Input Modal (Repair issue / Laundry status)
+  const [maintenanceForm, setMaintenanceForm] = useState(null);
 
   // AI Semantic Search Logic
   const filteredItems = useMemo(() => {
@@ -51,7 +54,6 @@ export default function InventoryCatalog({ globalRole }) {
 
   const availableCount = CATALOG_ITEMS.filter(i => i.status?.toLowerCase() === 'available').length;
 
-  // Categories updated: Maintenance is only visible to Admin
   const categories = [
     { id: 'all', label: 'All Collection' },
     { id: 'available', label: 'Available Now' },
@@ -59,7 +61,6 @@ export default function InventoryCatalog({ globalRole }) {
     { id: 'suits', label: 'Suits & Tuxedos' },
     { id: ['barong', 'filipiniana'], label: 'Barong & Filipiniana' },
     { id: 'costumes', label: 'Costumes' },
-    ...(globalRole === 'admin' ? [{ id: 'maintenance', label: 'Maintenance' }] : []),
   ];
 
   const toggleSelection = (id) => {
@@ -74,23 +75,43 @@ export default function InventoryCatalog({ globalRole }) {
   };
 
   const handleMaintenanceConfirm = (data) => {
-    // In a real app, you would update your backend/mockData here
     alert(`Success: ${maintenanceForm.items.length} item(s) moved to ${maintenanceForm.type}.\nDetails: ${data.value} | Priority: ${data.priority}`);
     
     setMaintenanceForm(null);
     setSelectedItems([]);
     setSelectionMode(false);
-    setFilter('maintenance'); // Automatically switch to maintenance view
+    setFilter('maintenance');
   };
 
   const isItemAvailable = detailItem?.status?.toLowerCase() === 'available';
 
+  // --- Background Click Handler ---
+  const handleBgClick = () => {
+    if (selectionMode) {
+      if (selectedItems.length > 0) {
+        setShowCancelPrompt(true); // Trigger Pop-up if items are selected
+      } else {
+        setSelectionMode(false); // Cancel silently if nothing is selected
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-full relative bg-[#faf6f6]" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif' }}>
-      <div className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full scrollbar-hide">
+      
+      {/* The main scrollable wrapper detects background clicks.
+        Internal elements use e.stopPropagation() so they don't trigger the cancel prompt.
+      */}
+      <div 
+        className="grow overflow-y-auto px-4 md:px-12 pt-8 md:pt-16 pb-28 md:pb-12 md:max-w-[1400px] md:mx-auto md:w-full scrollbar-hide"
+        onClick={handleBgClick}
+      >
         
         {/* SHARED HEADER */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12 animate-slide-up">
+        <div 
+          className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-10 animate-slide-up"
+          onClick={(e) => e.stopPropagation()} // Prevent BG click
+        >
           <div>
             <p className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-2">
               {filter === 'maintenance' ? 'Service Tracking' : 'The Collection'}
@@ -113,8 +134,12 @@ export default function InventoryCatalog({ globalRole }) {
               <div className="flex gap-2 w-full">
                 <button 
                   onClick={() => {
-                    setSelectionMode(!selectionMode);
-                    setSelectedItems([]);
+                    if (selectionMode && selectedItems.length > 0) {
+                      setShowCancelPrompt(true);
+                    } else {
+                      setSelectionMode(!selectionMode);
+                      setSelectedItems([]);
+                    }
                   }}
                   className={`flex-1 md:w-auto px-6 py-3 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2 border-2 ${
                     selectionMode ? 'bg-primary text-white border-primary' : 'bg-white text-text-main border-border-soft hover:border-primary/50'
@@ -137,7 +162,10 @@ export default function InventoryCatalog({ globalRole }) {
 
         {/* BULK ACTION BAR */}
         {selectionMode && selectedItems.length > 0 && (
-          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-app-card border-2 border-primary rounded-3xl p-4 shadow-2xl flex items-center justify-center gap-3 animate-slide-up w-auto px-8">
+          <div 
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[90] bg-app-card border-2 border-primary rounded-3xl p-4 shadow-2xl flex items-center justify-center gap-3 animate-slide-up w-auto px-8"
+            onClick={(e) => e.stopPropagation()} // Prevent BG click
+          >
             <button 
               onClick={() => triggerMaintenanceForm('laundry', selectedItems)}
               className="bg-primary text-white px-10 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-primary-dark transition-all shadow-lg shadow-primary/20"
@@ -153,46 +181,77 @@ export default function InventoryCatalog({ globalRole }) {
           </div>
         )}
 
+        {/* --- VIEW TOGGLE (ADMIN ONLY) --- */}
+        {globalRole === 'admin' && (
+          <div 
+            className="flex p-1 bg-app-card border border-border-soft rounded-2xl w-full md:w-max mb-6 shadow-sm animate-slide-up"
+            onClick={(e) => e.stopPropagation()} // Prevent BG click
+          >
+            <button 
+              onClick={() => { setFilter('all'); setSelectionMode(false); }}
+              className={`flex-1 md:w-48 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${filter !== 'maintenance' ? 'bg-primary text-white shadow-md' : 'text-text-muted hover:text-text-main'}`}
+            >
+              Catalog View
+            </button>
+            <button 
+              onClick={() => { setFilter('maintenance'); setSelectionMode(false); }}
+              className={`flex-1 md:w-48 py-2.5 text-xs font-black uppercase tracking-widest rounded-xl transition-all ${filter === 'maintenance' ? 'bg-primary text-white shadow-md' : 'text-text-muted hover:text-text-main'}`}
+            >
+              Maintenance Center
+            </button>
+          </div>
+        )}
+
         {/* SEARCH & FILTERS */}
-        <div className="flex flex-col md:flex-row gap-4 mb-10 animate-slide-up" style={{ animationDelay: '0.05s' }}>
+        <div 
+          className="flex flex-col md:flex-row gap-4 mb-10 animate-slide-up" 
+          style={{ animationDelay: '0.05s' }}
+          onClick={(e) => e.stopPropagation()} // Prevent BG click
+        >
           <div className="relative w-full md:w-80 shrink-0">
             <input 
               type="text" 
-              placeholder="Search..." 
+              placeholder={filter === 'maintenance' ? "Search maintenance records..." : "Search catalog..."} 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full py-3.5 pr-4 pl-4 border border-border-soft rounded-2xl bg-app-bg shadow-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-bold text-sm text-text-main placeholder:text-text-muted/50"
             />
           </div>
 
-          <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-            <div className="flex gap-2 w-max pr-4 md:pr-0">
-              {categories.map(cat => {
-                const isActive = Array.isArray(cat.id) 
-                  ? Array.isArray(filter) && cat.id.join(',') === filter.join(',')
-                  : filter === cat.id;
+          {/* Hide categories when in maintenance mode */}
+          {filter !== 'maintenance' && (
+            <div className="w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+              <div className="flex gap-2 w-max pr-4 md:pr-0">
+                {categories.map(cat => {
+                  const isActive = Array.isArray(cat.id) 
+                    ? Array.isArray(filter) && cat.id.join(',') === filter.join(',')
+                    : filter === cat.id;
 
-                return (
-                  <button 
-                    key={Array.isArray(cat.id) ? cat.id.join('-') : cat.id} 
-                    onClick={() => {setFilter(cat.id); setSelectionMode(false);}}
-                    className={`shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
-                      isActive 
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20 border border-primary' 
-                        : 'bg-app-card text-text-muted border border-border-soft hover:border-primary/30 hover:text-primary'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                );
-              })}
+                  return (
+                    <button 
+                      key={Array.isArray(cat.id) ? cat.id.join('-') : cat.id} 
+                      onClick={() => {setFilter(cat.id); setSelectionMode(false);}}
+                      className={`shrink-0 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-wider whitespace-nowrap transition-all ${
+                        isActive 
+                          ? 'bg-primary text-white shadow-lg shadow-primary/20 border border-primary' 
+                          : 'bg-app-card text-text-muted border border-border-soft hover:border-primary/30 hover:text-primary'
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* FASHION GRID OR MAINTENANCE CENTER */}
         {filter === 'maintenance' && globalRole === 'admin' ? (
-          <div className="flex flex-col gap-10 pb-20 animate-slide-up">
+          <div 
+            className="flex flex-col gap-10 pb-20 animate-slide-up"
+            onClick={(e) => e.stopPropagation()} // Prevent BG click
+          >
             <MaintenanceTable 
               title="Laundry" 
               count="3" 
@@ -208,7 +267,7 @@ export default function InventoryCatalog({ globalRole }) {
               count="2" 
               headers={['Outfit Asset', 'Status / Issue', 'Priority', 'Action']}
               data={[
-                { id: 'ITEM-1007', name: 'Emerald Evening Gown', status: 'Loose Hemline', sub: 'Assigned: Manang Nene', priority: 'Urgent' },
+                { id: 'ITEM-1007', name: 'Emerald Evening Gown', status: 'Loose Hemline', sub: 'Assigned: Nene', priority: 'Urgent' },
                 { id: 'ITEM-1014', name: 'Modern Piña Barong', status: 'Fabric Snag', sub: 'Assigned: Internal', priority: 'High' },
               ]}
             />
@@ -222,11 +281,14 @@ export default function InventoryCatalog({ globalRole }) {
             <p className="text-text-muted font-medium">Try adjusting your search or filters.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 pb-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-8 pb-10 min-h-[50vh]">
             {filteredItems.map((item, i) => (
               <div 
                 key={item.id} 
-                onClick={() => selectionMode ? toggleSelection(item.id) : setDetailItem(item)}
+                onClick={(e) => {
+                  e.stopPropagation(); // VERY IMPORTANT: Clicking the card won't trigger BG cancel
+                  selectionMode ? toggleSelection(item.id) : setDetailItem(item);
+                }}
                 className={`group cursor-pointer animate-slide-up flex flex-col relative ${selectionMode && selectedItems.includes(item.id) ? 'scale-95' : ''} transition-transform`}
                 style={{ animationDelay: `${i * 0.05}s` }}
               >
@@ -270,6 +332,42 @@ export default function InventoryCatalog({ globalRole }) {
           </div>
         )}
       </div>
+
+      {/* --- CANCEL SELECTION POP-UP MODAL --- */}
+      {showCancelPrompt && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCancelPrompt(false)}></div>
+          <div className="relative bg-app-card rounded-[32px] p-8 max-w-sm w-full text-center shadow-2xl animate-scale-in border border-border-soft">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-5 text-primary">
+              <svg className="w-8 h-8 stroke-[2.5px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-black text-text-main mb-2 tracking-tight">Cancel Selection?</h3>
+            <p className="text-text-muted text-sm font-medium mb-8">
+              You currently have <span className="font-bold text-text-main">{selectedItems.length} item(s)</span> selected. Are you sure you want to discard this selection?
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setShowCancelPrompt(false)} 
+                className="flex-1 py-3.5 font-bold text-text-main bg-app-bg hover:bg-border-soft border border-border-soft rounded-2xl transition-colors text-sm"
+              >
+                Keep Selecting
+              </button>
+              <button 
+                onClick={() => {
+                  setShowCancelPrompt(false);
+                  setSelectionMode(false);
+                  setSelectedItems([]);
+                }} 
+                className="flex-1 py-3.5 font-black text-white bg-primary rounded-2xl shadow-lg shadow-primary/20 hover:bg-primary-dark active:scale-95 transition-all text-sm uppercase tracking-wider"
+              >
+                Yes, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MAINTENANCE ACTION MODAL */}
       {maintenanceForm && (
@@ -392,22 +490,22 @@ function MaintenanceTable({ title, count, headers, data }) {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-app-bg/50">
-              {headers.map(h => <th key={h} className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest">{h}</th>)}
+              {headers.map(h => <th key={h} className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest whitespace-nowrap">{h}</th>)}
             </tr>
           </thead>
           <tbody>
             {data.map((row, i) => (
               <tr key={i} className="border-t border-border-soft hover:bg-app-bg/30 transition-colors">
                 <td className="px-6 py-5">
-                  <p className="font-black text-sm text-text-main">{row.name}</p>
+                  <p className="font-black text-sm text-text-main whitespace-nowrap">{row.name}</p>
                   <p className="text-[10px] font-bold text-text-muted">{row.id}</p>
                 </td>
                 <td className="px-6 py-5">
-                  <p className="text-sm font-bold text-text-main">{row.status}</p>
+                  <p className="text-sm font-bold text-text-main whitespace-nowrap">{row.status}</p>
                   <p className="text-[10px] font-medium text-text-muted">{row.sub}</p>
                 </td>
                 <td className="px-6 py-5">
-                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                  <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap ${
                     row.priority === 'Urgent' ? 'bg-primary text-white' : 
                     row.priority === 'High' ? 'bg-primary/20 text-primary' : 'bg-app-bg text-text-muted border border-border-soft'
                   }`}>
@@ -415,7 +513,7 @@ function MaintenanceTable({ title, count, headers, data }) {
                   </span>
                 </td>
                 <td className="px-6 py-5">
-                  <button onClick={() => alert(`${row.id} set to Available`)} className="bg-success text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-success-dark transition-all">
+                  <button onClick={() => alert(`${row.id} set to Available`)} className="bg-success text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-success-dark transition-all whitespace-nowrap">
                     Set Available
                   </button>
                 </td>
