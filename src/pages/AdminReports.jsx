@@ -6,8 +6,8 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
 
 /**
- * RENTECH: AN AI-ENHANCED RENTAL MANAGEMENT SYSTEM [cite: 1]
- * Implementation for Mylene's Boutique [cite: 30]
+ * RENTECH: AN AI-ENHANCED RENTAL MANAGEMENT SYSTEM
+ * Implementation for Mylene's Boutique
  */
 
 // ==========================================
@@ -214,21 +214,6 @@ const ITEM_INSIGHTS = [
 ];
 
 // ==========================================
-// LAUNDRY & REPAIR DATA (from first code)
-// ==========================================
-const CARE_DATA = {
-  Laundry: [
-    { id: "ITEM-1011", name: "Ivory Lace Bridal Gown", status: "In Wash", since: "2 hours ago", priority: "High", imageUrl: "https://images.unsplash.com/photo-1594434212624-4054ad902401?w=150" },
-    { id: "ITEM-1004", name: "Midnight Blue Peak Tuxedo", status: "Drying", since: "5 hours ago", priority: "Normal", imageUrl: "https://images.unsplash.com/photo-1594932224491-ef7012971337?w=150" },
-    { id: "ITEM-1021", name: "Satin Bridesmaid Midi", status: "Pressing", since: "1 hour ago", priority: "Urgent", imageUrl: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=150" }
-  ],
-  Repair: [
-    { id: "ITEM-1007", name: "Emerald Evening Gown", issue: "Loose Hemline", assigned: "Manang Nene", priority: "Urgent", imageUrl: "https://images.unsplash.com/photo-1568252542512-9fe8fe9c87bb?w=150" },
-    { id: "ITEM-1014", name: "Modern Piña Barong", issue: "Fabric Snag", assigned: "Internal", priority: "High", imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150" }
-  ]
-};
-
-// ==========================================
 // REUSABLE COMPONENT
 // ==========================================
 const ResponsiveInsights = ({ items, isModal = false, onAdjustClick, onActionClick }) => (
@@ -362,19 +347,16 @@ export default function AdminReports() {
   const [activeModal, setActiveModal] = useState(null);
   const [actionSuccess, setActionSuccess] = useState(null);
   const [manualAdjustItem, setManualAdjustItem] = useState(null);
-  const [activeCareTab, setActiveCareTab] = useState('Laundry'); // for Maintenance & Care Center
 
-  // Dynamic AI State
-  const [insightsConfig, setInsightsConfig] = useState({
+  // Static Insights Config
+  const insightsConfig = {
     spikePercent: 22,
     spikeCategory1: 'Wedding Gowns',
     spikeCategory2: 'Formal Suits',
     spikeTimeline: 'June/July',
     discountPercent: 10,
     discountCategory: 'Party Dresses'
-  });
-
-  const [tempInsights, setTempInsights] = useState(insightsConfig);
+  };
 
   const currentData = DATA_SETS[timeRange] || DATA_SETS['This Year'];
   const maxRevenue = Math.max(...currentData.chart.map(d => d.revenue));
@@ -400,17 +382,6 @@ export default function AdminReports() {
     if (e) e.stopPropagation();
     setActionSuccess(`Successfully executed: ${actionName}`);
     setTimeout(() => setActionSuccess(null), 3000);
-  };
-
-  const openConfigModal = () => {
-    setTempInsights(insightsConfig);
-    setActiveModal('configureInsights');
-  };
-
-  const saveInsightsConfig = () => {
-    setInsightsConfig(tempInsights);
-    setActiveModal(null);
-    handleActionClick('Model Configuration Updated');
   };
 
   return (
@@ -465,13 +436,6 @@ export default function AdminReports() {
 
             <div className="flex items-center gap-3">
                <span className="text-text-muted text-[9px] md:text-[10px] uppercase font-bold tracking-widest hidden md:inline-block">Updated Just Now</span>
-               <button
-                 onClick={openConfigModal}
-                 className="p-2 md:p-2.5 bg-app-bg border border-border-soft rounded-lg md:rounded-xl text-text-muted hover:text-primary hover:border-primary transition-all shadow-sm active:scale-95"
-                 title="Configure Model"
-               >
-                 <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-               </button>
             </div>
           </div>
 
@@ -562,83 +526,6 @@ export default function AdminReports() {
             </p>
             <h2 className="text-xl md:text-3xl font-black text-text-main truncate">3 Items</h2>
             <p className="text-[9px] md:text-xs text-success font-bold mt-1 md:mt-2 truncate">↓ 18% Since SMS Reminders</p>
-          </div>
-        </div>
-
-        {/* MAINTENANCE & CARE CENTER (added from first code) */}
-        <div className="mb-8 bg-app-card rounded-3xl md:rounded-[2rem] shadow-sm border border-border-soft overflow-hidden animate-slide-up">
-          <div className="px-5 md:px-8 py-4 md:py-6 border-b border-border-soft flex flex-col md:flex-row md:items-center justify-between gap-4 bg-app-bg/50">
-            <div>
-              <h3 className="font-bold text-text-main flex items-center gap-2 text-sm md:text-base">
-                Maintenance & Care Center
-                <span className="bg-primary/10 text-primary text-[8px] md:text-[9px] px-2 py-0.5 rounded-md uppercase tracking-widest font-black">Active Flow</span>
-              </h3>
-              <p className="text-[10px] md:text-xs text-text-muted font-medium mt-1">Tracking outfits in cleaning or restoration cycles.</p>
-            </div>
-
-            <div className="flex bg-app-bg border border-border-soft p-1 rounded-xl w-fit">
-              {['Laundry', 'Repair'].map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveCareTab(tab)}
-                  className={`px-4 py-1.5 rounded-lg text-[10px] md:text-xs font-black uppercase tracking-wider transition-all ${
-                    activeCareTab === tab ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'
-                  }`}
-                >
-                  {tab} ({CARE_DATA[tab].length})
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="overflow-x-auto scrollbar-hide">
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead>
-                <tr className="border-b border-border-soft">
-                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest">Outfit Asset</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest">Status / Issue</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest">Priority</th>
-                  <th className="px-6 py-4 text-[10px] font-black uppercase text-text-muted tracking-widest text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border-soft">
-                {CARE_DATA[activeCareTab].map((item) => (
-                  <tr key={item.id} className="hover:bg-app-bg/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <img src={item.imageUrl} className="w-12 h-12 rounded-xl object-cover border border-border-soft" alt={item.name} />
-                        <div>
-                          <span className="font-bold text-sm text-text-main block">{item.name}</span>
-                          <span className="text-[10px] text-text-muted font-black tracking-widest uppercase">{item.id}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div>
-                        <span className="text-xs font-bold text-text-main block">{activeCareTab === 'Laundry' ? item.status : item.issue}</span>
-                        <span className="text-[10px] text-text-muted">{activeCareTab === 'Laundry' ? item.since : `Assigned: ${item.assigned}`}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-md font-black border tracking-widest uppercase ${
-                        item.priority === 'Urgent' ? 'bg-red-50 text-red-600 border-red-100' :
-                        item.priority === 'High' ? 'bg-orange-50 text-orange-600 border-orange-100' : 'bg-app-bg text-text-muted border-border-soft'
-                      }`}>
-                        {item.priority}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleActionClick(`Flagged ${item.id} as Available`)}
-                        className="px-4 py-2 bg-app-bg border border-border-soft text-[10px] font-black uppercase tracking-widest rounded-xl hover:border-primary hover:text-primary transition-all shadow-sm"
-                      >
-                        Set Available
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
 
@@ -841,7 +728,7 @@ export default function AdminReports() {
         <div className="fixed inset-0 z-100 flex items-center justify-center p-2 sm:p-4 md:p-6 transition-all">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity" onClick={() => setActiveModal(null)} />
 
-          <div className={`relative bg-app-card border border-border-soft w-full ${activeModal === 'configureInsights' ? 'max-w-2xl' : 'max-w-5xl'} rounded-3xl sm:rounded-4xl overflow-hidden max-h-[90vh] md:max-h-[85vh] flex flex-col shadow-2xl animate-scale-in z-10`}>
+          <div className="relative bg-app-card border border-border-soft w-full max-w-5xl rounded-3xl sm:rounded-4xl overflow-hidden max-h-[90vh] md:max-h-[85vh] flex flex-col shadow-2xl animate-scale-in z-10">
 
             <button
               onClick={() => setActiveModal(null)}
@@ -850,108 +737,7 @@ export default function AdminReports() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5 stroke-[3px]"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
 
-            <div className={`flex flex-col h-full overflow-y-auto scrollbar-hide ${activeModal === 'configureInsights' ? 'p-5 sm:p-8 pt-12 md:pt-8' : 'p-4 sm:p-6 md:p-10 pt-12 md:pt-10'}`}>
-
-              {/* MODAL: CONFIGURE INSIGHTS */}
-              {activeModal === 'configureInsights' && (
-                <div className="space-y-6 animate-fade-in pb-4">
-                  <div>
-                    <h2 className="text-2xl md:text-3xl font-black text-text-main tracking-tight pr-8">Configure Model</h2>
-                    <p className="text-sm text-text-muted font-medium mt-1">Adjust the parameters for the real-time AI Insights.</p>
-                  </div>
-
-                  {/* Forecast Adjustments */}
-                  <div className="bg-app-bg p-5 rounded-2xl border border-border-soft">
-                     <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-success"></div>
-                        Demand Forecast Parameters
-                     </h3>
-
-                     <div className="space-y-4">
-                        <div>
-                           <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Projected Spike (%)</label>
-                           <input
-                             type="number"
-                             value={tempInsights.spikePercent}
-                             onChange={e => setTempInsights({...tempInsights, spikePercent: e.target.value})}
-                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                           />
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                           <div>
-                              <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Primary Category</label>
-                              <select
-                                value={tempInsights.spikeCategory1}
-                                onChange={e => setTempInsights({...tempInsights, spikeCategory1: e.target.value})}
-                                className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                              >
-                                {POPULAR_CATEGORIES.map(cat => <option key={cat.name} value={cat.name}>{cat.name}</option>)}
-                              </select>
-                           </div>
-                           <div>
-                              <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Secondary Category</label>
-                              <select
-                                value={tempInsights.spikeCategory2}
-                                onChange={e => setTempInsights({...tempInsights, spikeCategory2: e.target.value})}
-                                className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                              >
-                                {POPULAR_CATEGORIES.map(cat => <option key={cat.name} value={cat.name}>{cat.name}</option>)}
-                              </select>
-                           </div>
-                        </div>
-
-                        <div>
-                           <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Timeline Target</label>
-                           <input
-                             type="text"
-                             value={tempInsights.spikeTimeline}
-                             onChange={e => setTempInsights({...tempInsights, spikeTimeline: e.target.value})}
-                             placeholder="e.g. June/July"
-                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                           />
-                        </div>
-                     </div>
-                  </div>
-
-                  {/* Optimization Adjustments */}
-                  <div className="bg-app-bg p-5 rounded-2xl border border-border-soft">
-                     <h3 className="font-bold text-text-main mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#ff9f0a]"></div>
-                        Suggested Optimization Parameters
-                     </h3>
-
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                           <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Proposed Discount (%)</label>
-                           <input
-                             type="number"
-                             value={tempInsights.discountPercent}
-                             onChange={e => setTempInsights({...tempInsights, discountPercent: e.target.value})}
-                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                           />
-                        </div>
-
-                        <div>
-                           <label className="text-[10px] font-black uppercase text-text-muted tracking-widest mb-1.5 block">Target Category</label>
-                           <select
-                             value={tempInsights.discountCategory}
-                             onChange={e => setTempInsights({...tempInsights, discountCategory: e.target.value})}
-                             className="w-full bg-app-card border border-border-soft rounded-xl px-4 py-3 font-bold text-text-main outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                           >
-                             {POPULAR_CATEGORIES.map(cat => <option key={cat.name} value={cat.name}>{cat.name}</option>)}
-                           </select>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                     <button onClick={() => setActiveModal(null)} className="w-full sm:flex-1 py-3.5 bg-app-bg border border-transparent hover:border-border-soft text-text-muted font-bold rounded-xl transition-colors">Discard</button>
-                     <button onClick={saveInsightsConfig} className="w-full sm:flex-2 py-3.5 bg-primary text-white font-black rounded-xl hover:bg-primary-dark transition-colors shadow-lg active:scale-95">Save Configuration</button>
-                  </div>
-
-                </div>
-              )}
+            <div className="flex flex-col h-full overflow-y-auto scrollbar-hide p-4 sm:p-6 md:p-10 pt-12 md:pt-10">
 
               {/* MODAL 1: REVENUE DETAILS */}
               {activeModal === 'revenue' && (
